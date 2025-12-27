@@ -17,8 +17,6 @@ void imu_init(MahonyFilterParam* param, ukf_filter_param_t* ukf_param)
     memset(&imu, 0, sizeof(imu_t));
     imu.state = IMU_STATE_UNINIT;
 
-    // 初始化滤波器
-    butterworth_lowpass_init(&imu.gyro_filter_z, 15.0f, 1000 / IMU_UPDATE_INTERVAL_MS, 2);
     Mahony_Init(&imu.mahony_filter, param);
     bool ret = ukf_filter_init(&imu.ukf_filter, ukf_param);
     if(ret)
@@ -102,12 +100,6 @@ static void read_sensor_data(void)
     imu.raw.gyro[2] = imu660ra_gyro_transition(imu660ra_gyro_z);
 }
 
-float lpf_alpha = 0.08; // 滤波系数：越小越平滑，但滞后越大
-static float apply_lpf_to_omega(float current_omega) {
-    static float last_omega = 0.0;
-    last_omega = lpf_alpha * current_omega + (1.0 - lpf_alpha) * last_omega;
-    return last_omega;
-}
 
 // 按照传感器安装方向转换到机体坐标系
 static void apply_bias_and_cordinate_transform(void)
@@ -126,9 +118,6 @@ static void apply_bias_and_cordinate_transform(void)
     imu.body.gyro[0] = corrected_gyro[0];
     imu.body.gyro[1] = -corrected_gyro[1];
     imu.body.gyro[2] = -corrected_gyro[2];
-
-    // 对Z轴角速度进行低通滤波
-    imu.body.omega_filtered = imu.body.gyro[2];
 }
 
 
@@ -162,6 +151,6 @@ static void process_filter_update(void)
         (float)motor_value.receive_right_speed_data) / 2.0f * PI * 0.065f / 60.0f; // 轮速转换为线速度，单位m/s
     ukf_measurement[0] = imu.body.speed;      // 速度
     ukf_measurement[1] = imu.euler[2] * DEG_TO_RAD;       // 航向角（弧度）
-    ukf_measurement[2] = imu.body.omega_filtered * DEG_TO_RAD;   // 角速度（弧度/s）
+    ukf_measurement[2] = imu.body.gyro[2] * DEG_TO_RAD;   // 角速度（弧度/s）
     ukf_filter_update(&imu.ukf_filter, ukf_measurement);
 }

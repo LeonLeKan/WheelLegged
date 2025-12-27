@@ -48,8 +48,8 @@ int main(void)
     {
         seekfree_assistant_data_analysis();
         
-        send_attitude();
-        process_param();
+        // send_attitude();
+        // process_param();
         update_screen();
         key_handle();
         // 此处编写需要循环执行的代码
@@ -63,9 +63,9 @@ void send_attitude(void)
     seekfree_assistant_oscilloscope_data.data[1] = imu.ukf_filter.output.position_y;
     seekfree_assistant_oscilloscope_data.data[2] = imu.body.gyro[2];
     seekfree_assistant_oscilloscope_data.data[3] = imu.ukf_filter.output.yaw_rate;
-    seekfree_assistant_oscilloscope_data.data[4] = imu.body.omega_filtered;
+    seekfree_assistant_oscilloscope_data.data[4] = imu.euler[2];
     seekfree_assistant_oscilloscope_data.data[5] = imu.ukf_filter.output.yaw;
-    seekfree_assistant_oscilloscope_data.data[6] = imu.euler[2];
+    seekfree_assistant_oscilloscope_data.data[6] = imu.body.speed;
     seekfree_assistant_oscilloscope_data.data[7] = imu.ukf_filter.output.speed;
     seekfree_assistant_oscilloscope_data.channel_num = 8;
     seekfree_assistant_oscilloscope_send(&seekfree_assistant_oscilloscope_data);

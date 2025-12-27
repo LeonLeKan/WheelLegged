@@ -2,7 +2,6 @@
 #define __IMU_H__
 
 #include "zf_common_headfile.h"
-#include "butterworth_filter.h"
 #include "mahony_filter.h"
 #include "ukf_filter.h"
 
@@ -28,7 +27,6 @@ typedef struct {
     struct {
         float acc[3];   // 转换后的加速度
         float gyro[3];  // 减去零偏后的角速度
-        float omega_filtered;  // 滤波后的yaw角速度
         float speed;    // 速度（m/s）
     } body;
     
@@ -45,7 +43,6 @@ typedef struct {
     imu_state_t state;  // 当前状态
     
     // 算法实例
-    ButterworthFilter gyro_filter_z; // 陀螺仪Z轴低通滤波器
     MahonyFilter mahony_filter;
     ukf_filter_t ukf_filter;
 } imu_t;
