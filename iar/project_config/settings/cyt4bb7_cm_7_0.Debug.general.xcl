@@ -1,0 +1,21 @@
+D:\iar\ewarm-9.60.3\arm\bin\armPROC.dll
+
+ D:\iar\ewarm-9.60.3\arm\bin\armJET.dll
+
+ D:\smartcar\control\Seekfree_CYT4BB_Opensource_Library\project\iar\project_config\Debug_m7_0\Exe\cyt4bb7_cm_7_0.out
+
+ --plugin=D:\iar\ewarm-9.60.3\arm\bin\armLibSupportUniversal.dll
+
+ --device_macro=D:\iar\ewarm-9.60.3\arm/config/debugger/Infineon/CYT4BB_M7.dmac
+
+ --device_macro=D:\iar\ewarm-9.60.3\arm/config/debugger/Infineon/CYTVII_M7.dmac
+
+ --device_macro=D:\iar\ewarm-9.60.3\arm/config/debugger/Infineon/CYTVII_Trace.dmac
+
+ --device_macro=D:\iar\ewarm-9.60.3\arm/config/debugger/Infineon/CYTVII_Common.dmac
+
+ --flash_loader=D:\iar\ewarm-9.60.3\arm/config/flashloader/Infineon/FlashCYT4_CF4M_WF256K.board
+
+ 
+
+
