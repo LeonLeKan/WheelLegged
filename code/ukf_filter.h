@@ -18,11 +18,11 @@ typedef struct
     ukf_filter_param_t params;
     struct
     {
-        float position_x;   // x位置估计值
-        float position_y;   // y位置估计值
-        float speed;        // 速度估计值
-        float yaw;          // 航向角估计值(deg)
-        float yaw_rate;     // 角速度估计值(deg/s)
+        float position_x;   // x位置估计值 (m)
+        float position_y;   // y位置估计值 (m)
+        float speed;        // 速度估计值 (m/s)
+        float yaw;          // 航向角估计值 (deg)
+        float yaw_rate;     // 角速度估计值 (deg/s)
     }output;
 }ukf_filter_t;
 

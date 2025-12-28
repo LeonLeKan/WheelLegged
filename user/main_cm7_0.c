@@ -1,8 +1,9 @@
 #include "zf_common_headfile.h"
 #include "imu.h"
 #include "small_driver_uart_control.h"
+#include "screen_interface.h"
+#include "ahrs_ui.h"
 
-#define IPS200_TYPE     (IPS200_TYPE_SPI)
 
 #define BUTTON_LF (P20_0)
 #define BUTTON_RT (P20_1)
@@ -20,7 +21,7 @@ void start_imu_calibration(void);
 
 
 MahonyFilterParam mahony_filter_param = {
-    .Kp = 0.8f,
+    .Kp = 0.7f,
     .Ki = 0.005f,
     .dt = IMU_UPDATE_INTERVAL_MS / 1000.0f
 };
@@ -31,6 +32,8 @@ ukf_filter_param_t ukf_filter_param = {
     .r = {0.0001, 1, 3}
 };
 
+bool showing_points = false;
+
 int main(void)
 {
     clock_init(SYSTEM_CLOCK_250M); 	// 时钟配置及系统初始化<务必保留>
@@ -38,19 +41,22 @@ int main(void)
 
     seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_DEBUG_UART);
     gpio_init_all();
-    ips200_init(IPS200_TYPE);
+
+    screen_init();     // 屏幕初始化
 
     // imu初始化
     small_driver_uart_init();
     imu_init(&mahony_filter_param, &ukf_filter_param);
 
+    ahrs_ui_init();
+
     while (true)
     {
         seekfree_assistant_data_analysis();
         
-        // send_attitude();
+        send_attitude();
         // process_param();
-        update_screen();
+        if(!showing_points) update_screen();
         key_handle();
         // 此处编写需要循环执行的代码
     }
@@ -59,8 +65,8 @@ int main(void)
 
 void send_attitude(void)
 {
-    seekfree_assistant_oscilloscope_data.data[0] = imu.ukf_filter.output.position_x;
-    seekfree_assistant_oscilloscope_data.data[1] = imu.ukf_filter.output.position_y;
+    seekfree_assistant_oscilloscope_data.data[0] = imu.euler[0];
+    seekfree_assistant_oscilloscope_data.data[1] = imu.euler[1];
     seekfree_assistant_oscilloscope_data.data[2] = imu.body.gyro[2];
     seekfree_assistant_oscilloscope_data.data[3] = imu.ukf_filter.output.yaw_rate;
     seekfree_assistant_oscilloscope_data.data[4] = imu.euler[2];
@@ -131,27 +137,28 @@ void start_imu_calibration(void)
 
 void update_screen(void)
 {
-    char text[35];
-    sprintf(text, "Kp = %.3f, Ki = %.3f", mahony_filter_param.Kp, mahony_filter_param.Ki);
-    ips200_show_string(0, 0, text);
     switch (imu.state)
     {
         case IMU_STATE_UNINIT:
-            ips200_show_string(0, 16, "IMU State: UNINIT     ");
+            screen_printf(0, 16, "IMU State: UNINIT     ");
             break;
         case IMU_STATE_CALIBRATING:
-            ips200_show_string(0, 16, "IMU State: CALIBRATING");
+            screen_printf(0, 16, "IMU State: CALIBRATING");
             break;
         case IMU_STATE_RUNNING:
-            ips200_show_string(0, 16, "IMU State: RUNNING    ");
+            screen_printf(0, 16, "IMU State: RUNNING    ");
             break;
         case IMU_STATE_ERROR:
-            ips200_show_string(0, 16, "IMU State: ERROR      ");
+            screen_printf(0, 16, "IMU State: ERROR      ");
             break;
         default:
-            ips200_show_string(0, 16, "IMU State: UNKNOWN    ");
+            screen_printf(0, 16, "IMU State: UNKNOWN    ");
             break;
     }
+    screen_printf(0, 32, "Yaw: %6.4f deg   ", imu.ukf_filter.output.yaw);
+    screen_printf(0, 48, "PosX: %8.4f m   ", imu.ukf_filter.output.position_x);
+    screen_printf(0, 64, "PosY: %8.4f m   ", imu.ukf_filter.output.position_y);
+    screen_printf(0, 80, "Speed: %6.4f m/s ", imu.ukf_filter.output.speed);
 }
 
 void gpio_init_all(void)
@@ -173,13 +180,21 @@ void key_handle(void)
     if (switch_changed) 
     {
         last_switch_state = current_switch_state;
+        if (showing_points)
+            points_display_key_ok_pressed();
+        else
+        {
+            showing_points = true;
+            ahrs_ui_show();
+        }
     }
     else if (gpio_get_level(BUTTON_LF) == 0)
     {
         system_delay_ms(80);
         if (gpio_get_level(BUTTON_LF) == 0)
         {
-
+            if (showing_points)
+                points_display_key_left_pressed();
         }
     }
     else if (gpio_get_level(BUTTON_RT) == 0)
@@ -187,7 +202,8 @@ void key_handle(void)
         system_delay_ms(80);
         if (gpio_get_level(BUTTON_RT) == 0)
         {
-
+            if (showing_points)
+                points_display_key_right_pressed();
         }
     }
     else if (gpio_get_level(BUTTON_DN) == 0)
@@ -195,7 +211,8 @@ void key_handle(void)
         system_delay_ms(80);
         if (gpio_get_level(BUTTON_DN) == 0)
         {
-
+            if (showing_points)
+                points_display_key_down_pressed();
         }
     }
     else if (gpio_get_level(BUTTON_UP) == 0)
@@ -203,7 +220,9 @@ void key_handle(void)
         system_delay_ms(80);
         if (gpio_get_level(BUTTON_UP) == 0)
         {
-            start_imu_calibration();
+            if (showing_points)
+                points_display_key_up_pressed();
+            else start_imu_calibration();
         }
 
     }

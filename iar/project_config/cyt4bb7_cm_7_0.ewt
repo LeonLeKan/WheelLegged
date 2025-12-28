@@ -1468,18 +1468,27 @@
     <group>
         <name>code</name>
         <group>
-            <name>gps_ui</name>
+            <name>ui</name>
+            <group>
+                <name>ahrs_ui</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\ahrs_ui.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\ahrs_ui.h</name>
+                </file>
+            </group>
             <file>
-                <name>$PROJ_DIR$\..\..\code\gps_save_manager.c</name>
+                <name>$PROJ_DIR$\..\..\code\points_display.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\code\gps_save_manager.h</name>
+                <name>$PROJ_DIR$\..\..\code\points_display.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\code\gps_show_points.c</name>
+                <name>$PROJ_DIR$\..\..\code\screen_interface.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\code\gps_show_points.h</name>
+                <name>$PROJ_DIR$\..\..\code\screen_interface.h</name>
             </file>
         </group>
         <group>
@@ -1522,12 +1531,6 @@
             <name>$PROJ_DIR$\..\..\code\control.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\code\gps_core.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\code\gps_core.h</name>
-        </file>
-        <file>
             <name>$PROJ_DIR$\..\..\code\imu.c</name>
         </file>
         <file>
@@ -1544,6 +1547,12 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\code\small_driver_uart_control.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\code\waypoint.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\code\waypoint.h</name>
         </file>
     </group>
     <group>

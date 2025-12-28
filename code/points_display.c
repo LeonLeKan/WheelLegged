@@ -1,0 +1,580 @@
+#include "points_display.h"
+#include "screen_interface.h"
+
+// 屏幕尺寸定义
+#define SCREEN_WIDTH  240
+#define SCREEN_HEIGHT 240
+#define MAX_POINTS    50
+
+// 颜色定义
+#define COLOR_BACKGROUND  RGB565_WHITE // 白色背景
+#define COLOR_PATH        RGB565_RED   // 红色路径
+#define COLOR_POINTS      RGB565_BLUE  // 蓝色点
+#define COLOR_SELECTED    RGB565_RED  // 红色选中标识
+#define COLOR_MENU_TEXT   RGB565_BLUE
+#define COLOR_MENU_BACKGROUND 0xbffa
+#define COLOR_MENU_HIGHLIGHT RGB565_CYAN
+
+// 移动步长（米）
+#define MOVE_STEP    0.5
+
+// 全局点显示实例(单例)
+points_display_instance_t points_display_instance;
+
+
+// 接口函数
+points_display_info_t* points_display_create(points_display_create_info_t* create_info);
+void points_display_show(points_display_info_t* info);
+void points_display_update_current_position(void);
+// 坐标转换函数
+void update_display_params(void);
+void plane_to_screen(double plane_x, double plane_y, int* screen_x, int* screen_y);
+void update_screen_coordinates(void);
+// 绘图辅助函数
+void screen_draw_line(int x1, int y1, int x2, int y2, uint16 color);
+void draw_point_marker(int x, int y, uint16 color);
+void draw_cross_marker(int x, int y, uint16 color);
+void draw_all_points_and_path(void);
+void clear_previous_display(waypoint_node_t* node);
+void clear_all_display(void);
+void update_point_display(waypoint_node_t* node, uint16 color);
+// 点操作函数
+void move_selected_point(int dx, int dy);
+void select_next_point(void);
+void select_prev_point(void);
+// 底部菜单
+void new_func(char* name, void (*func)(void));
+void show_func(void);
+void show_next_func(void);
+void show_prev_func(void);
+// 菜单功能函数
+void func_move_point(void);
+void func_add_current_point_next(void);
+void func_remove_point(void);
+void func_save_and_quit(void);
+void func_quit(void);
+// 节点信息展示
+void show_cordinates(void);
+
+
+// ===================== 接口函数 =====================
+// 创建点显示信息结构体
+points_display_info_t* points_display_create(points_display_create_info_t* create_info)
+{
+    points_display_info_t* info = (points_display_info_t*)malloc(sizeof(points_display_info_t));
+    if(!info) return NULL;
+
+    info->waypoint_list = create_info->waypoint_list;
+    // 回调函数
+    info->get_current_position_callback = create_info->get_current_position_callback;
+    info->plane_to_waypoint_callback = create_info->plane_to_waypoint_callback;
+    info->add_current_callback = create_info->add_current_callback;
+    info->save_callback = create_info->save_callback;
+    info->quit_callback = create_info->quit_callback;
+
+    info->offset_x = 0.0;
+    info->offset_y = 0.0;
+    info->scale_factor = 1.0;
+    info->min_x = 0.0;
+    info->max_x = 0.0;
+    info->min_y = 0.0;
+    info->max_y = 0.0;
+
+    info->selected_node_idx = -1;
+    info->selected_node = NULL;
+    return info;
+}
+
+void points_display_show(points_display_info_t* info)
+{
+    // 初始化实例
+    points_display_instance.info = info;
+    // 先获取一次当前定位点
+    info->get_current_position_callback(&points_display_instance.current_position.x,
+                                        &points_display_instance.current_position.y);
+    pit_ms_init(PIT_CH15, 100); // 开启100ms中断刷新当前定位点
+
+    // 计算屏幕坐标和显示参数
+    update_display_params();
+    update_screen_coordinates();
+    
+    ips200_set_color(COLOR_MENU_TEXT, COLOR_BACKGROUND);
+    ips200_clear();
+    
+    draw_all_points_and_path();
+    
+    show_func();
+    show_cordinates();
+}
+
+void points_display_update_current_position(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    // 擦除之前定位点的十字标识
+    draw_cross_marker(points_display_instance.screen_x, points_display_instance.screen_y, COLOR_BACKGROUND);
+    // 获取当前定位点
+    info->get_current_position_callback(&points_display_instance.current_position.x,
+        &points_display_instance.current_position.y);
+    // 计算屏幕坐标
+    plane_to_screen(points_display_instance.current_position.x, points_display_instance.current_position.y,
+        &points_display_instance.screen_x, &points_display_instance.screen_y);
+
+    // 如果非常靠近边界，刷新显示缩放
+    if (points_display_instance.screen_x < 5 || points_display_instance.screen_x > SCREEN_WIDTH - 5 ||
+        points_display_instance.screen_y < 5 || points_display_instance.screen_y > SCREEN_HEIGHT - 5)
+    {
+        clear_all_display();
+        update_display_params();
+        update_screen_coordinates();
+        draw_all_points_and_path();
+    }
+
+    // 绘制新的定位点十字标识
+    draw_cross_marker(points_display_instance.screen_x, points_display_instance.screen_y, RGB565_GREEN);
+}
+
+
+// ====================== 坐标转换函数 ======================
+void update_display_params(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    int count = info->waypoint_list->size;
+    if (count < 1) return;
+    
+    // 找到点集的边界
+    waypoint_node_t* current = info->waypoint_list->root;
+    // 包括当前实时定位点
+    info->min_x = points_display_instance.current_position.x;
+    info->max_x = points_display_instance.current_position.x;
+    info->min_y = points_display_instance.current_position.y;
+    info->max_y = points_display_instance.current_position.y;
+
+    while (current)
+    {
+        if (current->screen_param->plane_x < info->min_x)
+            info->min_x = current->screen_param->plane_x;
+        if (current->screen_param->plane_x > info->max_x)
+            info->max_x = current->screen_param->plane_x;
+        if (current->screen_param->plane_y < info->min_y)
+            info->min_y = current->screen_param->plane_y;
+        if (current->screen_param->plane_y > info->max_y)
+            info->max_y = current->screen_param->plane_y;
+        current = current->next;
+    }
+
+    // 计算点集的宽度和高度
+    double data_width = info->max_x - info->min_x;
+    double data_height = info->max_y - info->min_y;
+    
+    // 添加20%边距
+    if (data_width == 0) data_width = 10.0;
+    if (data_height == 0) data_height = 10.0;
+    
+    data_width *= 1.2;
+    data_height *= 1.2;
+    
+    // 计算缩放比例
+    double scale_x = (SCREEN_WIDTH * 0.9) / data_width;
+    double scale_y = (SCREEN_HEIGHT * 0.9) / data_height;
+    info->scale_factor = (scale_x < scale_y) ? scale_x : scale_y;
+    
+    // 计算偏移量（居中显示）
+    info->offset_x = (SCREEN_WIDTH - (info->max_x - info->min_x) * info->scale_factor) / 2 - info->min_x * info->scale_factor;
+    info->offset_y = (SCREEN_HEIGHT - (info->max_y - info->min_y) * info->scale_factor) / 2 - info->min_y * info->scale_factor;
+}
+
+
+// 将一个点的平面坐标转换为屏幕坐标
+void plane_to_screen(double plane_x, double plane_y, int* screen_x, int* screen_y)
+{
+    points_display_info_t* info = points_display_instance.info;
+    *screen_x = (int)(plane_x * info->scale_factor + info->offset_x);
+    *screen_y = (int)(SCREEN_HEIGHT - (plane_y * info->scale_factor + info->offset_y));
+    // 边界检查
+    if (*screen_x < 0) *screen_x = 0;
+    if (*screen_x >= SCREEN_WIDTH) *screen_x = SCREEN_WIDTH - 1;
+    if (*screen_y < 0) *screen_y = 0;
+    if (*screen_y >= SCREEN_HEIGHT) *screen_y = SCREEN_HEIGHT - 1;
+}
+
+
+// 更新所有节点的屏幕坐标
+void update_screen_coordinates(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    waypoint_node_t* current = info->waypoint_list->root;
+    
+    while (current)
+    {
+        plane_to_screen(current->screen_param->plane_x, current->screen_param->plane_y,
+                        &current->screen_param->screen_x, &current->screen_param->screen_y);
+        
+        current = current->next;
+    }
+
+    // 更新当前定位点屏幕坐标
+    plane_to_screen(points_display_instance.current_position.x, points_display_instance.current_position.y,
+                    &points_display_instance.screen_x, &points_display_instance.screen_y);
+}
+
+
+// ====================== 绘图辅助函数 ======================
+
+// 绘制点标记
+void draw_point_marker(int x, int y, uint16 color)
+{
+    // 绘制3x3方块
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -1; dy <= 1; dy++) {
+            screen_draw_point(x + dx, y + dy, color);
+        }
+    }
+}
+
+// 绘制十字标记
+void draw_cross_marker(int x, int y, uint16 color)
+{
+    int size = 10;
+    
+    // 水平线
+    screen_draw_line(x - size, y, x - 3, y, color);
+    screen_draw_line(x + 3, y, x + size, y, color);
+    
+    // 垂直线
+    screen_draw_line(x, y - size, x, y - 3, color);
+    screen_draw_line(x, y + 3, x, y + size, color);
+    
+    // 中心交叉
+    // screen_draw_line(x-1, y-1, x+1, y+1, color);
+    // screen_draw_line(x-1, y+1, x+1, y-1, color);
+}
+
+// 绘制所有点和路径
+void draw_all_points_and_path(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    // 默认选择第一个点
+    info->selected_node = info->waypoint_list->root->next;
+    info->selected_node_idx = 1;
+    // 绘制连接线
+    waypoint_node_t* current = info->waypoint_list->root;
+    while (current && current->next) {
+        screen_draw_line(current->screen_param->screen_x, current->screen_param->screen_y,
+                           current->next->screen_param->screen_x, current->next->screen_param->screen_y,
+                           COLOR_PATH);
+        current = current->next;
+    }
+    
+    // 绘制所有点
+    current = info->waypoint_list->root->next;
+    while (current) {
+        if (current == info->selected_node) {
+            draw_cross_marker(current->screen_param->screen_x, current->screen_param->screen_y, COLOR_SELECTED);
+            draw_point_marker(current->screen_param->screen_x, current->screen_param->screen_y, COLOR_POINTS);
+        } else {
+            draw_point_marker(current->screen_param->screen_x, current->screen_param->screen_y, COLOR_POINTS);
+        }
+        current = current->next;
+    }
+}
+
+// 清除节点的旧显示
+void clear_previous_display(waypoint_node_t* node)
+{
+    if (!node || !node->waypoint) return;
+    
+    // 清除点标记
+    draw_point_marker(node->screen_param->screen_x, node->screen_param->screen_y, COLOR_BACKGROUND);
+    
+    // 清除十字标记
+    draw_cross_marker(node->screen_param->screen_x, node->screen_param->screen_y, COLOR_BACKGROUND);
+
+    // 清除连接线（前一条）
+    if (node->prev && node->prev->waypoint) {
+        screen_draw_line(node->prev->screen_param->screen_x, node->prev->screen_param->screen_y,
+                           node->screen_param->screen_x, node->screen_param->screen_y, COLOR_BACKGROUND);
+    }
+    
+    // 清除连接线（后一条）
+    if (node->next) {
+        screen_draw_line(node->screen_param->screen_x, node->screen_param->screen_y,
+                           node->next->screen_param->screen_x, node->next->screen_param->screen_y, COLOR_BACKGROUND);
+    }
+}
+
+void clear_all_display(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    waypoint_node_t* current = info->waypoint_list->root;
+    while (current) {
+        clear_previous_display(current);
+        current = current->next;
+    }
+}
+
+// 更新节点显示（可以指定颜色）
+void update_point_display(waypoint_node_t* node, uint16 color)
+{
+    points_display_info_t* info = points_display_instance.info;
+    if (!node || !node->waypoint) return;
+    
+    // 绘制点标记
+    draw_point_marker(node->screen_param->screen_x, node->screen_param->screen_y, color);
+    
+    // 绘制连接线（前一条）
+    if (node->prev && node->prev->waypoint) {
+        screen_draw_line(node->prev->screen_param->screen_x, node->prev->screen_param->screen_y,
+                           node->screen_param->screen_x, node->screen_param->screen_y, COLOR_PATH);
+    }
+    
+    // 绘制连接线（后一条）
+    if (node->next) {
+        screen_draw_line(node->screen_param->screen_x, node->screen_param->screen_y,
+                           node->next->screen_param->screen_x, node->next->screen_param->screen_y, COLOR_PATH);
+    }
+    
+    // 如果是选中节点，绘制十字标记
+    if (node == info->selected_node) {
+        draw_cross_marker(node->screen_param->screen_x, node->screen_param->screen_y, COLOR_SELECTED);
+        show_cordinates();
+    }
+}
+
+// ====================== 点操作函数实现 ======================
+
+// 移动选中的点
+void move_selected_point(int dx, int dy) {
+    points_display_info_t* info = points_display_instance.info;
+    if (!info->selected_node) return;
+    
+    // 清除旧显示
+    clear_previous_display(info->selected_node);
+    if (info->selected_node->prev) clear_previous_display(info->selected_node->prev);
+    if (info->selected_node->next) clear_previous_display(info->selected_node->next);
+    
+    // 更新平面坐标
+    info->selected_node->screen_param->plane_x += dx * MOVE_STEP;
+    info->selected_node->screen_param->plane_y += dy * MOVE_STEP;
+
+    // 更新GPS坐标
+    info->plane_to_waypoint_callback(info->selected_node->screen_param->plane_x, 
+                info->selected_node->screen_param->plane_y,
+                info->selected_node->waypoint);
+
+    // 更新屏幕坐标
+    info->selected_node->screen_param->screen_x =
+        (int)(info->selected_node->screen_param->plane_x * info->scale_factor + info->offset_x);
+    info->selected_node->screen_param->screen_y =
+        (int)(SCREEN_HEIGHT - (info->selected_node->screen_param->plane_y * info->scale_factor + info->offset_y));
+
+    // 边界检查
+    if (info->selected_node->screen_param->screen_x < 0)
+        info->selected_node->screen_param->screen_x = 0;
+    if (info->selected_node->screen_param->screen_x >= SCREEN_WIDTH)
+        info->selected_node->screen_param->screen_x = SCREEN_WIDTH - 1;
+    if (info->selected_node->screen_param->screen_y < 0)
+        info->selected_node->screen_param->screen_y = 0;
+    if (info->selected_node->screen_param->screen_y >= SCREEN_HEIGHT)
+        info->selected_node->screen_param->screen_y = SCREEN_HEIGHT - 1;
+
+    // 重新绘制
+    if (info->selected_node->prev)
+        update_point_display(info->selected_node->prev, COLOR_POINTS);
+    
+    update_point_display(info->selected_node, COLOR_SELECTED);
+
+    if (info->selected_node->next)
+        update_point_display(info->selected_node->next, COLOR_POINTS);
+}
+
+// 选择下一个点
+void select_next_point(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    if (!info->selected_node->next) return;
+    
+    // 清除十字标记
+    // draw_cross_marker(info->selected_node->screen_x, info->selected_node->screen_y, COLOR_BACKGROUND);
+    clear_previous_display(info->selected_node);
+    
+    // 选择下一个点
+    info->selected_node = info->selected_node->next;
+    info->selected_node_idx++;
+    
+    // 绘制新选中点
+    update_point_display(info->selected_node->prev, COLOR_POINTS);
+    update_point_display(info->selected_node, COLOR_POINTS);
+}
+
+// 选择上一个点
+void select_prev_point(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    if (!info->selected_node->prev) return;
+    if (!info->selected_node->prev->waypoint) return;
+    
+    // 清除十字标记
+    // draw_cross_marker(info->selected_node->screen_x, info->selected_node->screen_y, COLOR_BACKGROUND);
+    clear_previous_display(info->selected_node);
+    
+    info->selected_node = info->selected_node->prev;
+    info->selected_node_idx--;
+
+    update_point_display(info->selected_node->next, COLOR_POINTS);
+    update_point_display(info->selected_node, COLOR_POINTS);
+}
+
+
+
+// ====================== 节点信息展示 =========================
+void show_cordinates(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    ips200_set_color(COLOR_MENU_TEXT, COLOR_MENU_BACKGROUND);
+    screen_printf(16, 15 * 16, "Point Index: %d", (int)info->selected_node_idx);
+    if(info->selected_node->waypoint)
+    {
+        screen_printf(16, 17 * 16, "X/LAT. %.6f", info->selected_node->waypoint->x);
+        screen_printf(16, 18 * 16, "Y/LONG. %.6f", info->selected_node->waypoint->y);
+    }
+    else
+    {
+        screen_printf(16, 17 * 16, "X/LAT. N/A");
+        screen_printf(16, 18 * 16, "Y/LONG. N/A");
+    }
+}
+
+// ====================== 菜单功能函数实现 ======================
+void func_move_point(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    info->moving_point = 1;
+    ips200_set_color(COLOR_MENU_TEXT, COLOR_MENU_HIGHLIGHT);
+    ips200_show_string(0, 304, "Moving Point...");
+}
+
+void func_add_current_point_next(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    info->add_current_callback(info->waypoint_list, info->selected_node);
+    points_display_show(info);
+}
+
+void func_remove_point(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    waypoint_list_remove(info->waypoint_list, info->selected_node);
+    points_display_show(info);
+}
+
+void func_save_and_quit(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    info->save_callback();
+    func_quit();
+}
+
+void func_quit(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    info->quit_callback();
+}
+
+// ====================== 底部菜单实现 ========================
+void new_func(char* name, void(*func)(void))
+{
+    points_display_info_t* info = points_display_instance.info;
+    info->funcs[info->total_funcs].name = name;
+    info->funcs[info->total_funcs].func = func;
+    info->total_funcs++;
+}
+
+void funcs_init(void)
+{
+    new_func("Move Point", func_move_point);
+    new_func("Add Current Point", func_add_current_point_next);
+    new_func("Remove Point", func_remove_point);
+    new_func("Save and Quit", func_save_and_quit);
+    new_func("Quit Without Save", func_quit);
+}
+
+void show_func(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    ips200_set_color(COLOR_MENU_TEXT, COLOR_MENU_BACKGROUND);
+    char text[35];
+    sprintf(text, "%-30s", info->funcs[info->active_func_idx].name);
+    ips200_show_string(0, 19*16, text);
+}
+
+void show_next_func(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    info->active_func_idx++;
+    if(info->active_func_idx >= info->total_funcs)
+        info->active_func_idx = 0;
+    show_func();
+}
+
+void show_prev_func(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    info->active_func_idx--;
+    if(info->active_func_idx < 0)
+        info->active_func_idx = info->total_funcs - 1;
+    show_func();
+}
+
+
+// ====================== 按键功能函数实现 ======================
+void points_display_key_down_pressed(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    if(!info->moving_point) 
+        select_next_point();
+    else
+        move_selected_point(0, -1);
+}
+
+void points_display_key_up_pressed(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    if (!info->moving_point)
+        select_prev_point();
+    else
+        move_selected_point(0, 1);
+}
+
+void points_display_key_left_pressed(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    if(info->moving_point)
+        move_selected_point(-1, 0);
+    else
+        show_prev_func();
+
+}
+
+void points_display_key_right_pressed(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    if (info->moving_point)
+        move_selected_point(1, 0);
+    else
+        show_next_func();
+}
+
+void points_display_key_ok_pressed(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    if(info->moving_point)
+    {
+        info->moving_point = 0;
+        show_func();
+    }
+        
+    else
+    {
+        info->funcs[info->active_func_idx].func();
+    }
+}

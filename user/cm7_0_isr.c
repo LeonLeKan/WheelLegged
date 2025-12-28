@@ -37,6 +37,7 @@
 #include "zf_common_headfile.h"
 #include "imu.h"
 #include "small_driver_uart_control.h"
+#include "points_display.h"
 
 
 // **************************** PIT中断函数 ****************************
@@ -99,6 +100,7 @@ void pit0_ch15_isr()                    // 定时器通道 15 周期中断服务函数
 {
     pit_isr_flag_clear(PIT_CH15);
     
+    points_display_update_current_position();
 }
 
 void pit0_ch16_isr()                    // 定时器通道 16 周期中断服务函数      

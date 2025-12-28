@@ -1,83 +1,70 @@
-#include "gps_core.h"
+#include "waypoint.h"
 
-gps_waypoint_node_t root; // 特殊根节点，id为0，无具体数据
-
-gps_waypoint_node_t* last_node; // 指向最后一个节点
-
-int total_points;  // 现在一共有多少个点
-
-
-void gps_init(void)
+waypoint_list_t* waypoint_list_create(void)
 {
-    // 初始化GPS
-    gnss_init(TAU1201);
-    // GPS 解析周期中断 100ms
-    pit_ms_init(PIT_CH10, 100);
-    
-    root.prev = NULL;
-    root.next = NULL;
-    root.waypoint = NULL;
-    
-    last_node = &root;
+    waypoint_list_t* list = (waypoint_list_t*)malloc(sizeof(waypoint_list_t));
+    list->root = (waypoint_node_t*)malloc(sizeof(waypoint_node_t));
+    list->root->prev = NULL;
+    list->root->next = NULL;
+    list->root->waypoint = NULL;
+    list->root->screen_param = NULL;
+    list->size = 0;
+    list->tail = list->root;
+    return list;
 }
 
-void gps_add_point(gps_waypoint_node_t *pNode, double latitude, double longitude)
+void waypoint_list_add_next(waypoint_list_t *list, waypoint_node_t *pNode, waypoint_t waypoint)
 {
-    gps_waypoint_node_t *newNode = (gps_waypoint_node_t*)malloc(sizeof(gps_waypoint_node_t));
+    waypoint_node_t *newNode = (waypoint_node_t*)malloc(sizeof(waypoint_node_t));
     
-    newNode->waypoint = (gps_waypoint_t*)malloc(sizeof(gps_waypoint_t));
+    newNode->waypoint = (waypoint_t*)malloc(sizeof(waypoint_t));
+    newNode->screen_param = (waypoint_screen_param_t*)malloc(sizeof(waypoint_screen_param_t));
+    *(newNode->waypoint) = waypoint;
     newNode->prev = pNode;
     newNode->next = pNode->next;
-    
-    // 存入当前点信息
-    newNode->waypoint->latitude = latitude;
-    newNode->waypoint->longitude = longitude;
-    
+
+
     if(newNode->next == NULL)
     {
         // 新加入的点为最后一点，修改last_node
-        last_node = newNode;
+        list->tail = newNode;
     }
     else newNode->next->prev = newNode;
+
     pNode->next = newNode;
-    total_points++;
+    list->size++;
 }
 
-void gps_add_current_point(gps_waypoint_node_t *pNode)
-{
-    // 添加当前位置
-    gps_add_point(pNode, gnss.latitude, gnss.longitude);
-}
-
-void gps_remove_point(gps_waypoint_node_t *pNode)
+void waypoint_list_remove(waypoint_list_t *list, waypoint_node_t *pNode)
 {
     pNode->prev->next = pNode->next;
     pNode->next->prev = pNode->prev;
     if(pNode->next == NULL)
     {
-        // 移除的点为最后一点，修改last_node
-        last_node = pNode->prev;
+        // 移除的点为最后一点，修改tail
+        list->tail = pNode->prev;
     }
     
     free(pNode->waypoint);
+    free(pNode->screen_param);
     free(pNode);
-    total_points--;
+    list->size--;
 }
 
-void gps_clear(void)
+void waypoint_list_clear(waypoint_list_t *list)
 {
-    gps_waypoint_node_t* now_node = &root;
+    waypoint_node_t* now_node = list->root;
     if(!now_node->next) return;
     now_node = now_node->next;
     while(now_node)
     {
-        gps_waypoint_node_t* temp = now_node;
+        waypoint_node_t* temp = now_node;
         now_node = now_node->next;
-        gps_remove_point(temp);
+        waypoint_list_remove(list, temp);
     }
-    last_node = &root;
+    list->tail = list->root;
+    list->size = 0;
 }
-
 
 union double_converter
 {
@@ -86,10 +73,10 @@ union double_converter
 };
 
 
-void gps_save_points(uint32 flash_page)
+void waypoint_list_save_to_flash(waypoint_list_t *list, uint32 flash_page)
 {
     flash_buffer_clear();
-    gps_waypoint_node_t *now_node = root.next;
+    waypoint_node_t *now_node = list->root->next;
     
     int index = 1; // flash_union_buffer[0] : 一共有几个点
     union double_converter converter;
@@ -97,11 +84,11 @@ void gps_save_points(uint32 flash_page)
     while(now_node)
     {
         // double 占用两个uint32
-        converter.d = now_node->waypoint->latitude;
+        converter.d = now_node->waypoint->x;
         flash_union_buffer[index++].uint32_type = converter.buf[0];
         flash_union_buffer[index++].uint32_type = converter.buf[1];
         
-        converter.d = now_node->waypoint->longitude;
+        converter.d = now_node->waypoint->y;
         flash_union_buffer[index++].uint32_type = converter.buf[0];
         flash_union_buffer[index++].uint32_type = converter.buf[1];
         now_node = now_node->next;
@@ -110,35 +97,35 @@ void gps_save_points(uint32 flash_page)
     
     flash_erase_page(0, flash_page);
     flash_write_page_from_buffer(0, flash_page, index);
-    
 }
 
 
-bool gps_load_points(uint32 flash_page)
+bool waypoint_list_load_from_flash(waypoint_list_t *list, uint32 flash_page)
 {
-    gps_clear();
+    waypoint_list_clear(list);
     flash_buffer_clear();
     flash_read_page_to_buffer(0, flash_page, FLASH_PAGE_LENGTH);
     // 先读取一共有几个点
     int points_cnt = (flash_union_buffer[0].int32_type - 1) / 4;
-    if(points_cnt <= 0 || total_points > 200) // 点数非法，失败
+    if(points_cnt <= 0 || points_cnt > 10000) // 点数非法，失败
         return false;
     // 设置总点数
-    total_points = points_cnt;
-    double t_latitude, t_longitude;
+    list->size = points_cnt;
+    double t_x, t_y;
     int index = 1;
     union double_converter converter;
     for(int i = 1; i <= points_cnt; i++)
     {
         converter.buf[0] = flash_union_buffer[index++].uint32_type;
         converter.buf[1] = flash_union_buffer[index++].uint32_type;
-        t_latitude = converter.d;
+        t_x = converter.d;
         
         converter.buf[0] = flash_union_buffer[index++].uint32_type;
         converter.buf[1] = flash_union_buffer[index++].uint32_type;
-        t_longitude = converter.d;
+        t_y = converter.d;
         
-        gps_add_point(last_node, t_latitude, t_longitude);
+        waypoint_list_add_next(list, list->tail, (waypoint_t){t_x, t_y});
     }
     return true;
 }
+

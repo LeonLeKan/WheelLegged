@@ -25,8 +25,8 @@ typedef struct {
     
     // 校准后数据（机体FLU坐标系）
     struct {
-        float acc[3];   // 转换后的加速度
-        float gyro[3];  // 减去零偏后的角速度
+        float acc[3];   // 转换后的加速度 (g)
+        float gyro[3];  // 减去零偏后的角速度 (deg/s)
         float speed;    // 速度（m/s）
     } body;
     
