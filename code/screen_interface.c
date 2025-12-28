@@ -9,13 +9,55 @@ void screen_init(void)
 
 void screen_draw_point(int x, int y, uint16 color)
 {
-    ips200_draw_point(x, y, color);
+    if(x < 240 && x >= 0 && y < 240 && y >= 0)
+        ips200_draw_point(x, y, color);
 }
 
-// 统一绘制线函数
-void screen_draw_line(int x1, int y1, int x2, int y2, uint16 color)
+void screen_draw_line(uint16 x_start, uint16 y_start, uint16 x_end, uint16 y_end, const uint16 color)
 {
-    ips200_draw_line(x1, y1, x2, y2, color);
+    int16 x_dir = (x_start < x_end ? 1 : -1);
+    int16 y_dir = (y_start < y_end ? 1 : -1);
+    float temp_rate = 0;
+    float temp_b = 0;
+
+    do
+    {
+        if(x_start != x_end)
+        {
+            temp_rate = (float)(y_start - y_end) / (float)(x_start - x_end);
+            temp_b = (float)y_start - (float)x_start * temp_rate;
+        }
+        else
+        {
+            while(y_start != y_end)
+            {
+                screen_draw_point(x_start, y_start, color);
+                y_start += y_dir;
+            }
+            screen_draw_point(x_start, y_start, color);
+            break;
+        }
+        if(func_abs(y_start - y_end) > func_abs(x_start - x_end))
+        {
+            while(y_start != y_end)
+            {
+                screen_draw_point(x_start, y_start, color);
+                y_start += y_dir;
+                x_start = (int16)(((float)y_start - temp_b) / temp_rate);
+            }
+            screen_draw_point(x_start, y_start, color);
+        }
+        else
+        {
+            while(x_start != x_end)
+            {
+                screen_draw_point(x_start, y_start, color);
+                x_start += x_dir;
+                y_start = (int16)((float)x_start * temp_rate + temp_b);
+            }
+            screen_draw_point(x_start, y_start, color);
+        }
+    }while(0);
 }
 
 void screen_printf(uint16_t x, uint16_t y, const char* format, ...)

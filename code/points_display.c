@@ -31,7 +31,6 @@ void update_display_params(void);
 void plane_to_screen(double plane_x, double plane_y, int* screen_x, int* screen_y);
 void update_screen_coordinates(void);
 // 绘图辅助函数
-void screen_draw_line(int x1, int y1, int x2, int y2, uint16 color);
 void draw_point_marker(int x, int y, uint16 color);
 void draw_cross_marker(int x, int y, uint16 color);
 void draw_all_points_and_path(void);
@@ -111,7 +110,9 @@ void points_display_update_current_position(void)
 {
     points_display_info_t* info = points_display_instance.info;
     // 擦除之前定位点的十字标识
-    draw_cross_marker(points_display_instance.screen_x, points_display_instance.screen_y, COLOR_BACKGROUND);
+    if (!(points_display_instance.screen_x < 8 || points_display_instance.screen_x > SCREEN_WIDTH - 8 ||
+        points_display_instance.screen_y < 8 || points_display_instance.screen_y > SCREEN_HEIGHT - 8))
+        draw_cross_marker(points_display_instance.screen_x, points_display_instance.screen_y, COLOR_BACKGROUND);
     // 获取当前定位点
     info->get_current_position_callback(&points_display_instance.current_position.x,
         &points_display_instance.current_position.y);
@@ -120,8 +121,8 @@ void points_display_update_current_position(void)
         &points_display_instance.screen_x, &points_display_instance.screen_y);
 
     // 如果非常靠近边界，刷新显示缩放
-    if (points_display_instance.screen_x < 5 || points_display_instance.screen_x > SCREEN_WIDTH - 5 ||
-        points_display_instance.screen_y < 5 || points_display_instance.screen_y > SCREEN_HEIGHT - 5)
+    if (points_display_instance.screen_x < 8 || points_display_instance.screen_x > SCREEN_WIDTH - 8 ||
+        points_display_instance.screen_y < 8 || points_display_instance.screen_y > SCREEN_HEIGHT - 8)
     {
         clear_all_display();
         update_display_params();
@@ -142,7 +143,7 @@ void update_display_params(void)
     if (count < 1) return;
     
     // 找到点集的边界
-    waypoint_node_t* current = info->waypoint_list->root;
+    waypoint_node_t* current = info->waypoint_list->root->next;
     // 包括当前实时定位点
     info->min_x = points_display_instance.current_position.x;
     info->max_x = points_display_instance.current_position.x;
@@ -202,7 +203,7 @@ void plane_to_screen(double plane_x, double plane_y, int* screen_x, int* screen_
 void update_screen_coordinates(void)
 {
     points_display_info_t* info = points_display_instance.info;
-    waypoint_node_t* current = info->waypoint_list->root;
+    waypoint_node_t* current = info->waypoint_list->root->next;
     
     while (current)
     {
@@ -257,7 +258,7 @@ void draw_all_points_and_path(void)
     info->selected_node = info->waypoint_list->root->next;
     info->selected_node_idx = 1;
     // 绘制连接线
-    waypoint_node_t* current = info->waypoint_list->root;
+    waypoint_node_t* current = info->waypoint_list->root->next;
     while (current && current->next) {
         screen_draw_line(current->screen_param->screen_x, current->screen_param->screen_y,
                            current->next->screen_param->screen_x, current->next->screen_param->screen_y,
@@ -305,8 +306,9 @@ void clear_previous_display(waypoint_node_t* node)
 void clear_all_display(void)
 {
     points_display_info_t* info = points_display_instance.info;
-    waypoint_node_t* current = info->waypoint_list->root;
-    while (current) {
+    waypoint_node_t* current = info->waypoint_list->root->next;
+    while (current)
+    {
         clear_previous_display(current);
         current = current->next;
     }
@@ -502,9 +504,7 @@ void show_func(void)
 {
     points_display_info_t* info = points_display_instance.info;
     ips200_set_color(COLOR_MENU_TEXT, COLOR_MENU_BACKGROUND);
-    char text[35];
-    sprintf(text, "%-30s", info->funcs[info->active_func_idx].name);
-    ips200_show_string(0, 19*16, text);
+    screen_printf(0, 16 * 19, info->funcs[info->active_func_idx].name);
 }
 
 void show_next_func(void)

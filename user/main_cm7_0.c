@@ -132,7 +132,7 @@ void process_param(void)
 void start_imu_calibration(void)
 {
     system_delay_ms(1000);  // 等待1秒，确保系统稳定
-    imu_start_calibration(5000);  // 采集5000个样本进行校准
+    imu_start_calibration(2000);  // 采集2000个样本进行校准
 }
 
 void update_screen(void)

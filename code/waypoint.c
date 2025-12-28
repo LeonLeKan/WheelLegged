@@ -13,7 +13,7 @@ waypoint_list_t* waypoint_list_create(void)
     return list;
 }
 
-void waypoint_list_add_next(waypoint_list_t *list, waypoint_node_t *pNode, waypoint_t waypoint)
+waypoint_node_t* waypoint_list_add_next(waypoint_list_t *list, waypoint_node_t *pNode, waypoint_t waypoint)
 {
     waypoint_node_t *newNode = (waypoint_node_t*)malloc(sizeof(waypoint_node_t));
     
@@ -33,6 +33,8 @@ void waypoint_list_add_next(waypoint_list_t *list, waypoint_node_t *pNode, waypo
 
     pNode->next = newNode;
     list->size++;
+
+    return newNode;
 }
 
 void waypoint_list_remove(waypoint_list_t *list, waypoint_node_t *pNode)

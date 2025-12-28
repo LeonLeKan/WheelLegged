@@ -30,7 +30,7 @@ typedef struct
 
 
 waypoint_list_t* waypoint_list_create(void);
-void waypoint_list_add_next(waypoint_list_t *list, waypoint_node_t *pNode, waypoint_t waypoint);
+waypoint_node_t* waypoint_list_add_next(waypoint_list_t *list, waypoint_node_t *pNode, waypoint_t waypoint);
 void waypoint_list_remove(waypoint_list_t *list, waypoint_node_t *pNode);
 void waypoint_list_clear(waypoint_list_t* list);
 

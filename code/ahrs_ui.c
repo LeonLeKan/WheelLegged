@@ -5,6 +5,8 @@
 // 回调函数
 void ahrs_plane_to_waypoint(double x, double y, waypoint_t* waypoint);
 void ahrs_get_current_position(double* x, double* y);
+// 辅助函数
+waypoint_node_t* ahrs_add_next(waypoint_list_t* list, waypoint_node_t* pNode, waypoint_t waypoint);
 
 waypoint_list_t* now_list;
 points_display_info_t* info;
@@ -14,7 +16,7 @@ points_display_info_t* info;
 void ahrs_ui_init(void)
 {
     now_list = waypoint_list_create();
-    waypoint_list_add_next(now_list, now_list->root, (waypoint_t){0.1, 0});
+    ahrs_add_next(now_list, now_list->root, (waypoint_t){0.1, 0});
     // 初始化点显示模块
     points_display_create_info_t create_info;
     create_info.waypoint_list = now_list;
@@ -32,6 +34,16 @@ void ahrs_ui_show(void)
 {
     // 显示点界面
     points_display_show(info);
+}
+
+// ====================== 辅助函数 =======================
+waypoint_node_t* ahrs_add_next(waypoint_list_t* list, waypoint_node_t* pNode, waypoint_t waypoint)
+{
+    waypoint_node_t* pNew = waypoint_list_add_next(list, pNode, waypoint);
+    if (pNew == NULL) return NULL;
+    pNew->screen_param->plane_x = waypoint.x;
+    pNew->screen_param->plane_y = waypoint.y;
+    return pNew;
 }
 
 // ====================== 回调函数 =======================
