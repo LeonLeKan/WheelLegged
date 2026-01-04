@@ -26,7 +26,7 @@ thumbs.db
 **/settings/*.wspos
 
 # IAR Debug Exe
-*.sim
+**/Exe/*.sim
 
 # IAR Debug Obj
 **/Obj/*.pbd
@@ -37,16 +37,13 @@ thumbs.db
 # IAR project "Debug" directory
 iar/Debug_m7_0/
 iar/Debug_m7_1/
-iar/settings/
 # IAR project "Release" directory
 
 
 # IAR backup files
-*.ewt
-*.out
-*.ewp
-*.dnx
+Backup*
 
 # IAR .dep files
 *.dep
 
+.vscode/
