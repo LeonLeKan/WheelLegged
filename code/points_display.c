@@ -10,7 +10,8 @@
 #define COLOR_BACKGROUND  RGB565_WHITE // 白色背景
 #define COLOR_PATH        RGB565_RED   // 红色路径
 #define COLOR_POINTS      RGB565_BLUE  // 蓝色点
-#define COLOR_SELECTED    RGB565_RED  // 红色选中标识
+#define COLOR_SELECTED    RGB565_RED   // 红色选中标识
+#define COLOR_CURRENT     RGB565_BLUE  // 蓝色定位标识
 #define COLOR_MENU_TEXT   RGB565_BLUE
 #define COLOR_MENU_BACKGROUND 0xbffa
 #define COLOR_MENU_HIGHLIGHT RGB565_CYAN
@@ -35,14 +36,16 @@ void draw_point_marker(int x, int y, uint16 color);
 void draw_cross_marker(int x, int y, uint16 color);
 void draw_all_points_and_path(void);
 void clear_previous_display(waypoint_node_t* node);
-void clear_all_display(void);
+void clear_all_previous_display(void);
 void update_point_display(waypoint_node_t* node, uint16 color);
+void show_path(void);
 // 点操作函数
 void move_selected_point(int dx, int dy);
 void select_next_point(void);
 void select_prev_point(void);
 // 底部菜单
 void new_func(char* name, void (*func)(void));
+void funcs_init(void);
 void show_func(void);
 void show_next_func(void);
 void show_prev_func(void);
@@ -52,8 +55,9 @@ void func_add_current_point_next(void);
 void func_remove_point(void);
 void func_save_and_quit(void);
 void func_quit(void);
-// 节点信息展示
-void show_cordinates(void);
+// 坐标显示
+void show_selected_cordinates(void);
+void show_current_cordinates(void);
 
 
 // ===================== 接口函数 =====================
@@ -67,20 +71,22 @@ points_display_info_t* points_display_create(points_display_create_info_t* creat
     // 回调函数
     info->get_current_position_callback = create_info->get_current_position_callback;
     info->plane_to_waypoint_callback = create_info->plane_to_waypoint_callback;
-    info->add_current_callback = create_info->add_current_callback;
+    info->add_point_next_callback = create_info->add_point_next_callback;
     info->save_callback = create_info->save_callback;
     info->quit_callback = create_info->quit_callback;
-
-    info->offset_x = 0.0;
-    info->offset_y = 0.0;
+    // 显示参数
+    info->offset_x = 0.0, info->offset_y = 0.0;
     info->scale_factor = 1.0;
-    info->min_x = 0.0;
-    info->max_x = 0.0;
-    info->min_y = 0.0;
-    info->max_y = 0.0;
-
-    info->selected_node_idx = -1;
+    info->min_x = 0.0, info->max_x = 0.0;
+    info->min_y = 0.0, info->max_y = 0.0;
+    // 状态变量
     info->selected_node = NULL;
+    info->selected_node_idx = 0;
+    info->moving_point = 0;
+    // 菜单功能
+    info->total_funcs = 0;
+    info->active_func_idx = 0;
+
     return info;
 }
 
@@ -88,31 +94,34 @@ void points_display_show(points_display_info_t* info)
 {
     // 初始化实例
     points_display_instance.info = info;
+
+    ips200_set_color(COLOR_MENU_TEXT, COLOR_BACKGROUND);
+    ips200_clear();
+
+    // 默认选择第一个点
+    info->selected_node = info->waypoint_list->head;
+    info->selected_node_idx = 1;
     // 先获取一次当前定位点
     info->get_current_position_callback(&points_display_instance.current_position.x,
                                         &points_display_instance.current_position.y);
-    pit_ms_init(PIT_CH15, 100); // 开启100ms中断刷新当前定位点
-
-    // 计算屏幕坐标和显示参数
-    update_display_params();
-    update_screen_coordinates();
-    
-    ips200_set_color(COLOR_MENU_TEXT, COLOR_BACKGROUND);
-    ips200_clear();
-    
-    draw_all_points_and_path();
-    
+    // 显示路径图
+    show_path();
+    // 显示下方菜单
+    funcs_init();
     show_func();
-    show_cordinates();
+    // 显示选中点和当前定位点坐标
+    show_selected_cordinates();
+
+    pit_ms_init(PIT_CH15, 100); // 开启100ms中断刷新当前定位点
 }
 
 void points_display_update_current_position(void)
 {
     points_display_info_t* info = points_display_instance.info;
     // 擦除之前定位点的十字标识
-    if (!(points_display_instance.screen_x < 8 || points_display_instance.screen_x > SCREEN_WIDTH - 8 ||
-        points_display_instance.screen_y < 8 || points_display_instance.screen_y > SCREEN_HEIGHT - 8))
-        draw_cross_marker(points_display_instance.screen_x, points_display_instance.screen_y, COLOR_BACKGROUND);
+    draw_cross_marker(points_display_instance.screen_x, points_display_instance.screen_y, COLOR_BACKGROUND);
+    // 绘制选中点的十字标识（防止被一起擦除）
+    draw_cross_marker(info->selected_node->screen_param->screen_x, info->selected_node->screen_param->screen_y, COLOR_SELECTED);
     // 获取当前定位点
     info->get_current_position_callback(&points_display_instance.current_position.x,
         &points_display_instance.current_position.y);
@@ -124,14 +133,13 @@ void points_display_update_current_position(void)
     if (points_display_instance.screen_x < 8 || points_display_instance.screen_x > SCREEN_WIDTH - 8 ||
         points_display_instance.screen_y < 8 || points_display_instance.screen_y > SCREEN_HEIGHT - 8)
     {
-        clear_all_display();
-        update_display_params();
-        update_screen_coordinates();
-        draw_all_points_and_path();
+        clear_all_previous_display();
+        show_path();
     }
 
     // 绘制新的定位点十字标识
-    draw_cross_marker(points_display_instance.screen_x, points_display_instance.screen_y, RGB565_GREEN);
+    draw_cross_marker(points_display_instance.screen_x, points_display_instance.screen_y, COLOR_CURRENT);
+    show_current_cordinates();
 }
 
 
@@ -139,11 +147,10 @@ void points_display_update_current_position(void)
 void update_display_params(void)
 {
     points_display_info_t* info = points_display_instance.info;
-    int count = info->waypoint_list->size;
-    if (count < 1) return;
+    if (info->waypoint_list->size < 1) return;
     
     // 找到点集的边界
-    waypoint_node_t* current = info->waypoint_list->root->next;
+    waypoint_node_t* current = info->waypoint_list->head;
     // 包括当前实时定位点
     info->min_x = points_display_instance.current_position.x;
     info->max_x = points_display_instance.current_position.x;
@@ -203,8 +210,8 @@ void plane_to_screen(double plane_x, double plane_y, int* screen_x, int* screen_
 void update_screen_coordinates(void)
 {
     points_display_info_t* info = points_display_instance.info;
-    waypoint_node_t* current = info->waypoint_list->root->next;
-    
+    waypoint_node_t* current = info->waypoint_list->head;
+
     while (current)
     {
         plane_to_screen(current->screen_param->plane_x, current->screen_param->plane_y,
@@ -254,11 +261,8 @@ void draw_cross_marker(int x, int y, uint16 color)
 void draw_all_points_and_path(void)
 {
     points_display_info_t* info = points_display_instance.info;
-    // 默认选择第一个点
-    info->selected_node = info->waypoint_list->root->next;
-    info->selected_node_idx = 1;
     // 绘制连接线
-    waypoint_node_t* current = info->waypoint_list->root->next;
+    waypoint_node_t* current = info->waypoint_list->head;
     while (current && current->next) {
         screen_draw_line(current->screen_param->screen_x, current->screen_param->screen_y,
                            current->next->screen_param->screen_x, current->next->screen_param->screen_y,
@@ -267,7 +271,7 @@ void draw_all_points_and_path(void)
     }
     
     // 绘制所有点
-    current = info->waypoint_list->root->next;
+    current = info->waypoint_list->head;
     while (current) {
         if (current == info->selected_node) {
             draw_cross_marker(current->screen_param->screen_x, current->screen_param->screen_y, COLOR_SELECTED);
@@ -303,10 +307,14 @@ void clear_previous_display(waypoint_node_t* node)
     }
 }
 
-void clear_all_display(void)
+// 清除之前显示的实时定位点和路径图
+void clear_all_previous_display(void)
 {
+    // 清除之前实时定位点的标识
+    draw_cross_marker(points_display_instance.screen_x, points_display_instance.screen_y, COLOR_BACKGROUND);
+    // 清除之前显示的路径图
     points_display_info_t* info = points_display_instance.info;
-    waypoint_node_t* current = info->waypoint_list->root->next;
+    waypoint_node_t* current = info->waypoint_list->head;
     while (current)
     {
         clear_previous_display(current);
@@ -338,8 +346,17 @@ void update_point_display(waypoint_node_t* node, uint16 color)
     // 如果是选中节点，绘制十字标记
     if (node == info->selected_node) {
         draw_cross_marker(node->screen_param->screen_x, node->screen_param->screen_y, COLOR_SELECTED);
-        show_cordinates();
+        show_selected_cordinates();
     }
+}
+
+void show_path(void)
+{
+    // 更新显示参数
+    update_display_params();
+    update_screen_coordinates();
+    // 绘制路径
+    draw_all_points_and_path();
 }
 
 // ====================== 点操作函数实现 ======================
@@ -428,22 +445,26 @@ void select_prev_point(void)
 
 
 
-// ====================== 节点信息展示 =========================
-void show_cordinates(void)
+// ====================== 坐标显示 =========================
+void show_selected_cordinates(void)
 {
     points_display_info_t* info = points_display_instance.info;
     ips200_set_color(COLOR_MENU_TEXT, COLOR_MENU_BACKGROUND);
-    screen_printf(16, 15 * 16, "Point Index: %d", (int)info->selected_node_idx);
+    screen_printf(0, 15 * 16, "Point Index: %d", (int)info->selected_node_idx);
     if(info->selected_node->waypoint)
     {
-        screen_printf(16, 17 * 16, "X/LAT. %.6f", info->selected_node->waypoint->x);
-        screen_printf(16, 18 * 16, "Y/LONG. %.6f", info->selected_node->waypoint->y);
+        screen_printf(0, 17 * 16, "X/LAT %.6f", info->selected_node->waypoint->x);
+        screen_printf(0, 18 * 16, "Y/LON %.6f", info->selected_node->waypoint->y);
     }
-    else
-    {
-        screen_printf(16, 17 * 16, "X/LAT. N/A");
-        screen_printf(16, 18 * 16, "Y/LONG. N/A");
-    }
+}
+
+void show_current_cordinates(void)
+{
+    points_display_info_t* info = points_display_instance.info;
+    ips200_set_color(COLOR_MENU_TEXT, COLOR_MENU_BACKGROUND);
+    screen_printf(120, 15 * 16, "Current:", (int)info->selected_node_idx);    
+    screen_printf(120, 17 * 16, "X/LAT %.6f", points_display_instance.current_position.x);
+    screen_printf(120, 18 * 16, "Y/LON %.6f", points_display_instance.current_position.y);
 }
 
 // ====================== 菜单功能函数实现 ======================
@@ -457,16 +478,30 @@ void func_move_point(void)
 
 void func_add_current_point_next(void)
 {
+    clear_all_previous_display();
     points_display_info_t* info = points_display_instance.info;
-    info->add_current_callback(info->waypoint_list, info->selected_node);
-    points_display_show(info);
+    waypoint_t current_position = points_display_instance.current_position;
+    // 添加点并修改选中的点
+    info->add_point_next_callback(info->waypoint_list, info->selected_node,
+            (waypoint_t) { current_position.x, current_position.y });
+    info->selected_node = info->selected_node->next;
+    info->selected_node_idx++;
+    show_path();
 }
 
 void func_remove_point(void)
 {
     points_display_info_t* info = points_display_instance.info;
+    // 特殊的头节点不可删除
+    if (info->selected_node == info->waypoint_list->head) return;
+
+    waypoint_node_t* prev = info->selected_node->prev;
+    clear_all_previous_display();  // 先清除之前路径的显示
+    // 移除当前点，修改选中的点为被删除点的前一个点
     waypoint_list_remove(info->waypoint_list, info->selected_node);
-    points_display_show(info);
+    info->selected_node = prev;
+    info->selected_node_idx--;
+    show_path();    // 显示新路径
 }
 
 void func_save_and_quit(void)
@@ -493,6 +528,9 @@ void new_func(char* name, void(*func)(void))
 
 void funcs_init(void)
 {
+    points_display_info_t* info = points_display_instance.info;
+    info->total_funcs = 0;
+    info->active_func_idx = 0;
     new_func("Move Point", func_move_point);
     new_func("Add Current Point", func_add_current_point_next);
     new_func("Remove Point", func_remove_point);

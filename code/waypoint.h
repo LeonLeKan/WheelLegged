@@ -23,15 +23,16 @@ typedef struct _waypoint_node
 
 typedef struct 
 {
-    waypoint_node_t* root;
-    waypoint_node_t* tail;
-    int size;
+    waypoint_node_t* head;  // 特殊节点，存储开机时的坐标，无法被删除或修改
+    waypoint_node_t* tail;  // 最后一个节点，用于快速在尾部加点
+    int size;               // 点的数量（包括head）
 }waypoint_list_t;
 
 
-waypoint_list_t* waypoint_list_create(void);
-waypoint_node_t* waypoint_list_add_next(waypoint_list_t *list, waypoint_node_t *pNode, waypoint_t waypoint);
-void waypoint_list_remove(waypoint_list_t *list, waypoint_node_t *pNode);
+waypoint_list_t* waypoint_list_create(waypoint_t waypoint, waypoint_screen_param_t screen_param);
+waypoint_node_t* waypoint_list_add_next(waypoint_list_t* list, waypoint_node_t* pNode,
+                                waypoint_t waypoint, waypoint_screen_param_t screen_param);
+void waypoint_list_remove(waypoint_list_t* list, waypoint_node_t* pNode);
 void waypoint_list_clear(waypoint_list_t* list);
 
 void waypoint_list_save_to_flash(waypoint_list_t *list, uint32 flash_page);

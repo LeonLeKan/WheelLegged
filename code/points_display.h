@@ -16,7 +16,7 @@ typedef struct
     waypoint_list_t* waypoint_list; // 点链表
     void (*get_current_position_callback)(double* x, double* y); // 获取当前定位点回调
     void (*plane_to_waypoint_callback)(double x, double y, waypoint_t* waypoint);
-    void (*add_current_callback)(waypoint_list_t* list, waypoint_node_t* node);
+    waypoint_node_t* (*add_point_next_callback)(waypoint_list_t* list, waypoint_node_t* node, waypoint_t waypoint);
     void (*save_callback)(void);
     void (*quit_callback)(void);
 }points_display_create_info_t;
@@ -28,17 +28,17 @@ typedef struct
     // 回调函数
     void (*get_current_position_callback)(double* x, double* y);
     void (*plane_to_waypoint_callback)(double x, double y, waypoint_t* waypoint);
-    void (*add_current_callback)(waypoint_list_t* list, waypoint_node_t* node);
+    waypoint_node_t* (*add_point_next_callback)(waypoint_list_t* list, waypoint_node_t* node, waypoint_t waypoint);
     void (*save_callback)(void);
     void (*quit_callback)(void);
     // 显示参数
     double offset_x;      // 平面坐标偏移量X（米）
     double offset_y;      // 平面坐标偏移量Y（米）
     double scale_factor;  // 屏幕缩放比例（像素/米）
-    double selected_node_idx; // 选中节点索引
     double min_x, max_x, min_y, max_y; // 点集边界
     // 状态变量
     waypoint_node_t* selected_node; // 选中节点指针
+    int selected_node_idx; // 选中节点索引
     bool moving_point; // 是否处于移动点状态
     // 菜单功能
     func_menu_t funcs[10];

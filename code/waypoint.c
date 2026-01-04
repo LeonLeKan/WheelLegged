@@ -1,25 +1,31 @@
 #include "waypoint.h"
 
-waypoint_list_t* waypoint_list_create(void)
+waypoint_list_t* waypoint_list_create(waypoint_t waypoint, waypoint_screen_param_t screen_param)
 {
     waypoint_list_t* list = (waypoint_list_t*)malloc(sizeof(waypoint_list_t));
-    list->root = (waypoint_node_t*)malloc(sizeof(waypoint_node_t));
-    list->root->prev = NULL;
-    list->root->next = NULL;
-    list->root->waypoint = NULL;
-    list->root->screen_param = NULL;
-    list->size = 0;
-    list->tail = list->root;
+    list->head = (waypoint_node_t*)malloc(sizeof(waypoint_node_t));
+    list->head->prev = NULL;
+    list->head->next = NULL;
+    list->head->waypoint = (waypoint_t*)malloc(sizeof(waypoint_t));
+    list->head->screen_param = (waypoint_screen_param_t*)malloc(sizeof(waypoint_screen_param_t));
+    
+    *(list->head->waypoint) = waypoint;
+    *(list->head->screen_param) = screen_param;
+
+    list->size = 1;
+    list->tail = list->head;
     return list;
 }
 
-waypoint_node_t* waypoint_list_add_next(waypoint_list_t *list, waypoint_node_t *pNode, waypoint_t waypoint)
+waypoint_node_t* waypoint_list_add_next(waypoint_list_t* list, waypoint_node_t* pNode,
+                                        waypoint_t waypoint, waypoint_screen_param_t screen_param)
 {
     waypoint_node_t *newNode = (waypoint_node_t*)malloc(sizeof(waypoint_node_t));
     
     newNode->waypoint = (waypoint_t*)malloc(sizeof(waypoint_t));
     newNode->screen_param = (waypoint_screen_param_t*)malloc(sizeof(waypoint_screen_param_t));
     *(newNode->waypoint) = waypoint;
+    *(newNode->screen_param) = screen_param;
     newNode->prev = pNode;
     newNode->next = pNode->next;
 
@@ -55,7 +61,7 @@ void waypoint_list_remove(waypoint_list_t *list, waypoint_node_t *pNode)
 
 void waypoint_list_clear(waypoint_list_t *list)
 {
-    waypoint_node_t* now_node = list->root;
+    waypoint_node_t* now_node = list->head;
     if(!now_node->next) return;
     now_node = now_node->next;
     while(now_node)
@@ -64,7 +70,7 @@ void waypoint_list_clear(waypoint_list_t *list)
         now_node = now_node->next;
         waypoint_list_remove(list, temp);
     }
-    list->tail = list->root;
+    list->tail = list->head;
     list->size = 0;
 }
 
@@ -78,7 +84,7 @@ union double_converter
 void waypoint_list_save_to_flash(waypoint_list_t *list, uint32 flash_page)
 {
     flash_buffer_clear();
-    waypoint_node_t *now_node = list->root->next;
+    waypoint_node_t *now_node = list->head->next;
     
     int index = 1; // flash_union_buffer[0] : 一共有几个点
     union double_converter converter;
@@ -126,7 +132,8 @@ bool waypoint_list_load_from_flash(waypoint_list_t *list, uint32 flash_page)
         converter.buf[1] = flash_union_buffer[index++].uint32_type;
         t_y = converter.d;
         
-        waypoint_list_add_next(list, list->tail, (waypoint_t){t_x, t_y});
+        waypoint_list_add_next(list, list->tail,
+            (waypoint_t) { t_x, t_y }, (waypoint_screen_param_t) { t_x, t_y, 0, 0 });
     }
     return true;
 }
