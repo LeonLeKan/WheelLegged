@@ -16,12 +16,16 @@ typedef struct {
     float q[4];           // 四元数 [q0, q1, q2, q3]
     float integralFB[3];  // 误差积分项
     MahonyFilterParam param;
+
+    // 欧拉角输出
+    struct {
+        float euler[3];   // 欧拉角 [roll, pitch, yaw] (deg)
+    } output;
 } MahonyFilter;
 
 
 void Mahony_Init(MahonyFilter* filter, MahonyFilterParam* param);
 void Mahony_Update(MahonyFilter* filter, float gyro[3], float acc[3]);
-void Mahony_GetEuler(MahonyFilter* filter, float* roll, float* pitch, float* yaw);
 
 
 #endif

@@ -193,7 +193,7 @@ UkfMatrix_t UkfMatrixCfg1 =
 void Fx1(Matrix_t *pu_p, Matrix_t *pX_p, Matrix_t *pX_m, int sigmaIdx, double dT) {
     const int nCol = pX_m->ncol; // 现在应该是11
     float px = pX_p->val[nCol * 0 + sigmaIdx];
-    float py = pX_p->val[nCol * 1 + sigmaIdx];
+    // float py = pX_p->val[nCol * 1 + sigmaIdx];
     float v  = pX_p->val[nCol * 2 + sigmaIdx];
     float psi = pX_p->val[nCol * 3 + sigmaIdx];
     float omega = pX_p->val[nCol * 4 + sigmaIdx];
@@ -209,7 +209,7 @@ void Fx1(Matrix_t *pu_p, Matrix_t *pX_p, Matrix_t *pX_m, int sigmaIdx, double dT
 // Fx2: 预测状态1: y位置 (原理同Fx1，将cos换成sin，符号有变化)
 void Fx2(Matrix_t *pu_p, Matrix_t *pX_p, Matrix_t *pX_m, int sigmaIdx, double dT) {
     const int nCol = pX_m->ncol;
-    float px = pX_p->val[nCol * 0 + sigmaIdx];
+    // float px = pX_p->val[nCol * 0 + sigmaIdx];
     float py = pX_p->val[nCol * 1 + sigmaIdx];
     float v  = pX_p->val[nCol * 2 + sigmaIdx];
     float psi = pX_p->val[nCol * 3 + sigmaIdx];

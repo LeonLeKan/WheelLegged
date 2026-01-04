@@ -143,14 +143,33 @@ static void process_calibration(void)
 
 static void process_filter_update(void)
 {
+    // mahony更新
     Mahony_Update(&imu.mahony_filter, imu.body.gyro, imu.body.acc);
-    Mahony_GetEuler(&imu.mahony_filter, &imu.euler[0], &imu.euler[1], &imu.euler[2]);
-    // imu_angle_update();     // 测试用互补滤波姿态更新
-    float ukf_measurement[3];
+
+    // roll和pitch直接采用mahony输出
+    imu.output.euler[0] = imu.mahony_filter.output.euler[0];
+    imu.output.euler[1] = imu.mahony_filter.output.euler[1];
+    // roll和pitch角速度直接采用校准后数据
+    imu.output.gyro[0] = imu.body.gyro[0];
+    imu.output.gyro[1] = imu.body.gyro[1];
+
+    // 从编码器获取速度
     imu.body.speed = ((float)motor_value.receive_left_speed_data -
         (float)motor_value.receive_right_speed_data) / 2.0f * PI * 0.065f / 60.0f; // 轮速转换为线速度，单位m/s
-    ukf_measurement[0] = imu.body.speed;      // 速度
-    ukf_measurement[1] = imu.euler[2] * DEG_TO_RAD;       // 航向角（弧度）
-    ukf_measurement[2] = imu.body.gyro[2] * DEG_TO_RAD;   // 角速度（弧度/s）
+
+    // ukf更新
+    float ukf_measurement[3];
+    ukf_measurement[0] = imu.body.speed;                                       // 速度
+    // mahony解算的yaw角输入ukf
+    ukf_measurement[1] = imu.mahony_filter.output.euler[2] * DEG_TO_RAD;       // 航向角（弧度）
+    ukf_measurement[2] = imu.body.gyro[2] * DEG_TO_RAD;                        // 角速度（弧度/s）
     ukf_filter_update(&imu.ukf_filter, ukf_measurement);
+
+    // yaw和yaw角速度采用ukf输出
+    imu.output.euler[2] = imu.ukf_filter.output.yaw;
+    imu.output.gyro[2] = imu.ukf_filter.output.yaw_rate;
+    // 位置和速度采用ukf输出
+    imu.output.position_x = imu.ukf_filter.output.position_x;
+    imu.output.position_y = imu.ukf_filter.output.position_y;
+    imu.output.speed = imu.ukf_filter.output.speed;
 }

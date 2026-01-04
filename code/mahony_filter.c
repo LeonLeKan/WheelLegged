@@ -66,14 +66,11 @@ void Mahony_Update(MahonyFilter* filter, float gyro[3], float acc[3]) {
     filter->q[1] = q1 / norm;
     filter->q[2] = q2 / norm;
     filter->q[3] = q3 / norm;
-}
 
-
-// 从四元数获取欧拉角
-void Mahony_GetEuler(MahonyFilter* filter, float* roll, float* pitch, float* yaw) {
-    float q0 = filter->q[0], q1 = filter->q[1], q2 = filter->q[2], q3 = filter->q[3];
+    // 从四元数获取欧拉角
+    q0 = filter->q[0], q1 = filter->q[1], q2 = filter->q[2], q3 = filter->q[3];
     
-    *roll = atan2f(2.0f * (q0 * q1 + q2 * q3), q0 * q0 - q1 * q1 - q2 * q2 + q3 * q3) * RAD_TO_DEG;
-    *pitch = asinf(2.0f * (q0 * q2 - q1 * q3)) * RAD_TO_DEG;
-    *yaw = atan2f(2.0f * (q0 * q3 + q1 * q2), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * RAD_TO_DEG;
+    filter->output.euler[0] = atan2f(2.0f * (q0 * q1 + q2 * q3), q0 * q0 - q1 * q1 - q2 * q2 + q3 * q3) * RAD_TO_DEG;
+    filter->output.euler[1] = asinf(2.0f * (q0 * q2 - q1 * q3)) * RAD_TO_DEG;
+    filter->output.euler[2] = atan2f(2.0f * (q0 * q3 + q1 * q2), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * RAD_TO_DEG;
 }

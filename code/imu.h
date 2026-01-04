@@ -37,9 +37,16 @@ typedef struct {
         uint32_t target_samples; // 目标样本数
         bool is_calibrated;      // 校准完成标志
     } calib;
-    
+
     // 输出
-    float euler[3];     // 欧拉角 [roll, pitch, yaw] (度)
+    struct {
+        float euler[3];     // 欧拉角 [roll, pitch, yaw] (deg)
+        float gyro[3];      // 角速度 (deg/s)
+        float position_x;   // x位置坐标 (m)
+        float position_y;   // y位置坐标 (m)
+        float speed;        // 速度 (m/s)
+    } output;
+
     imu_state_t state;  // 当前状态
     
     // 算法实例

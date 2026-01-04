@@ -65,11 +65,11 @@ int main(void)
 
 void send_attitude(void)
 {
-    seekfree_assistant_oscilloscope_data.data[0] = imu.euler[0];
-    seekfree_assistant_oscilloscope_data.data[1] = imu.euler[1];
+    seekfree_assistant_oscilloscope_data.data[0] = imu.output.euler[0];
+    seekfree_assistant_oscilloscope_data.data[1] = imu.output.euler[1];
     seekfree_assistant_oscilloscope_data.data[2] = imu.body.gyro[2];
     seekfree_assistant_oscilloscope_data.data[3] = imu.ukf_filter.output.yaw_rate;
-    seekfree_assistant_oscilloscope_data.data[4] = imu.euler[2];
+    seekfree_assistant_oscilloscope_data.data[4] = imu.output.euler[2];
     seekfree_assistant_oscilloscope_data.data[5] = imu.ukf_filter.output.yaw;
     seekfree_assistant_oscilloscope_data.data[6] = imu.body.speed;
     seekfree_assistant_oscilloscope_data.data[7] = imu.ukf_filter.output.speed;
