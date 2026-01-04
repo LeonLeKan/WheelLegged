@@ -1468,6 +1468,21 @@
     <group>
         <name>code</name>
         <group>
+            <name>control</name>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\connecting_rod.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\connecting_rod.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\servo.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\servo.h</name>
+            </file>
+        </group>
+        <group>
             <name>ui</name>
             <group>
                 <name>ahrs_ui</name>
