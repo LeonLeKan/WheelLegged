@@ -168,10 +168,10 @@ static void process_filter_update(void)
 
     // ukf更新
     float ukf_measurement[3];
-    ukf_measurement[0] = imu.encoder.speed;                                    // 速度
+    ukf_measurement[0] = imu.encoder.speed;                     // 速度
     // mahony解算的yaw角输入ukf
-    ukf_measurement[1] = imu.mahony_filter.output.euler[2] * DEG_TO_RAD;       // 航向角（弧度）
-    ukf_measurement[2] = imu.body.gyro[2] * DEG_TO_RAD;                        // 角速度（弧度/s）
+    ukf_measurement[1] = imu.body.gyro[2] * DEG_TO_RAD;         // IMU角速度 (rad/s)
+    ukf_measurement[2] = imu.encoder.yaw_rate * DEG_TO_RAD;     // 编码器角速度 (rad/s)
     ukf_filter_update(&imu.ukf_filter, ukf_measurement);
 
     // yaw和yaw角速度采用ukf输出

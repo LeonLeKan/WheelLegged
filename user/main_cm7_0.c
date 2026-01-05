@@ -28,8 +28,8 @@ MahonyFilterParam mahony_filter_param = {
 
 ukf_filter_param_t ukf_filter_param = {
     .dt = IMU_UPDATE_INTERVAL_MS / 1000.0,
-    .q = {0.01, 0.01, 0.0015, 0.0002, 0.05},
-    .r = {0.0001, 1, 3}
+    .q = {0.01, 0.01, 0.0015, 0.02, 0.05},
+    .r = {0.0001, 0.05, 0.001}
 };
 
 bool showing_points = false;
@@ -136,7 +136,7 @@ void process_param(void)
 void start_imu_calibration(void)
 {
     system_delay_ms(1000);  // 等待1秒，确保系统稳定
-    imu_start_calibration(2000);  // 采集2000个样本进行校准
+    imu_start_calibration(3000);  // 采集3000个样本进行校准
 }
 
 void update_screen(void)

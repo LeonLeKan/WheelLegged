@@ -254,16 +254,16 @@ void Hy1(Matrix_t *pu, Matrix_t *pX_m, Matrix_t *pY_m, int sigmaIdx) {
     pu = pu;
 }
 
-// Hy2: 预测测量1: 航向角观测
+// Hy2: 预测测量1: IMU角速度观测
 void Hy2(Matrix_t *pu, Matrix_t *pX_m, Matrix_t *pY_m, int sigmaIdx) {
     const int nCol = pY_m->ncol;
     const int state_nCol = pX_m->ncol;
-    // 观测值 = 对应的状态值 (ψ)
-    pY_m->val[nCol * 1 + sigmaIdx] = pX_m->val[state_nCol * 3 + sigmaIdx];
+    // 观测值 = 对应的状态值 (ω)
+    pY_m->val[nCol * 1 + sigmaIdx] = pX_m->val[state_nCol * 4 + sigmaIdx];
     pu = pu;
 }
 
-// Hy3: 预测测量2: 角速度观测
+// Hy3: 预测测量2: 编码器角速度观测
 void Hy3(Matrix_t *pu, Matrix_t *pX_m, Matrix_t *pY_m, int sigmaIdx) {
     const int nCol = pY_m->ncol;
     const int state_nCol = pX_m->ncol;
