@@ -65,14 +65,18 @@ int main(void)
 
 void send_attitude(void)
 {
-    seekfree_assistant_oscilloscope_data.data[0] = imu.output.euler[0];
-    seekfree_assistant_oscilloscope_data.data[1] = imu.output.euler[1];
+    seekfree_assistant_oscilloscope_data.data[0] = imu.output.position_x;
+    seekfree_assistant_oscilloscope_data.data[1] = imu.output.position_y;
+
     seekfree_assistant_oscilloscope_data.data[2] = imu.body.gyro[2];
-    seekfree_assistant_oscilloscope_data.data[3] = imu.ukf_filter.output.yaw_rate;
-    seekfree_assistant_oscilloscope_data.data[4] = imu.output.euler[2];
-    seekfree_assistant_oscilloscope_data.data[5] = imu.ukf_filter.output.yaw;
-    seekfree_assistant_oscilloscope_data.data[6] = imu.body.speed;
-    seekfree_assistant_oscilloscope_data.data[7] = imu.ukf_filter.output.speed;
+    seekfree_assistant_oscilloscope_data.data[3] = imu.encoder.yaw_rate;
+    seekfree_assistant_oscilloscope_data.data[4] = imu.output.gyro[2];
+
+    seekfree_assistant_oscilloscope_data.data[5] = imu.output.euler[2];
+
+    seekfree_assistant_oscilloscope_data.data[6] = imu.encoder.speed;
+    seekfree_assistant_oscilloscope_data.data[7] = imu.output.speed;
+
     seekfree_assistant_oscilloscope_data.channel_num = 8;
     seekfree_assistant_oscilloscope_send(&seekfree_assistant_oscilloscope_data);
 }
