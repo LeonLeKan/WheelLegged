@@ -19,8 +19,8 @@ void ukf_filter_update(ukf_filter_t* filter, float measurement[3])
     double *const py = filter->ukfIO.input.y.val;
     // 设置测量值
     py[0] = measurement[0]; // 速度观测值
-    py[1] = measurement[1]; // 航向角观测值
-    py[2] = measurement[2]; // 角速度观测值
+    py[1] = measurement[1]; // IMU角速度观测值
+    py[2] = measurement[2]; // 编码器角速度观测值
     // 执行UKF步骤
     ukf_step(&filter->ukfIO);
     // 更新输出估计值
