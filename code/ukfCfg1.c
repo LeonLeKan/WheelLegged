@@ -47,46 +47,18 @@ static ObservFcn_t ObservFcn[3] = { &Hy1, &Hy2, &Hy3 };
 //-----------------------
 static double Sc_vector[1][3] = {{1, 2, -2}};
 // 均值权重 Wm
-static double Wm_weight_vector[1][11] = {
-    {
-        -0.6666666667,  // Wm[0]
-         0.1666666667,  // Wm[1]
-         0.1666666667,  // Wm[2]
-         0.1666666667,  // Wm[3]
-         0.1666666667,  // Wm[4]
-         0.1666666667,  // Wm[5]
-         0.1666666667,  // Wm[6]
-         0.1666666667,  // Wm[7]
-         0.1666666667,  // Wm[8]
-         0.1666666667,  // Wm[9]
-         0.1666666667   // Wm[10]
-    }
-};
+static double Wm_weight_vector[1][11] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
 // 协方差权重 Wc
-static double Wc_weight_vector[1][11] = {
-    {
-         1.3333333333,  // Wc[0]
-         0.1666666667,  // Wc[1]
-         0.1666666667,  // Wc[2]
-         0.1666666667,  // Wc[3]
-         0.1666666667,  // Wc[4]
-         0.1666666667,  // Wc[5]
-         0.1666666667,  // Wc[6]
-         0.1666666667,  // Wc[7]
-         0.1666666667,  // Wc[8]
-         0.1666666667,  // Wc[9]
-         0.1666666667   // Wc[10]
-    }
-};
+static double Wc_weight_vector[1][11] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 //static double u_system_input[2][1] = {{0},{0}};
 //static double u_prev_system_input[2][1] = {{0},{0}};
 static double y_meas[3][1] = {{0}, {0}, {0}};
 static double y_predicted_mean[3][1] = {{0}, {0}, {0}};
 static double x_system_states[5][1] = {{0},{0},{0},{0},{0}};
 static double x_system_states_ic[5][1] = {{0},{0},{0},{0},{0}};
-static double x_system_states_limits[5][3] = { {0, 0, NULL}, {0, 0, NULL}, {0, 0, NULL}, {0, 0, NULL}, {0, 0, NULL} };
-static _Bool x_system_states_limits_enable[5][1] = { {0},{0},{0},{0},NULL };
+static double x_system_states_limits[5][3] = { {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0} };
+static _Bool x_system_states_limits_enable[5][1] = { {0},{0},{0},{0}, {0} };
 static double x_system_states_correction[5][1] = {{0},{0},{0},{0},{0}};
 static double X_sigma_points[5][11] =
 {/*  s1  s2  s3  s4  s5}       */
@@ -117,29 +89,30 @@ static double Pxx_error_covariance[5][5]=
 //State covariance initial values
 static double Pxx0_init_error_covariance[5][5]=
 {/*  x1,    x2,    x3,    x4,    x5         */
-    {0,    0,     0,     0,     0}, /* x1 */
-    {0,    0,     0,     0,     0}, /* x2 */
-    {0,    0,     0,     0,     0}, /* x3 */
-    {0,    0,     0,     0,     0}, /* x4 */
-    {0,    0,     0,     0,     0}, /* x5 */
+    {0.001,    0,     0,     0,     0}, /* x1 */
+    {0,    0.001,     0,     0,     0}, /* x2 */
+    {0,    0,     0.0001,     0,     0}, /* x3 */
+    {0,    0,     0,     0.001,     0}, /* x4 */
+    {0,    0,     0,     0,     0.0001}, /* x5 */
 };
 
 //Process noise covariance Q : initial noise assumptions
 static double Qxx_process_noise_cov[5][5]=
-{/*  x1,  x2,  x3,  x4,  x5        */
-    { 0,      0,      0,      0,      0}, /* x1 */
-    {   0,    0,      0,      0,      0}, /* x2 */
-    {   0,      0,   0,      0,      0}, /* x3 */
-    {   0,      0,      0,  0,      0}, /* x4 */
-    {   0,      0,      0,      0,   0}, /* x5 */
+{/*  x1,    x2,    x3,      x4,      x5        */
+    { 1e-6,    0,      0,      0,      0}, /* x1 */
+    {   0,  1e-6,      0,      0,      0}, /* x2 */
+    {   0,      0,  1e-8,      0,      0}, /* x3 - 速度 */
+    {   0,      0,      0,  1e-7,      0}, /* x4 - 航向角 */
+    {   0,      0,      0,      0,  1e-8}  /* x5 - 角速度 */
 };
+
 
 //Output noise covariance: initial noise assumptions
 static double Ryy0_init_out_covariance[3][3]=
-{/*  y1,      */
-    {0,   0,      0},  /* y1 */
-    {0,   0,      0},  /* y2 */
-    {0,   0,      0},/* y3 */
+{/*      y1,        y2,        y3      */
+    { 1e-8,       0,        0    },  /* y1: 编码器速度 - 非常精确 */
+    {   0,     1e-6,        0    },  /* y2: IMU角速度 - 噪声较大 */
+    {   0,       0,      1e-10   }   /* y3: 编码器角速度 - 极其精确（无打滑时）*/
 };
 
 //Output covariance Pyy = R (initial assumption)
@@ -216,7 +189,7 @@ UkfMatrix_t UkfMatrixCfg1 =
     {COLXROW(Pxx_covariance_correction),NROWS(Pxx_covariance_correction),NCOL(Pxx_covariance_correction),&Pxx_covariance_correction[0][0]},
     &PredictFcn[0],
     &ObservFcn[0],
-    0
+    0.002
 };
 
 

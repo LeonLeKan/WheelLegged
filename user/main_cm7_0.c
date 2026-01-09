@@ -74,7 +74,7 @@ void send_attitude(void)
 
     seekfree_assistant_oscilloscope_data.data[5] = imu.output.euler[2];
 
-    double *P = imu.ukf_filter.ukfIO.predict.P_m.val;
+    double *P = imu.ukf_filter.ukfIO.update.Pxx.val;
     seekfree_assistant_oscilloscope_data.data[6] = P[0] + P[5 + 1] + P[10 + 2] + P[15 + 3] + P[20 + 4];
     seekfree_assistant_oscilloscope_data.data[7] = imu.output.speed;
 

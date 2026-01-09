@@ -37,7 +37,7 @@ void ukf_filter_update(ukf_filter_t* filter, float measurement[3])
 static void set_ukf_param(ukf_filter_param_t* param)
 {
     // 设置采样时间间隔
-    UkfMatrixCfg1.dT = 0;
+    UkfMatrixCfg1.dT = param->dt;
     // 设置过程噪声协方差矩阵Q
     for (int i = 0; i < 5; i++)
     {
