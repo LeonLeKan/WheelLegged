@@ -28,8 +28,8 @@ MahonyFilterParam mahony_filter_param = {
 
 ukf_filter_param_t ukf_filter_param = {
     .dt = IMU_UPDATE_INTERVAL_MS / 1000.0,
-    .q = {0.01, 0.01, 0.0015, 0.0002, 0.05},
-    .r = {0.0001, 1, 3}
+    .q = {0.0001, 0.0001, 0.000015, 0.0002, 0.0005},
+    .r = {0.0001, 0.05, 0.001}
 };
 
 bool showing_points = false;
@@ -55,7 +55,7 @@ int main(void)
         seekfree_assistant_data_analysis();
         
         send_attitude();
-        // process_param();
+        process_param();
         if(!showing_points) update_screen();
         key_handle();
         // 此处编写需要循环执行的代码
@@ -65,14 +65,19 @@ int main(void)
 
 void send_attitude(void)
 {
-    seekfree_assistant_oscilloscope_data.data[0] = imu.output.euler[0];
-    seekfree_assistant_oscilloscope_data.data[1] = imu.output.euler[1];
+    seekfree_assistant_oscilloscope_data.data[0] = imu.output.position_x;
+    seekfree_assistant_oscilloscope_data.data[1] = imu.output.position_y;
+
     seekfree_assistant_oscilloscope_data.data[2] = imu.body.gyro[2];
-    seekfree_assistant_oscilloscope_data.data[3] = imu.ukf_filter.output.yaw_rate;
-    seekfree_assistant_oscilloscope_data.data[4] = imu.output.euler[2];
-    seekfree_assistant_oscilloscope_data.data[5] = imu.ukf_filter.output.yaw;
-    seekfree_assistant_oscilloscope_data.data[6] = imu.body.speed;
-    seekfree_assistant_oscilloscope_data.data[7] = imu.ukf_filter.output.speed;
+    seekfree_assistant_oscilloscope_data.data[3] = imu.encoder.yaw_rate;
+    seekfree_assistant_oscilloscope_data.data[4] = imu.output.gyro[2];
+
+    seekfree_assistant_oscilloscope_data.data[5] = imu.output.euler[2];
+
+    double *P = imu.ukf_filter.ukfIO.update.Pxx.val;
+    seekfree_assistant_oscilloscope_data.data[6] = P[0] + P[5 + 1] + P[10 + 2] + P[15 + 3] + P[20 + 4];
+    seekfree_assistant_oscilloscope_data.data[7] = imu.output.speed;
+
     seekfree_assistant_oscilloscope_data.channel_num = 8;
     seekfree_assistant_oscilloscope_send(&seekfree_assistant_oscilloscope_data);
 }
@@ -132,7 +137,7 @@ void process_param(void)
 void start_imu_calibration(void)
 {
     system_delay_ms(1000);  // 等待1秒，确保系统稳定
-    imu_start_calibration(2000);  // 采集2000个样本进行校准
+    imu_start_calibration(3000);  // 采集3000个样本进行校准
 }
 
 void update_screen(void)
