@@ -8,7 +8,7 @@ static void set_ukf_param(ukf_filter_param_t* param);
 bool ukf_filter_init(ukf_filter_t* filter, ukf_filter_param_t* param)
 {
     // 设置UKF参数
-    // set_ukf_param(param);
+    set_ukf_param(param);
     // 初始化UKF实例
     return ukf_init(&filter->ukfIO, &UkfMatrixCfg1);
 }
@@ -54,18 +54,18 @@ static void set_ukf_param(ukf_filter_param_t* param)
         }
     }
     // 设置测量噪声协方差矩阵R
-    for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            if (i == j)
-            {
-                UkfMatrixCfg1.Ryy0_init_out_covariance.val[i * 3 + j] = param->r[i];
-            }
-            else
-            {
-                UkfMatrixCfg1.Ryy0_init_out_covariance.val[i * 3 + j] = 0.0;
-            }
-        }
-    }
+    // for (int i = 0; i < 3; i++)
+    // {
+    //     for (int j = 0; j < 3; j++)
+    //     {
+    //         if (i == j)
+    //         {
+    //             UkfMatrixCfg1.Ryy0_init_out_covariance.val[i * 3 + j] = param->r[i];
+    //         }
+    //         else
+    //         {
+    //             UkfMatrixCfg1.Ryy0_init_out_covariance.val[i * 3 + j] = 0.0;
+    //         }
+    //     }
+    // }
 }
