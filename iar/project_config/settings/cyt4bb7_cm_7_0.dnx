@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 <settings>
     <Jet>
+        <JetConnSerialNo>ZF-WLFS-CMSIS-DAP:80942420-B8F862D88090</JetConnSerialNo>
+        <JetConnFoundProbes />
+        <PrevWtdReset>Reset and halt after bootloader</PrevWtdReset>
         <DisableInterrupts>0</DisableInterrupts>
         <LeaveRunning>0</LeaveRunning>
         <MultiCoreRunAll>0</MultiCoreRunAll>
         <CpuHaltOnBreakpointSet>0</CpuHaltOnBreakpointSet>
         <OnlineReset>Software</OnlineReset>
-        <JetConnSerialNo>ZF-WLFS-CMSIS-DAP:80942420-B8F862D88090</JetConnSerialNo>
-        <JetConnFoundProbes />
-        <PrevWtdReset>Reset and halt after bootloader</PrevWtdReset>
     </Jet>
     <PlDriver>
-        <MemConfigValue>D:\iar\ewarm-9.60.3\arm\config\debugger\Infineon\CYT4BB_M7.ddf</MemConfigValue>
         <FirstRun>0</FirstRun>
+        <MemConfigValue>D:\iar\ewarm-9.60.3\arm\config\debugger\Infineon\CYT4BB_M7.ddf</MemConfigValue>
     </PlDriver>
     <Exceptions>
         <StopOnUncaught>_ 0</StopOnUncaught>
