@@ -45,20 +45,17 @@ static ObservFcn_t ObservFcn[3] = { &Hy1, &Hy2, &Hy3 };
 //-----------------------
 //UKF Processing matrix
 //-----------------------
-static double Sc_vector[1][3] = {{1, 2, -2}};
-// 均值权重 Wm
-static double Wm_weight_vector[1][11] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
-
-// 协方差权重 Wc
-static double Wc_weight_vector[1][11] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+static double Sc_vector[1][3] = {{0.1,2,0}};
+static double Wm_weight_vector[1][11] = {{0,0,0,0,0,0,0,0,0,0,0}};
+static double Wc_weight_vector[1][11] = {{0,0,0,0,0,0,0,0,0,0,0}};
 //static double u_system_input[2][1] = {{0},{0}};
 //static double u_prev_system_input[2][1] = {{0},{0}};
 static double y_meas[3][1] = {{0}, {0}, {0}};
 static double y_predicted_mean[3][1] = {{0}, {0}, {0}};
 static double x_system_states[5][1] = {{0},{0},{0},{0},{0}};
 static double x_system_states_ic[5][1] = {{0},{0},{0},{0},{0}};
-static double x_system_states_limits[5][3] = { {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0} };
-static _Bool x_system_states_limits_enable[5][1] = { {0},{0},{0},{0}, {0} };
+static double x_system_states_limits[5][3] = { {0, 0, NULL}, {0, 0, NULL}, {0, 0, NULL}, {0, 0, NULL}, {0, 0, NULL} };
+static _Bool x_system_states_limits_enable[5][1] = { {0},{0},{0},{0},NULL };
 static double x_system_states_correction[5][1] = {{0},{0},{0},{0},{0}};
 static double X_sigma_points[5][11] =
 {/*  s1  s2  s3  s4  s5}       */
@@ -89,45 +86,44 @@ static double Pxx_error_covariance[5][5]=
 //State covariance initial values
 static double Pxx0_init_error_covariance[5][5]=
 {/*  x1,    x2,    x3,    x4,    x5         */
-    {0.001,    0,     0,     0,     0}, /* x1 */
-    {0,    0.001,     0,     0,     0}, /* x2 */
-    {0,    0,     0.0001,     0,     0}, /* x3 */
-    {0,    0,     0,     0.001,     0}, /* x4 */
-    {0,    0,     0,     0,     0.0001}, /* x5 */
+    {1,    0,     0,     0,     0}, /* x1 */
+    {0,    1,     0,     0,     0}, /* x2 */
+    {0,    0,     1,     0,     0}, /* x3 */
+    {0,    0,     0,     1,     0}, /* x4 */
+    {0,    0,     0,     0,     1}, /* x5 */
 };
 
 //Process noise covariance Q : initial noise assumptions
 static double Qxx_process_noise_cov[5][5]=
-{/*  x1,    x2,    x3,      x4,      x5        */
-    { 1e-6,    0,      0,      0,      0}, /* x1 */
-    {   0,  1e-6,      0,      0,      0}, /* x2 */
-    {   0,      0,  1e-8,      0,      0}, /* x3 - 速度 */
-    {   0,      0,      0,  1e-7,      0}, /* x4 - 航向角 */
-    {   0,      0,      0,      0,  1e-8}  /* x5 - 角速度 */
+{/*  x1,  x2,  x3,  x4,  x5        */
+    { 0.1,      0,      0,      0,      0}, /* x1 */
+    {   0,    0.1,      0,      0,      0}, /* x2 */
+    {   0,      0,   0.01,      0,      0}, /* x3 */
+    {   0,      0,      0,  0.001,      0}, /* x4 */
+    {   0,      0,      0,      0,   0.01}, /* x5 */
 };
-
 
 //Output noise covariance: initial noise assumptions
 static double Ryy0_init_out_covariance[3][3]=
-{/*      y1,        y2,        y3      */
-    { 1e-8,       0,        0    },  /* y1: 编码器速度 - 非常精确 */
-    {   0,     1e-6,        0    },  /* y2: IMU角速度 - 噪声较大 */
-    {   0,       0,      1e-10   }   /* y3: 编码器角速度 - 极其精确（无打滑时）*/
+{/*  y1,      */
+    {0.01, 0,      0    },  /* y1 */
+    {0,    0.001, 0    },  /* y2 */
+    {0,    0,      0.5},/* y3 */
 };
 
 //Output covariance Pyy = R (initial assumption)
 static double Pyy_out_covariance[3][3]=
 {/*  y1        */
-    {0, 0, 0},  /* y1 */
-    {0, 0, 0},  /* y2 */
-    {0, 0, 0},  /* y3 */
+    {1, 0, 0},  /* y1 */
+    {0, 1, 0},  /* y2 */
+    {0, 0, 1},  /* y3 */
 };
 
 static double Pyy_out_covariance_copy[3][3]=
 {/*  y1         */
-    {0, 0, 0},  /* y1 */
-    {0, 0, 0},  /* y2 */
-    {0, 0, 0},  /* y3 */
+    {1, 0, 0},  /* y1 */
+    {0, 1, 0},  /* y2 */
+    {0, 0, 1},  /* y3 */
 };
 
 //cross-covariance of state and output
@@ -189,7 +185,7 @@ UkfMatrix_t UkfMatrixCfg1 =
     {COLXROW(Pxx_covariance_correction),NROWS(Pxx_covariance_correction),NCOL(Pxx_covariance_correction),&Pxx_covariance_correction[0][0]},
     &PredictFcn[0],
     &ObservFcn[0],
-    0.002
+    0.005
 };
 
 
@@ -258,16 +254,16 @@ void Hy1(Matrix_t *pu, Matrix_t *pX_m, Matrix_t *pY_m, int sigmaIdx) {
     pu = pu;
 }
 
-// Hy2: 预测测量1: IMU角速度观测
+// Hy2: 预测测量1: 航向角观测
 void Hy2(Matrix_t *pu, Matrix_t *pX_m, Matrix_t *pY_m, int sigmaIdx) {
     const int nCol = pY_m->ncol;
     const int state_nCol = pX_m->ncol;
-    // 观测值 = 对应的状态值 (ω)
-    pY_m->val[nCol * 1 + sigmaIdx] = pX_m->val[state_nCol * 4 + sigmaIdx];
+    // 观测值 = 对应的状态值 (ψ)
+    pY_m->val[nCol * 1 + sigmaIdx] = pX_m->val[state_nCol * 3 + sigmaIdx];
     pu = pu;
 }
 
-// Hy3: 预测测量2: 编码器角速度观测
+// Hy3: 预测测量2: 角速度观测
 void Hy3(Matrix_t *pu, Matrix_t *pX_m, Matrix_t *pY_m, int sigmaIdx) {
     const int nCol = pY_m->ncol;
     const int state_nCol = pX_m->ncol;

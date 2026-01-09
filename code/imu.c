@@ -5,7 +5,6 @@
 imu_t imu;
 
 static void read_sensor_data(void);
-static void read_encoder_data(void);
 static void apply_bias_and_cordinate_transform(void);
 static void process_calibration(void);
 static void process_filter_update(void);
@@ -66,7 +65,6 @@ bool imu_is_calibrated(void)
 void imu_update(void)
 {
     read_sensor_data();
-    read_encoder_data();
 
     switch (imu.state)
     {
@@ -100,17 +98,6 @@ static void read_sensor_data(void)
     imu.raw.gyro[0] = imu660ra_gyro_transition(imu660ra_gyro_x);
     imu.raw.gyro[1] = imu660ra_gyro_transition(imu660ra_gyro_y);
     imu.raw.gyro[2] = imu660ra_gyro_transition(imu660ra_gyro_z);
-}
-
-// 从编码器获取速度和yaw角速度
-static void read_encoder_data(void)
-{
-    imu.encoder.v_left = (float)motor_value.receive_left_speed_data * PI * WHEEL_D / 60.0f;
-    imu.encoder.v_right = -(float)motor_value.receive_right_speed_data * PI * WHEEL_D / 60.0f;
-
-    imu.encoder.speed = (imu.encoder.v_left + imu.encoder.v_right) / 2.0f;
-
-    imu.encoder.yaw_rate = (imu.encoder.v_right - imu.encoder.v_left) / WHEELBASE * RAD_TO_DEG;
 }
 
 
@@ -166,12 +153,16 @@ static void process_filter_update(void)
     imu.output.gyro[0] = imu.body.gyro[0];
     imu.output.gyro[1] = imu.body.gyro[1];
 
+    // 从编码器获取速度
+    imu.body.speed = ((float)motor_value.receive_left_speed_data -
+        (float)motor_value.receive_right_speed_data) / 2.0f * PI * 0.065f / 60.0f; // 轮速转换为线速度，单位m/s
+
     // ukf更新
     float ukf_measurement[3];
-    ukf_measurement[0] = imu.encoder.speed;                     // 速度
+    ukf_measurement[0] = imu.body.speed;                                       // 速度
     // mahony解算的yaw角输入ukf
-    ukf_measurement[1] = imu.body.gyro[2] * DEG_TO_RAD;         // IMU角速度 (rad/s)
-    ukf_measurement[2] = imu.encoder.yaw_rate * DEG_TO_RAD;     // 编码器角速度 (rad/s)
+    ukf_measurement[1] = imu.mahony_filter.output.euler[2] * DEG_TO_RAD;       // 航向角（弧度）
+    ukf_measurement[2] = imu.body.gyro[2] * DEG_TO_RAD;                        // 角速度（弧度/s）
     ukf_filter_update(&imu.ukf_filter, ukf_measurement);
 
     // yaw和yaw角速度采用ukf输出
