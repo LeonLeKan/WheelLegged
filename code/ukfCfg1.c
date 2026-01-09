@@ -185,7 +185,7 @@ UkfMatrix_t UkfMatrixCfg1 =
     {COLXROW(Pxx_covariance_correction),NROWS(Pxx_covariance_correction),NCOL(Pxx_covariance_correction),&Pxx_covariance_correction[0][0]},
     &PredictFcn[0],
     &ObservFcn[0],
-    0.005
+    0.002
 };
 
 

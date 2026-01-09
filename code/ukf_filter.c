@@ -39,20 +39,20 @@ static void set_ukf_param(ukf_filter_param_t* param)
     // 设置采样时间间隔
     UkfMatrixCfg1.dT = param->dt;
     // 设置过程噪声协方差矩阵Q
-    // for (int i = 0; i < 5; i++)
-    // {
-    //     for (int j = 0; j < 5; j++)
-    //     {
-    //         if (i == j)
-    //         {
-    //             UkfMatrixCfg1.Qxx_process_noise_cov.val[i * 5 + j] = param->q[i];
-    //         }
-    //         else
-    //         {
-    //             UkfMatrixCfg1.Qxx_process_noise_cov.val[i * 5 + j] = 0.0;
-    //         }
-    //     }
-    // }
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 5; j++)
+        {
+            if (i == j)
+            {
+                UkfMatrixCfg1.Qxx_process_noise_cov.val[i * 5 + j] = param->q[i];
+            }
+            else
+            {
+                UkfMatrixCfg1.Qxx_process_noise_cov.val[i * 5 + j] = 0.0;
+            }
+        }
+    }
     // 设置测量噪声协方差矩阵R
     for (int i = 0; i < 3; i++)
     {

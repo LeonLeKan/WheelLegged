@@ -28,7 +28,7 @@ MahonyFilterParam mahony_filter_param = {
 
 ukf_filter_param_t ukf_filter_param = {
     .dt = IMU_UPDATE_INTERVAL_MS / 1000.0,
-    .q = {0.01, 0.01, 0.0015, 0.02, 0.05},
+    .q = {0.0001, 0.0001, 0.000015, 0.0002, 0.0005},
     .r = {0.0001, 0.05, 0.001}
 };
 
