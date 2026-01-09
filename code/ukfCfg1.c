@@ -96,11 +96,11 @@ static double Pxx0_init_error_covariance[5][5]=
 //Process noise covariance Q : initial noise assumptions
 static double Qxx_process_noise_cov[5][5]=
 {/*  x1,  x2,  x3,  x4,  x5        */
-    { 0.001,      0,      0,      0,      0}, /* x1 */
-    {   0,    0.001,      0,      0,      0}, /* x2 */
-    {   0,      0,   0.0001,      0,      0}, /* x3 */
-    {   0,      0,      0,  0.001,      0}, /* x4 */
-    {   0,      0,      0,      0,   0.0001}, /* x5 */
+    { 0,      0,      0,      0,      0}, /* x1 */
+    {   0,    0,      0,      0,      0}, /* x2 */
+    {   0,      0,   0,      0,      0}, /* x3 */
+    {   0,      0,      0,  0,      0}, /* x4 */
+    {   0,      0,      0,      0,   0}, /* x5 */
 };
 
 //Output noise covariance: initial noise assumptions
