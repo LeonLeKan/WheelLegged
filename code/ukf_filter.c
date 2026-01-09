@@ -8,7 +8,7 @@ static void set_ukf_param(ukf_filter_param_t* param);
 bool ukf_filter_init(ukf_filter_t* filter, ukf_filter_param_t* param)
 {
     // 设置UKF参数
-    set_ukf_param(param);
+    // set_ukf_param(param);
     // 初始化UKF实例
     return ukf_init(&filter->ukfIO, &UkfMatrixCfg1);
 }

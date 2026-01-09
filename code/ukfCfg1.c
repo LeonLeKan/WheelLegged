@@ -86,11 +86,11 @@ static double Pxx_error_covariance[5][5]=
 //State covariance initial values
 static double Pxx0_init_error_covariance[5][5]=
 {/*  x1,    x2,    x3,    x4,    x5         */
-    {0.001,    0,     0,     0,     0}, /* x1 */
-    {0,    0.001,     0,     0,     0}, /* x2 */
-    {0,    0,     0.0001,     0,     0}, /* x3 */
-    {0,    0,     0,     0.001,     0}, /* x4 */
-    {0,    0,     0,     0,     0.0001}, /* x5 */
+    {0,    0,     0,     0,     0}, /* x1 */
+    {0,    0,     0,     0,     0}, /* x2 */
+    {0,    0,     0,     0,     0}, /* x3 */
+    {0,    0,     0,     0,     0}, /* x4 */
+    {0,    0,     0,     0,     0}, /* x5 */
 };
 
 //Process noise covariance Q : initial noise assumptions

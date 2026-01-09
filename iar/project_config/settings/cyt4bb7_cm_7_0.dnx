@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 <settings>
     <Jet>
+        <JetConnSerialNo>ZF-WLFS-CMSIS-DAP:80942420-B8F862D88090</JetConnSerialNo>
+        <JetConnFoundProbes />
+        <PrevWtdReset>Reset and halt after bootloader</PrevWtdReset>
         <DisableInterrupts>0</DisableInterrupts>
         <LeaveRunning>0</LeaveRunning>
         <MultiCoreRunAll>0</MultiCoreRunAll>
         <CpuHaltOnBreakpointSet>0</CpuHaltOnBreakpointSet>
         <OnlineReset>Software</OnlineReset>
-        <JetConnSerialNo>ZF-WLFS-CMSIS-DAP:80942420-B8F862D88090</JetConnSerialNo>
-        <JetConnFoundProbes />
-        <PrevWtdReset>Reset and halt after bootloader</PrevWtdReset>
     </Jet>
     <PlDriver>
-        <MemConfigValue>D:\iar\ewarm-9.60.3\arm\config\debugger\Infineon\CYT4BB_M7.ddf</MemConfigValue>
         <FirstRun>0</FirstRun>
+        <MemConfigValue>D:\iar\ewarm-9.60.3\arm\config\debugger\Infineon\CYT4BB_M7.ddf</MemConfigValue>
     </PlDriver>
     <Exceptions>
         <StopOnUncaught>_ 0</StopOnUncaught>
@@ -44,8 +44,8 @@
     <SWOManager>
         <SamplingDivider>8192</SamplingDivider>
         <OverrideClock>0</OverrideClock>
-        <CpuClock>5927111301654192175</CpuClock>
-        <SwoClock>8239164412772092500</SwoClock>
+        <CpuClock>4703255829819629652</CpuClock>
+        <SwoClock>6071772950867238731</SwoClock>
         <DataLogMode>0</DataLogMode>
         <ItmPortsEnabled>63</ItmPortsEnabled>
         <ItmTermIOPorts>1</ItmTermIOPorts>
