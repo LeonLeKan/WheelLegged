@@ -47,3 +47,5 @@ Backup*
 *.dep
 
 .vscode/
+iar/project_config/settings/cyt4bb7_cm_7_0.dnx
+iar/project_config/settings/cyt4bb7_cm_7_0.ewp.reggroups
