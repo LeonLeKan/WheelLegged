@@ -49,21 +49,21 @@ ukf_filter_param_t ukf_filter_param = {
     .r = {0.0001, 1, 3}};
 
 bool showing_points = false;
-// ÓÃÓÚÊµÏÖĞ£×¼ºóµÄ·Ö²ãÆô¶¯
+// ç”¨äºå®ç°æ ¡å‡†åçš„åˆ†å±‚å¯åŠ¨
 bool car_run_state = false;
 
 int main(void)
 {
-    clock_init(SYSTEM_CLOCK_250M); // Ê±ÖÓÅäÖÃ¼°ÏµÍ³³õÊ¼»¯<Îñ±Ø±£Áô>
-    debug_init();                  // µ÷ÊÔ´®¿ÚĞÅÏ¢³õÊ¼»¯
+    clock_init(SYSTEM_CLOCK_250M); // æ—¶é’Ÿé…ç½®åŠç³»ç»Ÿåˆå§‹åŒ–<åŠ¡å¿…ä¿ç•™>
+    debug_init();                  // è°ƒè¯•ä¸²å£ä¿¡æ¯åˆå§‹åŒ–
 
-    // flash³õÊ¼»¯
+    // flashåˆå§‹åŒ–
     flash_init();
 
-    // ´®¿Úµ÷ÊÔ³õÊ¼»¯
+    // ä¸²å£è°ƒè¯•åˆå§‹åŒ–
     seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_DEBUG_UART);
 
-    // ¿ØÖÆÏà¹Ø³õÊ¼»¯
+    // æ§åˆ¶ç›¸å…³åˆå§‹åŒ–
     mode_flag = 0;
     mt9v03x_init();
     control_init();
@@ -71,22 +71,22 @@ int main(void)
     gpio_init_all();
     para_zero();
 
-    // ²Ëµ¥³õÊ¼»¯
+    // èœå•åˆå§‹åŒ–
     create_1st_menu();
     create_2nd_menu();
     create_3rd_menu();
     menu_load1();
 
-    // ÈçÓĞĞèÒª£¬Ìí¼Ówifi
+    // å¦‚æœ‰éœ€è¦ï¼Œæ·»åŠ wifi
     wifi_init();
 
-    // ÆÁÄ»³õÊ¼»¯
+    // å±å¹•åˆå§‹åŒ–
     screen_init();
 
-    // imu³õÊ¼»¯
+    // imuåˆå§‹åŒ–
     imu_init(&mahony_filter_param, &ukf_filter_param);
 
-    // ahrs³õÊ¼»¯
+    // ahrsåˆå§‹åŒ–
     ahrs_ui_init();
 
     // threshold = (uint8_t)thre->data_int;
@@ -94,13 +94,13 @@ int main(void)
     error_calc_near_line = (uint8_t)nearl->data_int;
     while (true)
     {
-        // Ö÷Ñ­»·¼ì²â²¦ÂëµÄ×´Ì¬
+        // ä¸»å¾ªç¯æ£€æµ‹æ‹¨ç çš„çŠ¶æ€
         motion_mode1 = gpio_get_level(P21_6);
         motion_mode2 = gpio_get_level(P21_5);
 
         if (motion_mode1 == 1 && motion_mode2 == 1)
         {
-            // ½âÎöÖğ·ÉÖúÊÖµÄÊı¾İ
+            // è§£æé€é£åŠ©æ‰‹çš„æ•°æ®
             seekfree_assistant_data_analysis();
 
             send_attitude();
@@ -109,7 +109,7 @@ int main(void)
                 update_screen();
             key_handle_point();
 
-            // Èç¹ûĞèÒª£¬Ìí¼Ówifi
+            // å¦‚æœéœ€è¦ï¼Œæ·»åŠ wifi
             // wifi_send_data();
         }
 
@@ -118,11 +118,11 @@ int main(void)
             ips200_clear();
             while (true)
             {
-                // µ÷²Ëµ¥
+                // è°ƒèœå•
                 show_menu();
                 key_handle_menu();
 
-                // Èç¹ûĞèÒª£¬Ìí¼Ówifi
+                // å¦‚æœéœ€è¦ï¼Œæ·»åŠ wifi
                 wifi_send_data();
             }
         }
@@ -132,7 +132,7 @@ int main(void)
             ips200_clear();
             while (true)
             {
-                // ²é¿´errorÊÇ·ñÕı³£
+                // æŸ¥çœ‹erroræ˜¯å¦æ­£å¸¸
                 show_error();
                 image_main();
             }
@@ -143,7 +143,7 @@ int main(void)
             ips200_clear();
             while (true)
             {
-                // ÅÜ
+                // è·‘
                 image_main();
 
                 if (!car_run_state)
@@ -159,7 +159,7 @@ int main(void)
                     car_run_state = true;
                 }
 
-                // Èç¹ûĞèÒª£¬Ìí¼Ówifi
+                // å¦‚æœéœ€è¦ï¼Œæ·»åŠ wifi
                 // wifi_send_data();
             }
         }
@@ -168,14 +168,19 @@ int main(void)
 
 void send_attitude(void)
 {
-    seekfree_assistant_oscilloscope_data.data[0] = imu.output.euler[0];
-    seekfree_assistant_oscilloscope_data.data[1] = imu.output.euler[1];
+    seekfree_assistant_oscilloscope_data.data[0] = imu.output.position_x;
+    seekfree_assistant_oscilloscope_data.data[1] = imu.output.position_y;
+
     seekfree_assistant_oscilloscope_data.data[2] = imu.body.gyro[2];
-    seekfree_assistant_oscilloscope_data.data[3] = imu.ukf_filter.output.yaw_rate;
-    seekfree_assistant_oscilloscope_data.data[4] = imu.output.euler[2];
-    seekfree_assistant_oscilloscope_data.data[5] = imu.ukf_filter.output.yaw;
-    seekfree_assistant_oscilloscope_data.data[6] = imu.body.speed;
-    seekfree_assistant_oscilloscope_data.data[7] = imu.ukf_filter.output.speed;
+    seekfree_assistant_oscilloscope_data.data[3] = imu.encoder.yaw_rate;
+    seekfree_assistant_oscilloscope_data.data[4] = imu.output.gyro[2];
+
+    seekfree_assistant_oscilloscope_data.data[5] = imu.output.euler[2];
+
+    double *P = imu.ukf_filter.ukfIO.update.Pxx.val;
+    seekfree_assistant_oscilloscope_data.data[6] = P[0] + P[5 + 1] + P[10 + 2] + P[15 + 3] + P[20 + 4];
+    seekfree_assistant_oscilloscope_data.data[7] = imu.output.speed;
+
     seekfree_assistant_oscilloscope_data.channel_num = 8;
     seekfree_assistant_oscilloscope_send(&seekfree_assistant_oscilloscope_data);
 }
@@ -234,8 +239,8 @@ void process_param(void)
 
 void start_imu_calibration(void)
 {
-    system_delay_ms(1000);       // µÈ´ı1Ãë£¬È·±£ÏµÍ³ÎÈ¶¨
-    imu_start_calibration(2000); // ²É¼¯2000¸öÑù±¾½øĞĞĞ£×¼
+    system_delay_ms(1000);  // ç­‰å¾…1ç§’ï¼Œç¡®ä¿ç³»ç»Ÿç¨³å®š
+    imu_start_calibration(3000);  // é‡‡é›†3000ä¸ªæ ·æœ¬è¿›è¡Œæ ¡å‡†
 }
 
 void update_screen(void)
@@ -276,7 +281,7 @@ void gpio_init_all(void)
 
 void key_handle_point(void)
 {
-    static uint8_t last_switch_state = 1; // ÉÏµçÇ°À­»Ø¸ßµçÆ½
+    static uint8_t last_switch_state = 1; // ä¸Šç”µå‰æ‹‰å›é«˜ç”µå¹³
     uint8_t current_switch_state = gpio_get_level(BUTTON_OK);
 
     uint8_t switch_changed = (last_switch_state != current_switch_state);
