@@ -7,6 +7,10 @@
 
 #define IMU_UPDATE_INTERVAL_MS 2  // IMU更新间隔，单位毫秒
 
+// 车辆尺寸参数
+#define WHEEL_D     0.065   // 轮胎直径
+#define WHEELBASE   0.185   // 轮距
+
 
 // imu状态枚举
 typedef enum {
@@ -27,9 +31,14 @@ typedef struct {
     struct {
         float acc[3];   // 转换后的加速度 (g)
         float gyro[3];  // 减去零偏后的角速度 (deg/s)
-        float speed;    // 速度（m/s）
     } body;
-    
+
+    struct {
+        float v_left, v_right;  // 左右轮线速度 (m/s)
+        float speed;            // 前进速度 (m/s)
+        float yaw_rate;         // 编码器计算的yaw角速度 (deg/s)
+    } encoder;
+
     // 校准参数
     struct {
         float gyro_bias[3];      // 陀螺仪零偏
