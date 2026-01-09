@@ -38,7 +38,13 @@
 #include "imu.h"
 #include "small_driver_uart_control.h"
 #include "points_display.h"
+#include "control.h"
+#include "menu.h"
+#include "image.h"
+#include "servo.h"
 
+volatile uint32_t count = 0;
+volatile uint32_t count_turn = 0;
 
 // **************************** PIT中断函数 ****************************
 void pit0_ch0_isr()                     // 定时器通道 0 周期中断服务函数      
@@ -50,8 +56,51 @@ void pit0_ch0_isr()                     // 定时器通道 0 周期中断服务函数
 
 void pit0_ch1_isr()                     // 定时器通道 1 周期中断服务函数      
 {
-    pit_isr_flag_clear(PIT_CH1);
+    pit_isr_flag_clear(PIT_CH1); 
+    // 中断1: 轮腿姿态控制
+    if (mode_flag == 0)
+    {
+        speed_loop.Target = 0.0f;
+
+        angle_loop1.Target = pinit->data_float;
+
+        angle_loop1.Actual = imu.output.euler[1];
+        PID_Update_Lo(&angle_loop1);
+
+        small_driver_set_duty((int16)angle_loop1.Out, (int16)-angle_loop1.Out);
+    }
     
+    if (mode_flag == 1)
+    {
+        count++;
+        if (count >= 4)
+        {
+            count = 0;
+            
+            speed_loop.Target = speed->data_float / 100.0f;
+            speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+            PID_Update_Lo(&speed_loop);
+            servo_set(90.0f-speed_loop.Out, 90.0f+speed_loop.Out, 90.0f-speed_loop.Out, 90.0f+speed_loop.Out);
+            
+            turn_loop1.Target = 0.0f;                                     //outer
+            turn_loop1.Actual= (float)error;
+            PID_Update_Lo(&turn_loop1);
+        }
+        
+        turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual;       //inner
+        turn_loop2.Actual = imu.output.gyro[2];
+        PID_Update_Lo(&turn_loop2);
+        
+        angle_loop2.Target = pzero->data_float;
+        angle_loop2.Actual = imu.output.euler[1];
+        PID_Update_Lo(&angle_loop2);
+    
+        aspeed_loop.Target = angle_loop2.Out;
+        aspeed_loop.Actual = -imu.output.gyro[1];
+        PID_Update_Lo(&aspeed_loop);
+        
+        small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+    }
 }
 
 void pit0_ch2_isr()                     // 定时器通道 2 周期中断服务函数      
@@ -63,7 +112,7 @@ void pit0_ch2_isr()                     // 定时器通道 2 周期中断服务函数
 void pit0_ch10_isr()                    // 定时器通道 10 周期中断服务函数      
 {
     pit_isr_flag_clear(PIT_CH10);
-    // 如果GPS有数据，解析
+    // 中断10：如果GPS有数据，就进行解析
     if(gnss_flag)
     {
         gnss_flag = 0;
@@ -99,7 +148,7 @@ void pit0_ch14_isr()                    // 定时器通道 14 周期中断服务函数
 void pit0_ch15_isr()                    // 定时器通道 15 周期中断服务函数      
 {
     pit_isr_flag_clear(PIT_CH15);
-    
+    // 中断15：显点函数
     points_display_update_current_position();
 }
 
