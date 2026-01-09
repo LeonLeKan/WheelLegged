@@ -86,29 +86,29 @@ static double Pxx_error_covariance[5][5]=
 //State covariance initial values
 static double Pxx0_init_error_covariance[5][5]=
 {/*  x1,    x2,    x3,    x4,    x5         */
-    {1,    0,     0,     0,     0}, /* x1 */
-    {0,    1,     0,     0,     0}, /* x2 */
-    {0,    0,     1,     0,     0}, /* x3 */
-    {0,    0,     0,     1,     0}, /* x4 */
-    {0,    0,     0,     0,     1}, /* x5 */
+    {0.001,    0,     0,     0,     0}, /* x1 */
+    {0,    0.001,     0,     0,     0}, /* x2 */
+    {0,    0,     0.0001,     0,     0}, /* x3 */
+    {0,    0,     0,     0.001,     0}, /* x4 */
+    {0,    0,     0,     0,     0.0001}, /* x5 */
 };
 
 //Process noise covariance Q : initial noise assumptions
 static double Qxx_process_noise_cov[5][5]=
 {/*  x1,  x2,  x3,  x4,  x5        */
-    { 0.1,      0,      0,      0,      0}, /* x1 */
-    {   0,    0.1,      0,      0,      0}, /* x2 */
-    {   0,      0,   0.01,      0,      0}, /* x3 */
+    { 0.001,      0,      0,      0,      0}, /* x1 */
+    {   0,    0.001,      0,      0,      0}, /* x2 */
+    {   0,      0,   0.0001,      0,      0}, /* x3 */
     {   0,      0,      0,  0.001,      0}, /* x4 */
-    {   0,      0,      0,      0,   0.01}, /* x5 */
+    {   0,      0,      0,      0,   0.0001}, /* x5 */
 };
 
 //Output noise covariance: initial noise assumptions
 static double Ryy0_init_out_covariance[3][3]=
 {/*  y1,      */
-    {0.01, 0,      0    },  /* y1 */
-    {0,    0.001, 0    },  /* y2 */
-    {0,    0,      0.5},/* y3 */
+    {0.0001, 0,      0    },  /* y1 */
+    {0,    0.01, 0    },  /* y2 */
+    {0,    0,      0.0001},/* y3 */
 };
 
 //Output covariance Pyy = R (initial assumption)

@@ -55,7 +55,7 @@ int main(void)
         seekfree_assistant_data_analysis();
         
         send_attitude();
-        // process_param();
+        process_param();
         if(!showing_points) update_screen();
         key_handle();
         // 此处编写需要循环执行的代码
