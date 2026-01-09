@@ -35,7 +35,7 @@ bool ukf_filter_init(ukf_filter_t* filter, ukf_filter_param_t* param);
 
 /// @brief ukf滤波器更新函数（中断中调用）
 /// @param filter ukf滤波器实例
-/// @param measurement 测量值数组 [速度, IMU角速度, 编码器角速度]
+/// @param measurement 测量值数组 [速度, 航向角, 角速度]
 void ukf_filter_update(ukf_filter_t* filter, float measurement[3]);
 
 #endif
