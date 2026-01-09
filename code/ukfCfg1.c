@@ -106,24 +106,24 @@ static double Qxx_process_noise_cov[5][5]=
 //Output noise covariance: initial noise assumptions
 static double Ryy0_init_out_covariance[3][3]=
 {/*  y1,      */
-    {0.0001, 0,      0    },  /* y1 */
-    {0,    0.01, 0    },  /* y2 */
-    {0,    0,      0.0001},/* y3 */
+    {0,   0,      0},  /* y1 */
+    {0,   0,      0},  /* y2 */
+    {0,   0,      0},/* y3 */
 };
 
 //Output covariance Pyy = R (initial assumption)
 static double Pyy_out_covariance[3][3]=
 {/*  y1        */
-    {1, 0, 0},  /* y1 */
-    {0, 1, 0},  /* y2 */
-    {0, 0, 1},  /* y3 */
+    {0, 0, 0},  /* y1 */
+    {0, 0, 0},  /* y2 */
+    {0, 0, 0},  /* y3 */
 };
 
 static double Pyy_out_covariance_copy[3][3]=
 {/*  y1         */
-    {1, 0, 0},  /* y1 */
-    {0, 1, 0},  /* y2 */
-    {0, 0, 1},  /* y3 */
+    {0, 0, 0},  /* y1 */
+    {0, 0, 0},  /* y2 */
+    {0, 0, 0},  /* y3 */
 };
 
 //cross-covariance of state and output

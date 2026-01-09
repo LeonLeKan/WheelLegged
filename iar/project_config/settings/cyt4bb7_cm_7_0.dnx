@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <settings>
     <Jet>
-        <OnlineReset>Software</OnlineReset>
         <DisableInterrupts>0</DisableInterrupts>
         <LeaveRunning>0</LeaveRunning>
         <MultiCoreRunAll>0</MultiCoreRunAll>
         <CpuHaltOnBreakpointSet>0</CpuHaltOnBreakpointSet>
+        <OnlineReset>Software</OnlineReset>
         <JetConnSerialNo>ZF-WLFS-CMSIS-DAP:80942420-B8F862D88090</JetConnSerialNo>
         <JetConnFoundProbes />
         <PrevWtdReset>Reset and halt after bootloader</PrevWtdReset>
