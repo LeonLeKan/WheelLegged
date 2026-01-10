@@ -144,7 +144,7 @@ int main(void)
             while (true)
             {
                 // 跑
-                //image_main();
+                image_main();
 
                 if (!car_run_state)
                 {
@@ -401,7 +401,7 @@ void wifi_send_data(void)
     oscilloscope_data.data[1] = speed_loop.Actual;
     oscilloscope_data.data[2] = angle_loop2.Target;
     oscilloscope_data.data[3] = angle_loop2.Actual;
-    oscilloscope_data.data[4] = speed_loop.Out;
+    oscilloscope_data.data[4] = angle_loop2.ErrorInt;
     oscilloscope_data.channel_num = 5;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }

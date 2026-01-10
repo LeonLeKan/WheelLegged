@@ -72,6 +72,7 @@ void pit0_ch1_isr()                     // 定时器通道 1 周期中断服务函数
     
     if (mode_flag == 1)
     {
+        speed_loop.Kp = 3.0f;
         count++;
         if (count >= 4)
         {
@@ -79,18 +80,62 @@ void pit0_ch1_isr()                     // 定时器通道 1 周期中断服务函数
             
             speed_loop.Target = speed->data_float / 100.0f;
             speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+
+            if (fabs(speed_loop.Actual - speed_loop.Target)<=0.1f)
+            {
+                mode_flag = 2;
+            }
+
             PID_Update_Lo(&speed_loop);
             servo_set(90.0f-speed_loop.Out, 90.0f+speed_loop.Out, 90.0f-speed_loop.Out, 90.0f+speed_loop.Out);
             
-            //turn_loop1.Target = 0.0f;                   //outer
-            //turn_loop1.Actual= (float)error;
-            //turn_loop1.Actual= 18.0f;
-            //PID_Update_Lo(&turn_loop1);
+            turn_loop1.Target = 0.0f;                   //outer
+            turn_loop1.Actual= (float)error;
+            PID_Update_Lo(&turn_loop1);
         }
         
-        //turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual;       //inner
-        //turn_loop2.Actual = -imu.output.gyro[2];
-        //PID_Update_Lo(&turn_loop2);
+        turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual;       //inner
+        turn_loop2.Actual = -imu.output.gyro[2];
+        PID_Update_Lo(&turn_loop2);
+        
+        angle_loop2.Target = pzero->data_float;
+        angle_loop2.Actual = imu.output.euler[1];
+        PID_Update_Lo(&angle_loop2);
+    
+        aspeed_loop.Target = angle_loop2.Out;
+        aspeed_loop.Actual = imu.output.gyro[1];
+        PID_Update_Lo(&aspeed_loop);
+        
+        small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+    }
+
+    if (mode_flag == 2)
+    {
+        speed_loop.Kp = spkp->data_float;
+        count++;
+        if (count >= 4)
+        {
+            count = 0;
+            
+            speed_loop.Target = speed->data_float / 100.0f;
+            speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+
+            if (fabs(speed_loop.Actual - speed_loop.Target)<=0.1f)
+            {
+                mode_flag = 2;
+            }
+
+            PID_Update_Lo(&speed_loop);
+            servo_set(90.0f-speed_loop.Out, 90.0f+speed_loop.Out, 90.0f-speed_loop.Out, 90.0f+speed_loop.Out);
+            
+            turn_loop1.Target = 0.0f;                   //outer
+            turn_loop1.Actual= (float)error;
+            PID_Update_Lo(&turn_loop1);
+        }
+        
+        turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual;       //inner
+        turn_loop2.Actual = -imu.output.gyro[2];
+        PID_Update_Lo(&turn_loop2);
         
         angle_loop2.Target = pzero->data_float;
         angle_loop2.Actual = imu.output.euler[1];

@@ -69,7 +69,7 @@ void an2pid_update(float kp, float ki, float kd)
     angle_loop2.Kd = kd;
     angle_loop2.OutMax = +500;
     angle_loop2.OutMin = -500;
-    angle_loop2.ErrorIntMax = 500;
+    angle_loop2.ErrorIntMax = 600;
 }
 
 void an2_zero(void)
