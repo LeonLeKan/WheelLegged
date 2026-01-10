@@ -12,7 +12,7 @@
     </Jet>
     <PlDriver>
         <FirstRun>0</FirstRun>
-        <MemConfigValue>D:\iar\ewarm-9.60.3\arm\config\debugger\Infineon\CYT4BB_M7.ddf</MemConfigValue>
+        <MemConfigValue>D:\IAR\arm\config\debugger\Infineon\CYT4BB_M7.ddf</MemConfigValue>
     </PlDriver>
     <Exceptions>
         <StopOnUncaught>_ 0</StopOnUncaught>

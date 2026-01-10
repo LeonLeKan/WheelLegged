@@ -127,24 +127,24 @@ int main(void)
             }
         }
 
+        // else if (motion_mode1 == 0 && motion_mode2 == 1)
+        // {
+        //     ips200_clear();
+        //     while (true)
+        //     {
+        //         // 查看error是否正常
+        //         show_error();
+        //         image_main();
+        //     }
+        // }
+
         else if (motion_mode1 == 0 && motion_mode2 == 1)
         {
             ips200_clear();
             while (true)
             {
-                // 查看error是否正常
-                show_error();
-                image_main();
-            }
-        }
-
-        else if (motion_mode1 == 0 && motion_mode2 == 0)
-        {
-            ips200_clear();
-            while (true)
-            {
                 // 跑
-                image_main();
+                //image_main();
 
                 if (!car_run_state)
                 {
@@ -160,7 +160,7 @@ int main(void)
                 }
 
                 // 如果需要，添加wifi
-                // wifi_send_data();
+                wifi_send_data();
             }
         }
     }
@@ -397,8 +397,11 @@ void wifi_init(void)
 void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
-    oscilloscope_data.data[0] = imu.output.euler[0];
-    oscilloscope_data.data[1] = imu.output.euler[1];
-    oscilloscope_data.channel_num = 2;
+    oscilloscope_data.data[0] = speed_loop.Target;
+    oscilloscope_data.data[1] = speed_loop.Actual;
+    oscilloscope_data.data[2] = angle_loop2.Target;
+    oscilloscope_data.data[3] = angle_loop2.Actual;
+    oscilloscope_data.data[4] = speed_loop.Out;
+    oscilloscope_data.channel_num = 5;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }

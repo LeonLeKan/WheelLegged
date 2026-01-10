@@ -82,21 +82,22 @@ void pit0_ch1_isr()                     // 定时器通道 1 周期中断服务函数
             PID_Update_Lo(&speed_loop);
             servo_set(90.0f-speed_loop.Out, 90.0f+speed_loop.Out, 90.0f-speed_loop.Out, 90.0f+speed_loop.Out);
             
-            turn_loop1.Target = 0.0f;                                     //outer
-            turn_loop1.Actual= (float)error;
-            PID_Update_Lo(&turn_loop1);
+            //turn_loop1.Target = 0.0f;                   //outer
+            //turn_loop1.Actual= (float)error;
+            //turn_loop1.Actual= 18.0f;
+            //PID_Update_Lo(&turn_loop1);
         }
         
-        turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual;       //inner
-        turn_loop2.Actual = imu.output.gyro[2];
-        PID_Update_Lo(&turn_loop2);
+        //turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual;       //inner
+        //turn_loop2.Actual = -imu.output.gyro[2];
+        //PID_Update_Lo(&turn_loop2);
         
         angle_loop2.Target = pzero->data_float;
         angle_loop2.Actual = imu.output.euler[1];
         PID_Update_Lo(&angle_loop2);
     
         aspeed_loop.Target = angle_loop2.Out;
-        aspeed_loop.Actual = -imu.output.gyro[1];
+        aspeed_loop.Actual = imu.output.gyro[1];
         PID_Update_Lo(&aspeed_loop);
         
         small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
