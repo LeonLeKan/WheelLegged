@@ -78,7 +78,7 @@ int main(void)
     menu_load1();
 
     // 如有需要，添加wifi
-    wifi_init();
+    //wifi_init();
 
     // 屏幕初始化
     screen_init();
@@ -160,7 +160,7 @@ int main(void)
                 }
 
                 // 如果需要，添加wifi
-                wifi_send_data();
+                //wifi_send_data();
             }
         }
     }
