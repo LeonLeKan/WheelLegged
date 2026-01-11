@@ -1,5 +1,6 @@
 #include "points_display.h"
 #include "screen_interface.h"
+#include "config.h"
 
 // 屏幕尺寸定义
 #define SCREEN_WIDTH  240
@@ -112,7 +113,7 @@ void points_display_show(points_display_info_t* info)
     // 显示选中点和当前定位点坐标
     show_selected_cordinates();
 
-    pit_ms_init(PIT_CH15, 100); // 开启100ms中断刷新当前定位点
+    pit_enable(SCREEN_UPDATE_PIT); // 开启100ms中断刷新当前定位点
 }
 
 void points_display_update_current_position(void)
@@ -514,6 +515,8 @@ void func_save_and_quit(void)
 void func_quit(void)
 {
     points_display_info_t* info = points_display_instance.info;
+    // 关闭中断
+    pit_disable(SCREEN_UPDATE_PIT);
     info->quit_callback();
 }
 
