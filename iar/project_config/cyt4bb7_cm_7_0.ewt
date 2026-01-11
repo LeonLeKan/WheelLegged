@@ -1546,10 +1546,7 @@
             </file>
         </group>
         <file>
-            <name>$PROJ_DIR$\..\..\code\control.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\code\control.h</name>
+            <name>$PROJ_DIR$\..\..\code\config.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\code\imu.c</name>

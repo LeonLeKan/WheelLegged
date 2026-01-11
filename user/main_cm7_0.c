@@ -1,4 +1,5 @@
 #include "zf_common_headfile.h"
+#include "config.h"
 #include "imu.h"
 #include "small_driver_uart_control.h"
 #include "screen_interface.h"
@@ -9,6 +10,7 @@
 #define BUTTON_DN (P20_2)
 #define BUTTON_UP (P20_3)
 #define BUTTON_OK (P21_5)
+
 
 
 void gpio_init_all(void);
@@ -41,13 +43,28 @@ int main(void)
     seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_DEBUG_UART);
     gpio_init_all();
 
+
+    // 初始化所有中断
+    // 屏幕刷新中断
+    pit_ms_init(SCREEN_UPDATE_PIT, SCREEN_UPDATE_INTERVAL_MS);
+    pit_disable(SCREEN_UPDATE_PIT);
+    // imu更新中断
+    pit_ms_init(IMU_UPDATE_PIT, IMU_UPDATE_INTERVAL_MS);
+    pit_disable(IMU_UPDATE_PIT);
+
     screen_init();     // 屏幕初始化
 
-    // imu初始化
+    // flash初始化
+    flash_init();
+
+    // 电机驱动初始化
     small_driver_uart_init();
+    // imu初始化
     imu_init(&mahony_filter_param, &ukf_filter_param);
 
+    // 存档管理器ui初始化
     save_manager_init();
+
 
     while (true)
     {
@@ -136,7 +153,7 @@ void process_param(void)
 void start_imu_calibration(void)
 {
     system_delay_ms(1000);  // 等待1秒，确保系统稳定
-    imu_start_calibration(3000);  // 采集3000个样本进行校准
+    imu_start_calibration(2000);  // 采集2000个样本进行校准
 }
 
 void update_screen(void)

@@ -116,10 +116,10 @@ bool waypoint_list_load_from_flash(waypoint_list_t *list, uint32 flash_page)
     flash_read_page_to_buffer(0, flash_page, FLASH_PAGE_LENGTH);
     // 先读取一共有几个点
     int points_cnt = (flash_union_buffer[0].int32_type - 1) / 4;
-    if(points_cnt <= 0 || points_cnt > 10000) // 点数非法，失败
+    if(points_cnt < 0 || points_cnt > 10000) // 点数非法，失败
         return false;
     // 设置总点数
-    list->size = points_cnt;
+    list->size = points_cnt + 1;
     double t_x, t_y;
     int index = 1;
     union double_converter converter;

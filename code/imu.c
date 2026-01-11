@@ -25,7 +25,7 @@ void imu_init(MahonyFilterParam* param, ukf_filter_param_t* ukf_param)
         imu.state = IMU_STATE_ERROR;
         return;
     }
-    pit_ms_init(PIT_CH0, IMU_UPDATE_INTERVAL_MS);
+    pit_enable(IMU_UPDATE_PIT);
 }
 
 void imu_reset_mahony_filter(MahonyFilterParam* param)

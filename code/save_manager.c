@@ -61,7 +61,7 @@ void show_ahrs_points(void)
     points_display_show(info);
 }
 
-// ==================== 回调函数 ========================
+// ==================== 辅助函数 ========================
 void ahrs_save_callback(void)
 {
     waypoint_list_save_to_flash(
@@ -69,7 +69,6 @@ void ahrs_save_callback(void)
         AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx
     );
 }
-
 // ==================== 按键处理函数 ======================
 void save_manager_key_up_pressed(void)
 {
@@ -106,16 +105,24 @@ void save_manager_key_ok_pressed(void)
         return;
     }
     // todo: 根据类型加载
-    // bool ret = waypoint_list_load_from_flash(
-    //     save_manager_instance.active_save,
-    //     AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx
-    // );
-    // if (!ret)
-    // {
-    //     ips200_set_color(RGB565_BLACK, RGB565_RED);
-    //     ips200_show_string(0, 160, "Failed");
-    //     return;
-    // }
+    // 创建新的链表
+    save_manager_instance.active_save = waypoint_list_create(
+        (waypoint_t) {0, 0},
+        (waypoint_screen_param_t) {0, 0, 0, 0}
+    );
+    bool ret = waypoint_list_load_from_flash(
+        save_manager_instance.active_save,
+        AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx
+    );
+    if (!ret)
+    {
+        ips200_set_color(RGB565_BLACK, RGB565_RED);
+        ips200_show_string(0, 160, "Failed");
+        return;
+    }
+    // 测试用
+    // save_manager_instance.active_save = waypoint_list_create((waypoint_t) { 0, 0 }, (waypoint_screen_param_t) { 0, 0 });
+
     save_manager_instance.showing_points = 1;
     show_ahrs_points();
 }
