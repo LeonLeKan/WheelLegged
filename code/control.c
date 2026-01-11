@@ -8,6 +8,7 @@ volatile PID_t speed_loop;
 volatile PID_t turn_loop1;
 volatile PID_t turn_loop2;
 volatile PID_t aspeed_loop;
+volatile PID_t single_loop;
 
 volatile uint8_t mode_flag = 0;
 
@@ -144,5 +145,19 @@ void as_zero(void)
     aspeed_loop.Ki = 0;
     aspeed_loop.Kd = 0;
 }
- 
- 
+
+void snpid_update(float kp, float ki, float kd)
+{
+    single_loop.Kp = kp;
+    single_loop.Ki = ki;
+    single_loop.Kd = kd;
+    single_loop.OutMax = +100;
+    single_loop.OutMin = -100;
+}
+
+void sn_zero(void)
+{
+    single_loop.Kp = 0;
+    single_loop.Ki = 0;
+    single_loop.Kd = 0;
+}

@@ -13,9 +13,10 @@
 #define MAX_DISPLAY 10
 #define MAX_LAYER 3
 
-#define MENU1_FLASH_PAGE      0               
+#define MENU1_FLASH_PAGE 0
 
-typedef enum {
+typedef enum
+{
     MENU_TYPE_NORMAL,
     MENU_TYPE_INT,
     MENU_TYPE_FLOAT,
@@ -33,14 +34,14 @@ typedef struct Menu
     void (*Function)(void);
     uint8_t exec_flag;
 
-    struct Menu* last;
-    struct Menu* next;
-    struct Menu* parent;
-    struct Menu* child;
+    struct Menu *last;
+    struct Menu *next;
+    struct Menu *parent;
+    struct Menu *child;
 } MENU;
 
 extern MENU *RootMenu, *Balance, *Image, *currentMenu;
-extern MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *pzero, *pinit, *show,
+extern MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *pzero, *pinit, *show,
             *thre, *farl, *nearl, *saveim;
 extern MENU *an1kp, *an1ki, *an1kd,
             *an2kp, *an2ki, *an2kd,
@@ -48,12 +49,13 @@ extern MENU *an1kp, *an1ki, *an1kd,
             *tu1kp, *tu1ki, *tu1kd,
             *tu2kp, *tu2ki, *tu2kd,
             *askp, *aski, *askd,
-            *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, 
-            *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas;
+            *snkp, *snki, *snkd,
+            *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn,
+            *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn;
 
-MENU* createMenu(const char* name, uint8_t layer, uint16_t order, MENU_Type type, void (*func)(void));
-uint16_t countNodes(MENU* layerHead);
-void clear_exec_flag(MENU* layerHead);
+MENU *createMenu(const char *name, uint8_t layer, uint16_t order, MENU_Type type, void (*func)(void));
+uint16_t countNodes(MENU *layerHead);
+void clear_exec_flag(MENU *layerHead);
 void create_1st_menu(void);
 void create_2nd_menu(void);
 void create_3rd_menu(void);

@@ -33,6 +33,7 @@ extern volatile PID_t speed_loop;
 extern volatile PID_t turn_loop1;
 extern volatile PID_t turn_loop2;
 extern volatile PID_t aspeed_loop;
+extern volatile PID_t single_loop;
 
 extern volatile uint8_t mode_flag;
 
@@ -52,5 +53,7 @@ void tu2pid_update(float kp, float ki, float kd);
 void tu2_zero(void);
 void aspid_update(float kp, float ki, float kd);
 void as_zero(void);
+void snpid_update(float kp, float ki, float kd);
+void sn_zero(void);
 
 #endif /* CODE_CONTROL_H_ */

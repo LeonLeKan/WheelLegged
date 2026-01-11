@@ -70,58 +70,16 @@ void pit0_ch1_isr() // 定时器通道 1 周期中断服务函数
         small_driver_set_duty((int16)angle_loop1.Out, (int16)-angle_loop1.Out);
     }
 
-    if (mode_flag == 1)
+    if (mode_flag == 1 || mode_flag == 2)
     {
-        speed_loop.Kp = 3.0f;
-        count++;
-        if (count >= 4)
+        if (mode_flag == 1)
         {
-            count = 0;
-
-            speed_loop.Target = speed->data_float / 100.0f;
-            speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
-
-            if (fabs(speed_loop.Actual - speed_loop.Target) <= 0.1f)
-            {
-                mode_flag = 2;
-            }
-
-            PID_Update_Lo(&speed_loop);
-
-            // 对speed_loop.Out进行低通滤波
-            static float filtered_speed_out = 0.0f;
-            static const float speed_alpha = 0.1f; // 速度环滤波系数，可调整
-
-            // 更新滤波器
-            filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
-
-            // 使用滤波后的速度输出
-            servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
-                      90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
-
-            turn_loop1.Target = 0.0f; // outer
-            turn_loop1.Actual = (float)error;
-            PID_Update_Lo(&turn_loop1);
+            speed_loop.Kp = 3.0f;
         }
-
-        turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual; // inner
-        turn_loop2.Actual = -imu.body.gyro[2];
-        PID_Update_Lo(&turn_loop2);
-
-        angle_loop2.Target = pzero->data_float;
-        angle_loop2.Actual = imu.output.euler[1];
-        PID_Update_Lo(&angle_loop2);
-
-        aspeed_loop.Target = angle_loop2.Out;
-        aspeed_loop.Actual = imu.output.gyro[1];
-        PID_Update_Lo(&aspeed_loop);
-
-        small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
-    }
-
-    if (mode_flag == 2)
-    {
-        speed_loop.Kp = spkp->data_float;
+        else if (mode_flag == 2)
+        {
+            speed_loop.Kp = spkp->data_float;
+        }
         count++;
         if (count >= 4)
         {
@@ -137,6 +95,18 @@ void pit0_ch1_isr() // 定时器通道 1 周期中断服务函数
 
             PID_Update_Lo(&speed_loop);
 
+            single_loop.Target = 0.0f;
+            single_loop.Actual = imu.output.euler[0];
+            // 单边桥控制
+            if (fabs(single_loop.Actual) > 10.0f)
+            {
+                PID_Update_Lo(&single_loop);
+            }
+            else if (fabs(single_loop.Actual) <= 10.0f)
+            {
+                single_loop.Out = 0.0f;
+            }
+
             // 对speed_loop.Out进行低通滤波
             static float filtered_speed_out = 0.0f;
             static const float speed_alpha = 0.1f; // 速度环滤波系数，可调整
@@ -145,8 +115,8 @@ void pit0_ch1_isr() // 定时器通道 1 周期中断服务函数
             filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
 
             // 使用滤波后的速度输出
-            servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
-                      90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
+            servo_set(90.0f - filtered_speed_out - single_loop.Out, 90.0f + filtered_speed_out + single_loop.Out,
+                      90.0f - filtered_speed_out + single_loop.Out, 90.0f + filtered_speed_out - single_loop.Out);
 
             turn_loop1.Target = 0.0f; // outer
             turn_loop1.Actual = (float)error;

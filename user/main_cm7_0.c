@@ -28,7 +28,6 @@ void process_param(void);
 void update_screen(void);
 void start_imu_calibration(void);
 
-void show_error(void);
 void para_zero(void);
 void data_load1(void);
 void data_load2(void);
@@ -126,17 +125,6 @@ int main(void)
                 wifi_send_data();
             }
         }
-
-        // else if (motion_mode1 == 0 && motion_mode2 == 1)
-        // {
-        //     ips200_clear();
-        //     while (true)
-        //     {
-        //         // 查看error是否正常
-        //         show_error();
-        //         image_main();
-        //     }
-        // }
 
         else if (motion_mode1 == 0 && motion_mode2 == 1)
         {
@@ -337,13 +325,6 @@ void key_handle_point(void)
     }
 }
 
-void show_error(void)
-{
-    char buf[20];
-    sprintf(buf, "er:%c%02d", (error >= 0 ? '+' : '-'), abs(error));
-    ips200_show_string(0, 256, buf);
-}
-
 void para_zero(void)
 {
     an1_zero();
@@ -352,6 +333,7 @@ void para_zero(void)
     tu1_zero();
     tu2_zero();
     as_zero();
+    sn_zero();
 }
 
 void data_load1(void)
@@ -365,6 +347,7 @@ void data_load2(void)
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    snpid_update(snkp->data_float, snki->data_float, snkd->data_float);
     // threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
     error_calc_near_line = (uint8_t)nearl->data_int;

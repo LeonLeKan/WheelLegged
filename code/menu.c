@@ -2,7 +2,7 @@
 #include "image.h"
 
 MENU *RootMenu, *Balance, *Image, *currentMenu;
-MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *pzero, *pinit, *show,
+MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *pzero, *pinit, *show,
      *thre, *farl, *nearl, *saveim;
 MENU *an1kp, *an1ki, *an1kd,
      *an2kp, *an2ki, *an2kd,
@@ -10,8 +10,9 @@ MENU *an1kp, *an1ki, *an1kd,
      *tu1kp, *tu1ki, *tu1kd,
      *tu2kp, *tu2ki, *tu2kd,
      *askp, *aski, *askd,
-     *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, 
-     *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas;
+     *snkp, *snki, *snkd,
+     *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn,
+     *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn;
 
 #define MENU_POOL_SIZE 128
 
@@ -99,10 +100,11 @@ void create_2nd_menu(void)
     tuloop1 = createMenu("tuloop1", 2, 5, MENU_TYPE_NORMAL, NULL);
     tuloop2 = createMenu("tuloop2", 2, 6, MENU_TYPE_NORMAL, NULL);
     asloop = createMenu("asloop", 2, 7, MENU_TYPE_NORMAL, NULL);
-    pzero = createMenu("pzero", 2, 8, MENU_TYPE_FLOAT, NULL);
-    pinit = createMenu("pinit", 2, 9, MENU_TYPE_FLOAT, NULL);
-    show = createMenu("show", 2, 10, MENU_TYPE_FUNCTION, image_show);
-    
+    snloop = createMenu("snloop", 2, 8, MENU_TYPE_NORMAL, NULL);
+    pzero = createMenu("pzero", 2, 9, MENU_TYPE_FLOAT, NULL);
+    pinit = createMenu("pinit", 2, 10, MENU_TYPE_FLOAT, NULL);
+    show = createMenu("show", 2, 11, MENU_TYPE_FUNCTION, image_show);
+
     thre = createMenu("thre", 2, 1, MENU_TYPE_INT, NULL);
     farl = createMenu("farl", 2, 2, MENU_TYPE_INT, NULL);
     nearl = createMenu("nearl", 2, 3, MENU_TYPE_INT, NULL);
@@ -114,7 +116,8 @@ void create_2nd_menu(void)
     sploop->next = tuloop1; tuloop1->last = sploop;
     tuloop1->next = tuloop2; tuloop2->last = tuloop1;
     tuloop2->next = asloop; asloop->last = tuloop2;
-    asloop->next = pzero; pzero->last = asloop;
+    asloop->next = snloop; snloop->last = asloop;
+    snloop->next = pzero; pzero->last = snloop;
     pzero->next = pinit; pinit->last = pzero;
     pinit->next = show; show->last = pinit;
     show->next = speed; speed->last = show;
@@ -128,8 +131,9 @@ void create_2nd_menu(void)
     speed->parent = Balance; anloop1->parent = Balance;
     anloop2->parent = Balance; sploop->parent = Balance;
     tuloop1->parent = Balance; tuloop2->parent = Balance;
-    asloop->parent = Balance; pzero->parent = Balance; 
-    pinit->parent = Balance; show->parent = Balance;
+    asloop->parent = Balance; snloop->parent = Balance; 
+    pzero->parent = Balance; pinit->parent = Balance; 
+    show->parent = Balance;
 
     Image->child = thre;
     thre->parent = Image; farl->parent = Image;
@@ -162,12 +166,17 @@ void create_3rd_menu(void)
     aski = createMenu("aski", 3, 2, MENU_TYPE_FLOAT, NULL);
     askd = createMenu("askd", 3, 3, MENU_TYPE_FLOAT, NULL);
 
+    snkp = createMenu("snkp", 3, 1, MENU_TYPE_FLOAT, NULL);
+    snki = createMenu("snki", 3, 2, MENU_TYPE_FLOAT, NULL);
+    snkd = createMenu("snkd", 3, 3, MENU_TYPE_FLOAT, NULL);
+
     savean1 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save1);
     savean2 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save1);
     savesp = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save1);
     savetu1 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save1);
     savetu2 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save1);
     saveas = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save1);
+    savesn = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save1);
 
     zeroan1 = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
     zeroan2 = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
@@ -175,6 +184,7 @@ void create_3rd_menu(void)
     zerotu1 = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
     zerotu2 = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
     zeroas = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
+    zerosn = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
 
     anloop1->child = an1kp;
     an1kp->next = an1ki; an1ki->last = an1kp;
@@ -218,6 +228,13 @@ void create_3rd_menu(void)
     saveas->next = zeroas; zeroas->last = saveas;
     zeroas->next = askp; askp->last = zeroas;
 
+    snloop->child = snkp;
+    snkp->next = snki; snki->last = snkp;
+    snki->next = snkd; snkd->last = snki;
+    snkd->next = savesn; savesn->last = snkd;
+    savesn->next = zerosn; zerosn->last = savesn;
+    zerosn->next = snkp; snkp->last = zerosn;
+
     an1kp->parent = anloop1; an1ki->parent = anloop1;
     an1kd->parent = anloop1; zeroan1->parent = anloop1;
     savean1->parent = anloop1;
@@ -241,6 +258,10 @@ void create_3rd_menu(void)
     askp->parent = asloop; aski->parent = asloop;
     askd->parent = asloop; zeroas->parent = asloop;
     saveas->parent = asloop;
+
+    snkp->parent = snloop; snki->parent = snloop;
+    snkd->parent = snloop; zerosn->parent = snloop;
+    savesn->parent = snloop;
 }
 
 void key_handle_menu(void)
