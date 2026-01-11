@@ -98,11 +98,11 @@ void pit0_ch1_isr() // 定时器通道 1 周期中断服务函数
             single_loop.Target = 0.0f;
             single_loop.Actual = imu.output.euler[0];
             // 单边桥控制
-            if (fabs(single_loop.Actual) > 10.0f)
+            if (fabs(single_loop.Actual) > 11.0f)
             {
                 PID_Update_Lo(&single_loop);
             }
-            else if (fabs(single_loop.Actual) <= 10.0f)
+            else if (fabs(single_loop.Actual) <= 11.0f)
             {
                 single_loop.Out = 0.0f;
             }
