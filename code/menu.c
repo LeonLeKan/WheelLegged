@@ -1,5 +1,7 @@
 #include "menu.h"
 #include "image.h"
+#include "imu.h"
+#include "screen_interface.h"
 
 MENU *RootMenu, *Balance, *Image, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *pzero, *pinit, *show,
@@ -799,5 +801,4 @@ static void image_show(void)
     }
     ips200_clear();
 }
-
 
