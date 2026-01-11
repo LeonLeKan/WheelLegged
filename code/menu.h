@@ -1,5 +1,5 @@
-//#ifndef CODE_MENU_H_
-//#define CODE_MENU_H_
+#ifndef CODE_MENU_H_
+#define CODE_MENU_H_
 
 #include "zf_common_headfile.h"
 #include <math.h>
@@ -67,4 +67,4 @@ void menu_load1(void);
 void menu_zero(void);
 static void image_show(void);
 
-//#endif /* CODE_MENU_H_ */
+#endif /* CODE_MENU_H_ */

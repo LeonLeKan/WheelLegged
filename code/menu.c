@@ -1,5 +1,5 @@
 #include "menu.h"
-//#include "image.h"
+#include "image.h"
 
 MENU *RootMenu, *Balance, *Image, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *pzero, *pinit, *show,
