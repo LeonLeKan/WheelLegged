@@ -94,16 +94,19 @@ void pit0_ch1_isr() // 定时器通道 1 周期中断服务函数
 
             PID_Update_Lo(&speed_loop);
 
-            single_loop.Target = 0.0f;
-            single_loop.Actual = imu.output.euler[0];
-            // 单边桥控制
-            if (fabs(single_loop.Actual) > 10.0f)
+            if (single_side_state != 0)
             {
-                PID_Update_Lo(&single_loop);
-            }
-            else if (fabs(single_loop.Actual) <= 10.0f)
-            {
-                single_loop.Out = 0.0f;
+                single_loop.Target = 0.0f;
+                single_loop.Actual = imu.output.euler[0];
+                // 单边桥控制
+                if (fabs(single_loop.Actual) > 1.0f)
+                {
+                    PID_Update_Lo(&single_loop);
+                }
+                else if (fabs(single_loop.Actual) <= 1.0f)
+                {
+                    single_loop.Out = 0.0f;
+                }
             }
 
             // 对speed_loop.Out进行低通滤波
@@ -113,9 +116,19 @@ void pit0_ch1_isr() // 定时器通道 1 周期中断服务函数
             // 更新滤波器
             filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
 
-            // 使用滤波后的速度输出
-            servo_set(90.0f - filtered_speed_out - single_loop.Out, 90.0f + filtered_speed_out + single_loop.Out,
-                      90.0f - filtered_speed_out + single_loop.Out, 90.0f + filtered_speed_out - single_loop.Out);
+            if (single_side_state == 0)
+            {
+                // 使用滤波后的速度输出
+                servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
+                          90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
+            }
+
+            else
+            {
+                // 使用滤波后的速度输出
+                servo_set(120.0f - filtered_speed_out - single_loop.Out, 120.0f + filtered_speed_out + single_loop.Out,
+                          60.0f - filtered_speed_out + single_loop.Out, 60.0f + filtered_speed_out - single_loop.Out);
+            }
 
             turn_loop1.Target = 0.0f; // outer
             turn_loop1.Actual = (float)error;

@@ -105,6 +105,7 @@ extern uint8_t single_block_d;
 extern uint8_t single_round_d;//在第几个环岛后开始判单边桥
 extern uint8_t single_cross_d;//在过环岛后第几个十字后开始判单边桥
 extern uint8_t single_u;//最多判几次单边桥
+extern uint8_t single_side_state;
 extern uint8_t traverse_round_d;//在第几个环岛后开始判横断桥
 extern uint8_t traverse_cross_d;//在过环岛后第几个十字后开始判横断桥
 extern uint8_t traverse_u;//最多判几次横断桥

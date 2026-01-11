@@ -221,12 +221,8 @@ void wifi_init(void)
 void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
-    oscilloscope_data.data[0] = speed_loop.Target;
-    oscilloscope_data.data[1] = speed_loop.Actual;
-    oscilloscope_data.data[2] = angle_loop2.Target;
-    oscilloscope_data.data[3] = angle_loop2.Actual;
-    oscilloscope_data.data[4] = angle_loop2.ErrorInt;
-    oscilloscope_data.channel_num = 5;
+    oscilloscope_data.data[0] = (float)step;
+    oscilloscope_data.channel_num = 1;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 
