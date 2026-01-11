@@ -92,7 +92,6 @@ int main(void)
     error_calc_far_line = (uint8_t)farl->data_int;
     error_calc_near_line = (uint8_t)nearl->data_int;
 
-    system_delay_ms(1000);
     while (true)
     {
         // 主循环检测拨码的状态
@@ -236,19 +235,19 @@ void imu_state_show(void)
     switch (imu.state)
     {
     case IMU_STATE_UNINIT:
-        screen_printf(0, 224, "State: UNINIT     ");
+        screen_printf(0, 0, "IMU State: UNINIT     ");
         break;
     case IMU_STATE_CALIBRATING:
-        screen_printf(0, 224, "State: CALIBRATING");
+        screen_printf(0, 0, "IMU State: CALIBRATING");
         break;
     case IMU_STATE_RUNNING:
-        screen_printf(0, 224, "State: RUNNING    ");
+        screen_printf(0, 0, "IMU State: RUNNING    ");
         break;
     case IMU_STATE_ERROR:
-        screen_printf(0, 224, "State: ERROR      ");
+        screen_printf(0, 0, "IMU State: ERROR      ");
         break;
     default:
-        screen_printf(0, 224, "State: UNKNOWN    ");
+        screen_printf(0, 0, "IMU State: UNKNOWN    ");
         break;
     }
 }
