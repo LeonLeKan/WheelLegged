@@ -1224,6 +1224,12 @@
             <name>$PROJ_DIR$\..\..\code\config.h</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\..\..\code\image.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\code\image.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\..\code\imu.c</name>
         </file>
         <file>
