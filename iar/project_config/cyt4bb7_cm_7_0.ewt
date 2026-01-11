@@ -1476,6 +1476,12 @@
                 <name>$PROJ_DIR$\..\..\code\connecting_rod.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\..\code\control.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\control.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\code\servo.c</name>
             </file>
             <file>
@@ -1493,6 +1499,12 @@
                     <name>$PROJ_DIR$\..\..\code\ahrs_ui.h</name>
                 </file>
             </group>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\menu.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\menu.h</name>
+            </file>
             <file>
                 <name>$PROJ_DIR$\..\..\code\points_display.c</name>
             </file>
@@ -1546,7 +1558,10 @@
             </file>
         </group>
         <file>
-            <name>$PROJ_DIR$\..\..\code\config.h</name>
+            <name>$PROJ_DIR$\..\..\code\control.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\code\control.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\code\imu.c</name>
