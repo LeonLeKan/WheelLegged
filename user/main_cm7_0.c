@@ -152,7 +152,7 @@ int main(void)
 
 void start_imu_calibration(void)
 {
-    system_delay_ms(1000);  // 等待1秒，确保系统稳定
+    system_delay_ms(1500);  // 等待1秒，确保系统稳定
     imu_start_calibration(3000);  // 采集3000个样本进行校准
 }
 
