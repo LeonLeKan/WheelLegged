@@ -2,8 +2,7 @@
 #include "imu.h"
 #include "small_driver_uart_control.h"
 #include "screen_interface.h"
-#include "ahrs_ui.h"
-
+#include "save_manager.h"
 
 #define BUTTON_LF (P20_0)
 #define BUTTON_RT (P20_1)
@@ -48,7 +47,7 @@ int main(void)
     small_driver_uart_init();
     imu_init(&mahony_filter_param, &ukf_filter_param);
 
-    ahrs_ui_init();
+    save_manager_init();
 
     while (true)
     {
@@ -186,11 +185,11 @@ void key_handle(void)
     {
         last_switch_state = current_switch_state;
         if (showing_points)
-            points_display_key_ok_pressed();
+            save_manager_key_ok_pressed();
         else
         {
             showing_points = true;
-            ahrs_ui_show();
+            save_manager_show();
         }
     }
     else if (gpio_get_level(BUTTON_LF) == 0)
@@ -199,7 +198,7 @@ void key_handle(void)
         if (gpio_get_level(BUTTON_LF) == 0)
         {
             if (showing_points)
-                points_display_key_left_pressed();
+                save_manager_key_left_pressed();
         }
     }
     else if (gpio_get_level(BUTTON_RT) == 0)
@@ -208,7 +207,7 @@ void key_handle(void)
         if (gpio_get_level(BUTTON_RT) == 0)
         {
             if (showing_points)
-                points_display_key_right_pressed();
+                save_manager_key_right_pressed();
         }
     }
     else if (gpio_get_level(BUTTON_DN) == 0)
@@ -217,7 +216,7 @@ void key_handle(void)
         if (gpio_get_level(BUTTON_DN) == 0)
         {
             if (showing_points)
-                points_display_key_down_pressed();
+                save_manager_key_down_pressed();
         }
     }
     else if (gpio_get_level(BUTTON_UP) == 0)
@@ -226,7 +225,7 @@ void key_handle(void)
         if (gpio_get_level(BUTTON_UP) == 0)
         {
             if (showing_points)
-                points_display_key_up_pressed();
+                save_manager_key_up_pressed();
             else start_imu_calibration();
         }
 

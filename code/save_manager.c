@@ -1,0 +1,133 @@
+#include "save_manager.h"
+#include "points_display.h"
+#include "screen_interface.h"
+#include "ahrs_ui.h"
+
+// 屏幕显示函数
+void show_saves();
+void show_ahrs_points(void);
+// 回调函数
+void ahrs_save_callback(void);
+
+save_manager_t save_manager_instance;
+
+
+// ==================== 接口函数 ======================
+void save_manager_init(void)
+{
+    save_manager_instance.active_save = NULL;
+    save_manager_instance.active_save_idx = 0;
+    save_manager_instance.total_saves = 5;
+    save_manager_instance.showing_points = 0;
+}
+
+void save_manager_show(void)
+{
+    ips200_set_color(RGB565_BLACK, RGB565_WHITE);
+    ips200_clear();
+    save_manager_instance.showing_points = 0;
+    screen_printf(0, 0, "AHRS Saves:");
+    show_saves();
+}
+
+// ==================== 屏幕显示函数 ======================
+// 显示存档管理器主界面
+void show_saves()
+{
+    for (int i = 0; i < save_manager_instance.total_saves; i++)
+    {
+        if(i == save_manager_instance.active_save_idx)
+            ips200_set_color(RGB565_BLACK, RGB565_CYAN);
+        else
+            ips200_set_color(RGB565_BLACK, RGB565_WHITE);
+        screen_printf(16, 16 * (i + 1), "Save %2d", i);
+    }
+}
+
+// 启动ahrs显点
+void show_ahrs_points(void)
+{
+    // 初始化点显示模块
+    points_display_create_info_t create_info;
+    create_info.waypoint_list = save_manager_instance.active_save;
+    create_info.get_current_position_callback = ahrs_get_current_position; // 获取当前定位点的回调
+    create_info.plane_to_waypoint_callback = ahrs_plane_to_waypoint;   // 平面坐标转换为航点的回调
+    create_info.add_point_next_callback = ahrs_add_current;          // 添加当前点的回调
+    create_info.save_callback = ahrs_save_callback;                 // 保存回调
+    create_info.quit_callback = save_manager_show;                 // 退出回调
+
+    points_display_info_t* info = points_display_create(&create_info);
+
+    points_display_show(info);
+}
+
+// ==================== 回调函数 ========================
+void ahrs_save_callback(void)
+{
+    waypoint_list_save_to_flash(
+        save_manager_instance.active_save,
+        AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx
+    );
+}
+
+// ==================== 按键处理函数 ======================
+void save_manager_key_up_pressed(void)
+{
+    if(save_manager_instance.showing_points)
+    {
+        points_display_key_up_pressed();
+        return;
+    }
+    save_manager_instance.active_save_idx--;
+    if(save_manager_instance.active_save_idx < 0)
+        save_manager_instance.active_save_idx = save_manager_instance.total_saves - 1;
+    
+    show_saves();
+}
+
+void save_manager_key_down_pressed(void)
+{
+    if(save_manager_instance.showing_points)
+    {
+        points_display_key_down_pressed();
+        return;
+    }
+    save_manager_instance.active_save_idx++;
+    if(save_manager_instance.active_save_idx >= save_manager_instance.total_saves)
+        save_manager_instance.active_save_idx = 0;
+    show_saves();
+}
+
+void save_manager_key_ok_pressed(void)
+{
+    if(save_manager_instance.showing_points)
+    {
+        points_display_key_ok_pressed();
+        return;
+    }
+    // todo: 根据类型加载
+    // bool ret = waypoint_list_load_from_flash(
+    //     save_manager_instance.active_save,
+    //     AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx
+    // );
+    // if (!ret)
+    // {
+    //     ips200_set_color(RGB565_BLACK, RGB565_RED);
+    //     ips200_show_string(0, 160, "Failed");
+    //     return;
+    // }
+    save_manager_instance.showing_points = 1;
+    show_ahrs_points();
+}
+
+void save_manager_key_left_pressed(void)
+{
+    if(save_manager_instance.showing_points)
+        points_display_key_left_pressed();
+}
+
+void save_manager_key_right_pressed(void)
+{
+    if(save_manager_instance.showing_points)
+        points_display_key_right_pressed();
+}

@@ -86,7 +86,7 @@ void waypoint_list_save_to_flash(waypoint_list_t *list, uint32 flash_page)
     flash_buffer_clear();
     waypoint_node_t *now_node = list->head->next;
     
-    int index = 1; // flash_union_buffer[0] : 一共有几个点
+    int index = 1; // 从1开始, 0用来存一共有几个点
     union double_converter converter;
     
     while(now_node)
@@ -101,6 +101,7 @@ void waypoint_list_save_to_flash(waypoint_list_t *list, uint32 flash_page)
         flash_union_buffer[index++].uint32_type = converter.buf[1];
         now_node = now_node->next;
     }
+    // flash_union_buffer[0] : 一共有几个点
     flash_union_buffer[0].int32_type = index;
     
     flash_erase_page(0, flash_page);

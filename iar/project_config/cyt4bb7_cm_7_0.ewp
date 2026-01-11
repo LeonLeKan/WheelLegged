@@ -1163,6 +1163,12 @@
                 <name>$PROJ_DIR$\..\..\code\points_display.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\..\code\save_manager.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\save_manager.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\code\screen_interface.c</name>
             </file>
             <file>
