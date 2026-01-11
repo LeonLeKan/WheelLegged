@@ -1,4 +1,5 @@
 #include "zf_common_headfile.h"
+#include "config.h"
 #include "imu.h"
 #include "small_driver_uart_control.h"
 #include "screen_interface.h"
@@ -48,21 +49,21 @@ ukf_filter_param_t ukf_filter_param = {
     .r = {0.0001, 1, 3}};
 
 bool showing_points = false;
-// ç”¨äºå®ç°æ ¡å‡†åçš„åˆ†å±‚å¯åŠ¨
+// ÓÃÓÚÊµÏÖĞ£×¼ºóµÄ·Ö²ãÆô¶¯
 bool car_run_state = false;
 
 int main(void)
 {
-    clock_init(SYSTEM_CLOCK_250M); // æ—¶é’Ÿé…ç½®åŠç³»ç»Ÿåˆå§‹åŒ–<åŠ¡å¿…ä¿ç•™>
-    debug_init();                  // è°ƒè¯•ä¸²å£ä¿¡æ¯åˆå§‹åŒ–
+    clock_init(SYSTEM_CLOCK_250M); // Ê±ÖÓÅäÖÃ¼°ÏµÍ³³õÊ¼»¯<Îñ±Ø±£Áô>
+    debug_init();                  // µ÷ÊÔ´®¿ÚĞÅÏ¢³õÊ¼»¯
 
-    // flashåˆå§‹åŒ–
+    // flash³õÊ¼»¯
     flash_init();
 
-    // ä¸²å£è°ƒè¯•åˆå§‹åŒ–
+    // ´®¿Úµ÷ÊÔ³õÊ¼»¯
     seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_DEBUG_UART);
 
-    // æ§åˆ¶ç›¸å…³åˆå§‹åŒ–
+    // ¿ØÖÆÏà¹Ø³õÊ¼»¯
     mode_flag = 0;
     mt9v03x_init();
     control_init();
@@ -70,36 +71,43 @@ int main(void)
     gpio_init_all();
     para_zero();
 
-    // èœå•åˆå§‹åŒ–
+    // ²Ëµ¥³õÊ¼»¯
     create_1st_menu();
     create_2nd_menu();
     create_3rd_menu();
     menu_load1();
 
-    // å¦‚æœ‰éœ€è¦ï¼Œæ·»åŠ wifi
+    // ÈçÓĞĞèÒª£¬Ìí¼Ówifi
     //wifi_init();
 
-    // å±å¹•åˆå§‹åŒ–
+    // ÆÁÄ»³õÊ¼»¯
     screen_init();
 
-    // imuåˆå§‹åŒ–
+    // imu³õÊ¼»¯
+    // flash³õÊ¼»¯
+    flash_init();
+
+    // µç»úÇı¶¯³õÊ¼»¯
+    small_driver_uart_init();
+    // imu³õÊ¼»¯
     imu_init(&mahony_filter_param, &ukf_filter_param);
 
-    // ahrsåˆå§‹åŒ–
-    ahrs_ui_init();
+    // ´æµµ¹ÜÀíÆ÷ui³õÊ¼»¯
+    save_manager_init();
+
 
     // threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
     error_calc_near_line = (uint8_t)nearl->data_int;
     while (true)
     {
-        // ä¸»å¾ªç¯æ£€æµ‹æ‹¨ç çš„çŠ¶æ€
+        // Ö÷Ñ­»·¼ì²â²¦ÂëµÄ×´Ì¬
         motion_mode1 = gpio_get_level(P21_6);
         motion_mode2 = gpio_get_level(P21_5);
 
         if (motion_mode1 == 1 && motion_mode2 == 1)
         {
-            // è§£æé€é£åŠ©æ‰‹çš„æ•°æ®
+            // ½âÎöÖğ·ÉÖúÊÖµÄÊı¾İ
             seekfree_assistant_data_analysis();
 
             send_attitude();
@@ -108,7 +116,7 @@ int main(void)
                 update_screen();
             key_handle_point();
 
-            // å¦‚æœéœ€è¦ï¼Œæ·»åŠ wifi
+            // Èç¹ûĞèÒª£¬Ìí¼Ówifi
             // wifi_send_data();
         }
 
@@ -117,11 +125,11 @@ int main(void)
             ips200_clear();
             while (true)
             {
-                // è°ƒèœå•
+                // µ÷²Ëµ¥
                 show_menu();
                 key_handle_menu();
 
-                // å¦‚æœéœ€è¦ï¼Œæ·»åŠ wifi
+                // Èç¹ûĞèÒª£¬Ìí¼Ówifi
                 wifi_send_data();
             }
         }
@@ -131,7 +139,7 @@ int main(void)
             ips200_clear();
             while (true)
             {
-                // è·‘
+                // ÅÜ
                 image_main();
 
                 if (!car_run_state)
@@ -147,7 +155,7 @@ int main(void)
                     car_run_state = true;
                 }
 
-                // å¦‚æœéœ€è¦ï¼Œæ·»åŠ wifi
+                // Èç¹ûĞèÒª£¬Ìí¼Ówifi
                 //wifi_send_data();
             }
         }
@@ -227,8 +235,8 @@ void process_param(void)
 
 void start_imu_calibration(void)
 {
-    system_delay_ms(1000);  // ç­‰å¾…1ç§’ï¼Œç¡®ä¿ç³»ç»Ÿç¨³å®š
-    imu_start_calibration(3000);  // é‡‡é›†3000ä¸ªæ ·æœ¬è¿›è¡Œæ ¡å‡†
+    system_delay_ms(1000);  // µÈ´ı1Ãë£¬È·±£ÏµÍ³ÎÈ¶¨
+    imu_start_calibration(2000);  // ²É¼¯2000¸öÑù±¾½øĞĞĞ£×¼
 }
 
 void update_screen(void)
@@ -269,7 +277,7 @@ void gpio_init_all(void)
 
 void key_handle_point(void)
 {
-    static uint8_t last_switch_state = 1; // ä¸Šç”µå‰æ‹‰å›é«˜ç”µå¹³
+    static uint8_t last_switch_state = 1; // ÉÏµçÇ°À­»Ø¸ßµçÆ½
     uint8_t current_switch_state = gpio_get_level(BUTTON_OK);
 
     uint8_t switch_changed = (last_switch_state != current_switch_state);
@@ -278,11 +286,11 @@ void key_handle_point(void)
     {
         last_switch_state = current_switch_state;
         if (showing_points)
-            points_display_key_ok_pressed();
+            save_manager_key_ok_pressed();
         else
         {
             showing_points = true;
-            ahrs_ui_show();
+            save_manager_show();
         }
     }
     else if (gpio_get_level(BUTTON_LF) == 0)
@@ -291,7 +299,7 @@ void key_handle_point(void)
         if (gpio_get_level(BUTTON_LF) == 0)
         {
             if (showing_points)
-                points_display_key_left_pressed();
+                save_manager_key_left_pressed();
         }
     }
     else if (gpio_get_level(BUTTON_RT) == 0)
@@ -300,7 +308,7 @@ void key_handle_point(void)
         if (gpio_get_level(BUTTON_RT) == 0)
         {
             if (showing_points)
-                points_display_key_right_pressed();
+                save_manager_key_right_pressed();
         }
     }
     else if (gpio_get_level(BUTTON_DN) == 0)
@@ -309,7 +317,7 @@ void key_handle_point(void)
         if (gpio_get_level(BUTTON_DN) == 0)
         {
             if (showing_points)
-                points_display_key_down_pressed();
+                save_manager_key_down_pressed();
         }
     }
     else if (gpio_get_level(BUTTON_UP) == 0)
@@ -318,9 +326,8 @@ void key_handle_point(void)
         if (gpio_get_level(BUTTON_UP) == 0)
         {
             if (showing_points)
-                points_display_key_up_pressed();
-            else
-                start_imu_calibration();
+                save_manager_key_up_pressed();
+            else start_imu_calibration();
         }
     }
 }

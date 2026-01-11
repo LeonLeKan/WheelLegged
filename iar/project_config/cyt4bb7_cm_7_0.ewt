@@ -1512,6 +1512,12 @@
                 <name>$PROJ_DIR$\..\..\code\points_display.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\..\code\save_manager.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\save_manager.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\code\screen_interface.c</name>
             </file>
             <file>
@@ -1552,10 +1558,10 @@
             </file>
         </group>
         <file>
-            <name>$PROJ_DIR$\..\..\code\image.c</name>
+            <name>$PROJ_DIR$\..\..\code\control.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\code\image.h</name>
+            <name>$PROJ_DIR$\..\..\code\control.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\code\imu.c</name>

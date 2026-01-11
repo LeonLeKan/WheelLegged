@@ -4,13 +4,7 @@
 #include "zf_common_headfile.h"
 #include "mahony_filter.h"
 #include "ukf_filter.h"
-
-#define IMU_UPDATE_INTERVAL_MS 2  // IMU更新间隔，单位毫秒
-
-// 车辆尺寸参数
-#define WHEEL_D     0.065   // 轮胎直径
-#define WHEELBASE   0.185   // 轮距
-
+#include "config.h"
 
 // imu状态枚举
 typedef enum {
