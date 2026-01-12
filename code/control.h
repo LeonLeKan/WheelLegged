@@ -35,16 +35,16 @@ extern volatile PID_t turn_loop2;
 extern volatile PID_t aspeed_loop;
 extern volatile PID_t single_loop;
 
-extern volatile uint8_t mode_flag;
-
 void control_init(void);
 void PID_Update_Lo(volatile PID_t *p);
 void PID_Update_In(volatile PID_t *p);
 
+// PID参数更新与归零函数
 void an1pid_update(float kp, float ki, float kd);
 void an1_zero(void);
 void an2pid_update(float kp, float ki, float kd);
 void an2_zero(void);
+void acpid_update(float ki, float kd);
 void sppid_update(float kp, float ki, float kd);
 void sp_zero(void);
 void tu1pid_update(float kp, float ki, float kd);
@@ -56,4 +56,18 @@ void as_zero(void);
 void snpid_update(float kp, float ki, float kd);
 void sn_zero(void);
 
-#endif /* CODE_CONTROL_H_ */
+// 参数与输出归零函数（汇总）
+void para_zero(void);
+void out_zero(void);
+
+// 控制状态函数
+void control_state_idle(void);
+void control_state_stand_up(void);
+void control_state_stand_still(void);
+void control_state_accelerate(void);
+void control_state_forward(void);
+void control_state_stand_front_single_side(void);
+void control_state_single_side(void);
+void control_state_stop(void);
+
+#endif

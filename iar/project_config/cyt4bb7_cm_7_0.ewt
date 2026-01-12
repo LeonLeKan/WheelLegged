@@ -1482,6 +1482,12 @@
                 <name>$PROJ_DIR$\..\..\code\control.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\..\code\control_state.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\control_state.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\code\servo.c</name>
             </file>
             <file>
