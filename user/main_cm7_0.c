@@ -7,6 +7,7 @@
 #include "image.h"
 #include "servo.h"
 #include "control.h"
+#include "control_state.h"
 #include "connecting_rod.h"
 
 #define WIFI_SSID_TEST "Hhhyt"
@@ -25,9 +26,6 @@ void gpio_init_all(void);
 void imu_state_show(void);
 void start_imu_calibration(void);
 
-void para_zero(void);
-void data_load1(void);
-void data_load2(void);
 void wifi_init(void);
 void wifi_send_data(void);
 
@@ -62,7 +60,6 @@ int main(void)
     seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_DEBUG_UART);
 
     // 控制相关初始化
-    mode_flag = 0;
     mt9v03x_init();
     control_init();
     car_balance();
@@ -76,7 +73,7 @@ int main(void)
     menu_load1();
 
     // 如有需要，添加wifi
-    //wifi_init();
+    // wifi_init();
 
     // 屏幕初始化
     pit_ms_init(SCREEN_UPDATE_PIT, SCREEN_UPDATE_INTERVAL_MS);
@@ -88,10 +85,6 @@ int main(void)
     pit_disable(IMU_UPDATE_PIT);
     imu_init(&mahony_filter_param, &ukf_filter_param);
 
-    // threshold = (uint8_t)thre->data_int;
-    error_calc_far_line = (uint8_t)farl->data_int;
-    error_calc_near_line = (uint8_t)nearl->data_int;
-
     while (true)
     {
         // 主循环检测拨码的状态
@@ -100,6 +93,7 @@ int main(void)
 
         if (motion_mode1 == 1 && motion_mode2 == 1)
         {
+            current_state = STATE_IDLE;
             if (cali_flag == 1)
             {
                 start_imu_calibration();
@@ -110,6 +104,7 @@ int main(void)
 
         else if (motion_mode1 == 1 && motion_mode2 == 0)
         {
+            current_state = STATE_IDLE;
             ips200_clear();
             while (true)
             {
@@ -118,33 +113,21 @@ int main(void)
                 key_handle_menu();
 
                 // 如果需要，添加wifi
-                //wifi_send_data();
+                // wifi_send_data();
             }
         }
 
         else if (motion_mode1 == 0 && motion_mode2 == 1)
         {
             ips200_clear();
+            current_state = STATE_STAND_UP;
             while (true)
             {
                 // 跑
                 image_main();
 
-                if (!car_run_state)
-                {
-                    system_delay_ms(5000);
-                    an1pid_update(an1kp->data_float, an1ki->data_float, an1kd->data_float);
-                    system_delay_ms(500);
-                    mode_flag = 1;
-                    data_load1();
-                    system_delay_ms(500);
-                    data_load2();
-
-                    car_run_state = true;
-                }
-
                 // 如果需要，添加wifi
-                //wifi_send_data();
+                // wifi_send_data();
             }
         }
     }
@@ -152,8 +135,8 @@ int main(void)
 
 void start_imu_calibration(void)
 {
-    system_delay_ms(1500);  // 等待1秒，确保系统稳定
-    imu_start_calibration(3000);  // 采集3000个样本进行校准
+    system_delay_ms(1500);       // 等待1秒，确保系统稳定
+    imu_start_calibration(3000); // 采集3000个样本进行校准
 }
 
 void gpio_init_all(void)
@@ -164,34 +147,6 @@ void gpio_init_all(void)
     gpio_init(BUTTON_UP, GPI, 1, GPI_PULL_UP);
     gpio_init(BUTTON_OK, GPI, 1, GPI_PULL_UP);
     gpio_init(P21_6, GPI, 1, GPI_PULL_UP);
-}
-
-void para_zero(void)
-{
-    an1_zero();
-    an2_zero();
-    sp_zero();
-    tu1_zero();
-    tu2_zero();
-    as_zero();
-    sn_zero();
-}
-
-void data_load1(void)
-{
-    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
-    aspid_update(askp->data_float, aski->data_float, askd->data_float);
-}
-
-void data_load2(void)
-{
-    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
-    tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
-    tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
-    snpid_update(snkp->data_float, snki->data_float, snkd->data_float);
-    // threshold = (uint8_t)thre->data_int;
-    error_calc_far_line = (uint8_t)farl->data_int;
-    error_calc_near_line = (uint8_t)nearl->data_int;
 }
 
 void wifi_init(void)
