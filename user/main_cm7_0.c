@@ -73,7 +73,7 @@ int main(void)
     menu_load1();
 
     // 如有需要，添加wifi
-    // wifi_init();
+    //wifi_init();
 
     // 屏幕初始化
     pit_ms_init(SCREEN_UPDATE_PIT, SCREEN_UPDATE_INTERVAL_MS);
@@ -127,7 +127,7 @@ int main(void)
                 image_main();
 
                 // 如果需要，添加wifi
-                // wifi_send_data();
+                //wifi_send_data();
             }
         }
     }
@@ -176,8 +176,9 @@ void wifi_init(void)
 void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
-    oscilloscope_data.data[0] = (float)step;
-    oscilloscope_data.channel_num = 1;
+    oscilloscope_data.data[0] = (float)single_side_state;
+    oscilloscope_data.data[1] = (float)current_state;
+    oscilloscope_data.channel_num = 2;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 

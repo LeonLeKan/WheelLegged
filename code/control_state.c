@@ -11,14 +11,23 @@ void control_state_switch(void)
         current_state = STATE_FORWARD;
     }
 
-    if ((current_state != STATE_STAND_FRONT_SINGLE_SIDE &&  
+    if ((current_state != STATE_DECLINE_FRONT_SINGLE_SIDE &&
+         current_state != STATE_STAND_FRONT_SINGLE_SIDE &&  
          current_state != STATE_SINGLE_SIDE) 
       && single_side_state != 0)
+    {
+        current_state = STATE_DECLINE_FRONT_SINGLE_SIDE;
+    }
+
+    if (current_state == STATE_DECLINE_FRONT_SINGLE_SIDE
+      && single_side_state != 0
+      && fabs(3.0f - speed_loop.Actual) < 0.5f)
     {
         current_state = STATE_STAND_FRONT_SINGLE_SIDE;
     }
 
-    if ((current_state == STATE_STAND_FRONT_SINGLE_SIDE || 
+    if ((current_state == STATE_DECLINE_FRONT_SINGLE_SIDE ||
+         current_state == STATE_STAND_FRONT_SINGLE_SIDE || 
          current_state == STATE_SINGLE_SIDE) 
       && single_side_state == 0)
     {
@@ -44,6 +53,9 @@ void control_state_update(void)
         break;
     case STATE_FORWARD:
         control_state_forward();
+        break;
+    case STATE_DECLINE_FRONT_SINGLE_SIDE:
+        control_state_decline_front_single_side();
         break;
     case STATE_STAND_FRONT_SINGLE_SIDE:
         control_state_stand_front_single_side();

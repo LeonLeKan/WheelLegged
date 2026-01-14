@@ -5,16 +5,16 @@
 
 MENU *RootMenu, *Balance, *Image, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *pzero, *pinit, *show,
-    *thre, *farl, *nearl, *saveim;
+     *thre, *farl, *nearl, *saveim;
 MENU *an1kp, *an1ki, *an1kd,
-    *an2kp, *an2ki, *an2kd,
-    *spkp, *spki, *spkd,
-    *tu1kp, *tu1ki, *tu1kd,
-    *tu2kp, *tu2ki, *tu2kd,
-    *askp, *aski, *askd,
-    *snkp, *snki, *snkd,
-    *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn,
-    *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn;
+     *an2kp, *an2ki, *an2kd,
+     *spkp, *spki, *spkd,
+     *tu1kp, *tu1ki, *tu1kd,
+     *tu2kp, *tu2ki, *tu2kd,
+     *askp, *aski, *askd,
+     *snkp, *snki, *snkd,
+     *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn,
+     *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn;
 
 #define MENU_POOL_SIZE 128
 
