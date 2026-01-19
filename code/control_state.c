@@ -21,7 +21,7 @@ void control_state_switch(void)
 
     if (current_state == STATE_DECLINE_FRONT_SINGLE_SIDE
       && single_side_state != 0
-      && fabs(3.0f - speed_loop.Actual) < 0.5f)
+      && speed_loop.Actual < 2.5f + 0.3f)
     {
         current_state = STATE_STAND_FRONT_SINGLE_SIDE;
     }
@@ -65,6 +65,9 @@ void control_state_update(void)
         break;
     case STATE_STOP:
         control_state_stop();
+        break;
+    default:
+        control_state_forward();
         break;
     }
 }

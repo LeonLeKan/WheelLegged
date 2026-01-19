@@ -384,8 +384,8 @@ void control_state_decline_front_single_side(void)
         speed_loop.Target = 2.5f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
-        servo_set(135.0f, 45.0f,
-                  135.0f, 45.0f);
+        servo_set(110.0f, 70.0f,
+                  110.0f, 70.0f);
 
         turn_loop1.Target = 0.0f; // outer
         turn_loop1.Actual = (float)error;
@@ -409,6 +409,13 @@ void control_state_decline_front_single_side(void)
 
 void control_state_stand_front_single_side(void)
 {
+    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+    tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
+    tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    // threshold = (uint8_t)thre->data_int;
+    error_calc_far_line = (uint8_t)farl->data_int;
+    error_calc_near_line = (uint8_t)nearl->data_int;
+
     static uint32_t count = 0;
     static uint32_t single_delay = 0;
     count++;
@@ -417,7 +424,7 @@ void control_state_stand_front_single_side(void)
     {
         count = 0;
 
-        speed_loop.Target = 3.0f;
+        speed_loop.Target = 2.5f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
@@ -452,7 +459,7 @@ void control_state_stand_front_single_side(void)
 
     small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
 
-    if (single_delay >= 20)
+    if (single_delay >= 60)
     {
         single_delay = 0;
         current_state = STATE_SINGLE_SIDE;
@@ -461,13 +468,21 @@ void control_state_stand_front_single_side(void)
 
 void control_state_single_side(void)
 {
+    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+    tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
+    tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    snpid_update(snkp->data_float, snki->data_float, snkd->data_float);
+    // threshold = (uint8_t)thre->data_int;
+    error_calc_far_line = (uint8_t)farl->data_int;
+    error_calc_near_line = (uint8_t)nearl->data_int;
+
     static uint32_t count = 0;
     count++;
     if (count >= 4)
     {
         count = 0;
 
-        speed_loop.Target = 3.0f;
+        speed_loop.Target = 2.5f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
