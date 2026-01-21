@@ -224,7 +224,7 @@ void control_state_stand_up(void)
 {
     static uint32_t count = 0;
     count++;
-    if (count >= 1000)
+    if (count >= 200)
     {
         an1pid_update(an1kp->data_float, an1ki->data_float, an1kd->data_float);
 
@@ -234,7 +234,7 @@ void control_state_stand_up(void)
 
         small_driver_set_duty((int16)angle_loop1.Out, (int16)-angle_loop1.Out);
 
-        if (count >= 1100)
+        if (count >= 250)
         {
             count = 0;
             current_state = STATE_STAND_STILL;
@@ -246,10 +246,11 @@ void control_state_stand_still(void)
 {
     static uint32_t count = 0;
     count++;
-    if (count >= 100)
+    if (count >= 50)
     {
         count = 0;
-        current_state = STATE_ACCELERATE;
+        //current_state = STATE_ACCELERATE;
+        current_state = STATE_JUMP_UP;
     }
 
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
@@ -384,8 +385,8 @@ void control_state_decline_front_single_side(void)
         speed_loop.Target = 2.5f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
-        servo_set(110.0f, 70.0f,
-                  110.0f, 70.0f);
+        servo_set(100.0f, 80.0f,
+                  100.0f, 80.0f);
 
         turn_loop1.Target = 0.0f; // outer
         turn_loop1.Actual = (float)error;
@@ -478,6 +479,11 @@ void control_state_single_side(void)
 
     static uint32_t count = 0;
     count++;
+
+    // 对speed_loop.Out进行低通滤波
+    static float filtered_speed_out = 0.0f;
+    static const float speed_alpha = 0.1f; // 速度环滤波系数，可调整
+
     if (count >= 4)
     {
         count = 0;
@@ -487,26 +493,22 @@ void control_state_single_side(void)
 
         PID_Update_Lo(&speed_loop);
 
-        // 单边桥控制
-        single_loop.Target = 0.0f;
-        single_loop.Actual = imu.output.euler[0];
-        PID_Update_Lo(&single_loop);
-
-        // 对speed_loop.Out进行低通滤波
-        static float filtered_speed_out = 0.0f;
-        static const float speed_alpha = 0.1f; // 速度环滤波系数，可调整
-
         // 更新滤波器
         filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
-
-        // 使用滤波后的速度输出
-        servo_set(110.0f - filtered_speed_out - single_loop.Out, 110.0f + filtered_speed_out + single_loop.Out,
-                   70.0f - filtered_speed_out + single_loop.Out, 70.0f + filtered_speed_out - single_loop.Out);
 
         turn_loop1.Target = 0.0f; // outer
         turn_loop1.Actual = (float)error;
         PID_Update_Lo(&turn_loop1);
     }
+
+    // 单边桥控制
+    single_loop.Target = 0.0f;
+    single_loop.Actual = imu.output.euler[0];
+    PID_Update_Lo(&single_loop);
+
+    // 使用滤波后的速度输出
+    servo_set(110.0f - filtered_speed_out - single_loop.Out, 110.0f + filtered_speed_out + single_loop.Out,
+               70.0f - filtered_speed_out + single_loop.Out, 70.0f + filtered_speed_out - single_loop.Out);
 
     turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual; // inner
     turn_loop2.Actual = -imu.body.gyro[2];
@@ -521,6 +523,84 @@ void control_state_single_side(void)
     PID_Update_Lo(&aspeed_loop);
 
     small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+}
+
+void control_state_thunder(void)
+{
+    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+    tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
+    tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    // threshold = (uint8_t)thre->data_int;
+    error_calc_far_line = (uint8_t)farl->data_int;
+    error_calc_near_line = (uint8_t)nearl->data_int;
+
+    static uint32_t count = 0;
+    count++;
+    if (count >= 4)
+    {
+        count = 0;
+
+        speed_loop.Target = 0.0f;
+        speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+
+        PID_Update_Lo(&speed_loop);
+
+        // 对speed_loop.Out进行低通滤波
+        static float filtered_speed_out = 0.0f;
+        static const float speed_alpha = 0.1f; // 速度环滤波系数，可调整
+
+        // 更新滤波器
+        filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
+
+        servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
+                  90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
+    }
+
+    turn_loop2.Target = 180.0f;
+    turn_loop2.Actual = -imu.body.gyro[2];
+    PID_Update_Lo(&turn_loop2);
+
+    angle_loop2.Target = pzero->data_float;
+    angle_loop2.Actual = imu.output.euler[1];
+    PID_Update_Lo(&angle_loop2);
+
+    aspeed_loop.Target = angle_loop2.Out;
+    aspeed_loop.Actual = imu.output.gyro[1];
+    PID_Update_Lo(&aspeed_loop);
+
+    small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+}
+
+void control_state_jump_up(void)
+{
+    static uint32_t count = 0;
+    count++;
+
+    if (count < 20)
+    {
+        servo_set(150.0f, 150.0f,
+                   30.0f, 30.0f);
+    }
+
+    else if (count >= 20 && count < 60)
+    {
+        servo_set(100.0f, 100.0f,
+                   80.0f, 80.0f);
+    }
+
+    else if (count >= 60 && count < 70)
+    {
+        servo_set(100.0f - 1.0f * (count - 60), 100.0f - 1.0f * (count - 60),
+                   80.0f + 1.0f * (count - 60),  80.0f + 1.0f * (count - 60));
+    }
+
+    else if (count >= 70)
+    {
+        count = 0;
+        servo_set(90.0f, 90.0f,
+                  90.0f, 90.0f);
+        current_state = STATE_FORWARD;
+    }
 }
 
 void control_state_stop(void)

@@ -102,7 +102,7 @@ int main(void)
             imu_state_show();
         }
 
-        else if (motion_mode1 == 1 && motion_mode2 == 0)
+        else if (motion_mode1 == 0 && motion_mode2 == 1)
         {
             current_state = STATE_IDLE;
             ips200_clear();
@@ -113,18 +113,19 @@ int main(void)
                 key_handle_menu();
 
                 // 如果需要，添加wifi
-                // wifi_send_data();
+                //wifi_send_data();
             }
         }
 
-        else if (motion_mode1 == 0 && motion_mode2 == 1)
+        else if ((motion_mode1 == 1 && motion_mode2 == 0)
+              || (motion_mode1 == 0 && motion_mode2 == 0))
         {
             ips200_clear();
             current_state = STATE_STAND_UP;
             while (true)
             {
                 // 跑
-                image_main();
+                //image_main();
 
                 // 如果需要，添加wifi
                 //wifi_send_data();
@@ -176,8 +177,8 @@ void wifi_init(void)
 void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
-    oscilloscope_data.data[0] = (float)single_side_state;
-    oscilloscope_data.data[1] = (float)current_state;
+    oscilloscope_data.data[0] = turn_loop2.Target;
+    oscilloscope_data.data[1] = turn_loop2.Actual;
     oscilloscope_data.channel_num = 2;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }

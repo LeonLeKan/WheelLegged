@@ -6,6 +6,10 @@ volatile control_state_t current_state = STATE_IDLE;
 
 void control_state_switch(void)
 {
+    // 临时变量
+    static uint32_t switch_from_single_side_to_forward = 0;
+    static uint32_t switch_from_single_side_to_forward_count = 0;
+
     if (current_state == STATE_ACCELERATE && fabs(speed_loop.Target - speed_loop.Actual) < 0.1f)
     {
         current_state = STATE_FORWARD;
@@ -21,7 +25,7 @@ void control_state_switch(void)
 
     if (current_state == STATE_DECLINE_FRONT_SINGLE_SIDE
       && single_side_state != 0
-      && speed_loop.Actual < 2.5f + 0.3f)
+      && speed_loop.Actual < 2.5f + 0.2f)
     {
         current_state = STATE_STAND_FRONT_SINGLE_SIDE;
     }
@@ -29,9 +33,21 @@ void control_state_switch(void)
     if ((current_state == STATE_DECLINE_FRONT_SINGLE_SIDE ||
          current_state == STATE_STAND_FRONT_SINGLE_SIDE || 
          current_state == STATE_SINGLE_SIDE) 
-      && single_side_state == 0)
+      && single_side_state == 0
+      && switch_from_single_side_to_forward == 0)
     {
-        current_state = STATE_FORWARD;
+        switch_from_single_side_to_forward = 1;
+    }
+
+    if (switch_from_single_side_to_forward == 1)
+    {
+        switch_from_single_side_to_forward_count++;
+        if (switch_from_single_side_to_forward_count >= 100)
+        {
+            current_state = STATE_FORWARD;
+            switch_from_single_side_to_forward = 0;
+            switch_from_single_side_to_forward_count = 0;
+        }
     }
 }
 
@@ -62,6 +78,12 @@ void control_state_update(void)
         break;
     case STATE_SINGLE_SIDE:
         control_state_single_side();
+        break;
+    case STATE_THUNDER:
+        control_state_thunder();
+        break;
+    case STATE_JUMP_UP:
+        control_state_jump_up();
         break;
     case STATE_STOP:
         control_state_stop();
