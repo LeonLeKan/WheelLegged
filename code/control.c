@@ -249,8 +249,7 @@ void control_state_stand_still(void)
     if (count >= 50)
     {
         count = 0;
-        //current_state = STATE_ACCELERATE;
-        current_state = STATE_JUMP_UP;
+        current_state = STATE_ACCELERATE;
     }
 
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
@@ -578,8 +577,8 @@ void control_state_jump_up(void)
 
     if (count < 20)
     {
-        servo_set(150.0f, 150.0f,
-                   30.0f, 30.0f);
+        servo_set(160.0f, 160.0f,
+                   20.0f, 20.0f);
     }
 
     else if (count >= 20 && count < 60)

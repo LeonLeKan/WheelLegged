@@ -125,7 +125,7 @@ int main(void)
             while (true)
             {
                 // 跑
-                //image_main();
+                image_main();
 
                 // 如果需要，添加wifi
                 //wifi_send_data();
