@@ -63,7 +63,7 @@ void control_state_switch(void)
     if (switch_from_forward_to_jump_up == 1)
     {
         switch_from_forward_to_jump_up_count++;
-        if (switch_from_forward_to_jump_up_count >= 40)
+        if (switch_from_forward_to_jump_up_count >= 80)
         {
             current_state = STATE_JUMP_UP;
             switch_from_forward_to_jump_up = 0;
