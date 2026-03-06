@@ -12,9 +12,10 @@ typedef struct
     int active_save_idx;
     waypoint_list_t* active_save;
     int showing_points;
+    void (*exit_callback)(void);
 }save_manager_t;
 
-void save_manager_init(void);
+void save_manager_init(void (*exit_callback)(void));
 void save_manager_show(void);
 
 void save_manager_key_up_pressed(void);
