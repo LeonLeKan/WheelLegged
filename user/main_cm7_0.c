@@ -109,8 +109,15 @@ int main(void)
             while (true)
             {
                 // 调菜单
-                show_menu();
-                key_handle_menu();
+                if (menu_current_state == MENU_STATE_CONTROL)
+                {
+                    show_menu();
+                    key_handle_menu();
+                }
+                else if (menu_current_state == MENU_STATE_INS)
+                {
+                    // 显示存点
+                }
 
                 // 如果需要，添加wifi
                 //wifi_send_data();

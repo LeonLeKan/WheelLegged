@@ -40,6 +40,11 @@ typedef struct Menu
     struct Menu *child;
 } MENU;
 
+typedef enum {
+    MENU_STATE_CONTROL,
+    MENU_STATE_INS,
+} menu_state_t;
+
 extern MENU *RootMenu, *Balance, *Image, *currentMenu;
 extern MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *pzero, *pinit, *show,
             *thre, *farl, *nearl, *saveim;
@@ -52,6 +57,8 @@ extern MENU *an1kp, *an1ki, *an1kd,
             *snkp, *snki, *snkd,
             *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn,
             *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn;
+
+extern volatile menu_state_t menu_current_state;
 
 MENU *createMenu(const char *name, uint8_t layer, uint16_t order, MENU_Type type, void (*func)(void));
 uint16_t countNodes(MENU *layerHead);

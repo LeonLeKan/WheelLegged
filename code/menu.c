@@ -3,6 +3,8 @@
 #include "imu.h"
 #include "screen_interface.h"
 
+volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
+
 MENU *RootMenu, *Balance, *Image, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *pzero, *pinit, *show,
      *thre, *farl, *nearl, *saveim;
@@ -904,4 +906,9 @@ static void image_show(void)
         system_delay_ms(30);
     }
     ips200_clear();
+}
+
+void ins_to_control_menu(void)
+{
+    menu_current_state = MENU_STATE_CONTROL;
 }
