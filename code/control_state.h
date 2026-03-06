@@ -13,6 +13,7 @@ typedef enum {
     STATE_THUNDER,
     STATE_ACCUMULATE,
     STATE_JUMP_UP,
+    STATE_JOLT,
     STATE_STOP
 } control_state_t;
 
