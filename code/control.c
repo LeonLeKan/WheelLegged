@@ -13,6 +13,8 @@ volatile PID_t turn_loop2;
 volatile PID_t aspeed_loop;
 volatile PID_t single_loop;
 
+volatile uint8_t image_block = 1;
+
 void control_init(void)
 {
     servo_init();
@@ -244,6 +246,9 @@ void control_state_stand_up(void)
 
 void control_state_stand_still(void)
 {
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+    
     static uint32_t count = 0;
     count++;
     if (count >= 50)
@@ -251,9 +256,6 @@ void control_state_stand_still(void)
         count = 0;
         current_state = STATE_ACCELERATE;
     }
-
-    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
-    aspid_update(askp->data_float, aski->data_float, askd->data_float);
 
     angle_loop2.Target = pzero->data_float;
     angle_loop2.Actual = imu.output.euler[1];
@@ -268,6 +270,9 @@ void control_state_stand_still(void)
 
 void control_state_accelerate(void)
 {
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+
     acpid_update(spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
@@ -318,6 +323,9 @@ void control_state_accelerate(void)
 
 void control_state_forward(void)
 {
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
@@ -368,6 +376,9 @@ void control_state_forward(void)
 
 void control_state_decline_front_single_side(void)
 {
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
@@ -409,6 +420,9 @@ void control_state_decline_front_single_side(void)
 
 void control_state_stand_front_single_side(void)
 {
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
@@ -459,7 +473,7 @@ void control_state_stand_front_single_side(void)
 
     small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
 
-    if (single_delay >= 60)
+    if (single_delay >= 40)
     {
         single_delay = 0;
         current_state = STATE_SINGLE_SIDE;
@@ -468,6 +482,9 @@ void control_state_stand_front_single_side(void)
 
 void control_state_single_side(void)
 {
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
@@ -526,6 +543,9 @@ void control_state_single_side(void)
 
 void control_state_thunder(void)
 {
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
@@ -572,8 +592,20 @@ void control_state_thunder(void)
 
 void control_state_jump_up(void)
 {
+    angle_loop2.Ki = 0.0f;
+
     static uint32_t count = 0;
     count++;
+
+    angle_loop2.Target = pzero->data_float;
+    angle_loop2.Actual = imu.output.euler[1];
+    PID_Update_Lo(&angle_loop2);
+
+    aspeed_loop.Target = angle_loop2.Out;
+    aspeed_loop.Actual = imu.output.gyro[1];
+    PID_Update_Lo(&aspeed_loop);
+
+    small_driver_set_duty((int16)(aspeed_loop.Out), (int16)(-(aspeed_loop.Out)));
 
     if (count < 20)
     {
@@ -581,23 +613,26 @@ void control_state_jump_up(void)
                    20.0f, 20.0f);
     }
 
-    else if (count >= 20 && count < 60)
+    else if (count >= 20 && count < 30)
     {
-        servo_set(100.0f, 100.0f,
-                   80.0f, 80.0f);
+        servo_set(80.0f, 80.0f,
+                  100.0f, 100.0f);
     }
 
-    else if (count >= 60 && count < 70)
+    else if (count >= 30 && count < 60)
     {
-        servo_set(100.0f - 1.0f * (count - 60), 100.0f - 1.0f * (count - 60),
-                   80.0f + 1.0f * (count - 60),  80.0f + 1.0f * (count - 60));
+        servo_set(120.0f, 120.0f,
+                   60.0f, 60.0f);
     }
 
-    else if (count >= 70)
+    else if (count >= 60)
     {
         count = 0;
         servo_set(90.0f, 90.0f,
                   90.0f, 90.0f);
+        image_block = 1;
+        traverse_state = 0;
+        angle_loop2.ErrorInt = 0.0f;
         current_state = STATE_FORWARD;
     }
 }

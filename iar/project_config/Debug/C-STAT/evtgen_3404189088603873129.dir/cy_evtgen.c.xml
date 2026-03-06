@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source name="cy_evtgen.c" location="d:\vscode_project\seekfree_cyt4bb_opensource_library\project\libraries\sdk\common\src\drivers\evtgen" is_link="no">
+ <warning>
+ <file>d:\vscode_project\seekfree_cyt4bb_opensource_library\project\libraries\sdk\common\src\drivers\evtgen\cy_evtgen.c</file>
+  <method>Cy_Evtgen_Initialize</method>
+  <lineNo>89</lineNo>
+  <column>49</column>
+  <checkName>UNION-type-punning</checkName>
+  <message>Union `ratioCtl&apos; is written as `stcField&apos;, then read as another field</message>
+  <trace>
+   <traceBlock line="41" file="d:\vscode_project\seekfree_cyt4bb_opensource_library\project\libraries\sdk\common\src\drivers\evtgen\cy_evtgen.c" method="Cy_Evtgen_Initialize">
+    <traceLine line="41" text="if (config==_NULL) is false" type="^"/>
+    <traceLine line="47" text="for (;i&lt;EVTGEN_COMP_STRUCT_NR;i++) is false" type="^"/>
+    <traceLine line="57" text="if (config-&gt;frequencyRef%config-&gt;frequencyTick!=0) is false" type="^"/>
+    <traceLine line="61" text="if (refDiv&gt;256 || refDiv&lt;1) is false" type="^"/>
+    <traceLine line="71" text="if (config-&gt;ratioControlMode==0) is false" type="^"/>
+    <traceLine line="86" text="union_field_write_other" type="!"/>
+    <traceLine line="87" text="Write to union field: ratioCtl.stcField.u1DYNAMIC = 1u" type="!"/>
+    <traceLine line="88" text="Write to union field: ratioCtl.stcField.u3DYNAMIC_MODE = config-&gt;ratioValueDynamicMode" type="!"/>
+    <traceLine line="89" text="Read from union field: ratioCtl.u32Register" type="!"/>
+   </traceBlock>
+  </trace>
+  <rules></rules>
+  <severity>Medium</severity>
+ </warning>
+ <warning>
+ <file>d:\vscode_project\seekfree_cyt4bb_opensource_library\project\libraries\sdk\common\src\drivers\evtgen\cy_evtgen.c</file>
+  <method>Cy_Evtgen_InitializeCompStruct</method>
+  <lineNo>166</lineNo>
+  <column>25</column>
+  <checkName>ATH-shift-bounds</checkName>
+  <message>RHS argument is in interval [0,15] which is out of range of the shift operator</message>
+  <trace/>
+  <rules></rules>
+  <severity>Medium</severity>
+ </warning>
+ <warning>
+ <file>d:\vscode_project\seekfree_cyt4bb_opensource_library\project\libraries\sdk\common\src\drivers\evtgen\cy_evtgen.c</file>
+  <method>Cy_Evtgen_InitializeCompStruct</method>
+  <lineNo>198</lineNo>
+  <column>66</column>
+  <checkName>UNION-type-punning</checkName>
+  <message>Union `compCtr&apos; is written as `stcField&apos;, then read as another field</message>
+  <trace>
+   <traceBlock line="147" file="d:\vscode_project\seekfree_cyt4bb_opensource_library\project\libraries\sdk\common\src\drivers\evtgen\cy_evtgen.c" method="Cy_Evtgen_InitializeCompStruct">
+    <traceLine line="147" text="if (configStruct==_NULL) is false" type="^"/>
+    <traceLine line="152" text="if (structNum&gt;=EVTGEN_COMP_STRUCT_NR) is false" type="^"/>
+    <traceLine line="157" text="if (configStruct-&gt;functionalitySelection!=) is true" type="^"/>
+    <traceLine line="159" text="if (context==_NULL) is false" type="^"/>
+    <traceLine line="169" text="union_field_write_other" type="!"/>
+    <traceLine line="171" text="if (configStruct-&gt;functionalitySelection==) is true" type="^"/>
+    <traceLine line="173" text="Write to union field: compCtr.stcField.u1COMP1_EN = 1u" type="!"/>
+    <traceLine line="176" text="Write to union field: compCtr.stcField.u1COMP0_EN = 1u" type="!"/>
+    <traceLine line="178" text="Write to union field: compCtr.stcField.u1TR_OUT_EDGE = configStruct-&gt;triggerOutEdge" type="!"/>
+    <traceLine line="180" text="Write to union field: compCtr.stcField.u1ENABLED = 1u" type="!"/>
+    <traceLine line="190" text="if (configStruct-&gt;functionalitySelection==) is true" type="^"/>
+    <traceLine line="198" text="Read from union field: compCtr.u32Register" type="!"/>
+   </traceBlock>
+  </trace>
+  <rules></rules>
+  <severity>Medium</severity>
+ </warning>
+</source>

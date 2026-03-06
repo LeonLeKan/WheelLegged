@@ -35,6 +35,8 @@ extern volatile PID_t turn_loop2;
 extern volatile PID_t aspeed_loop;
 extern volatile PID_t single_loop;
 
+extern volatile uint8_t image_block;
+
 void control_init(void);
 void PID_Update_Lo(volatile PID_t *p);
 void PID_Update_In(volatile PID_t *p);

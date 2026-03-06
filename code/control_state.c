@@ -45,7 +45,7 @@ void control_state_switch(void)
     if (switch_from_single_side_to_forward == 1)
     {
         switch_from_single_side_to_forward_count++;
-        if (switch_from_single_side_to_forward_count >= 100)
+        if (switch_from_single_side_to_forward_count >= 80)
         {
             current_state = STATE_FORWARD;
             switch_from_single_side_to_forward = 0;
@@ -62,8 +62,10 @@ void control_state_switch(void)
 
     if (switch_from_forward_to_jump_up == 1)
     {
+        image_block = 0;
+        error = 0;
         switch_from_forward_to_jump_up_count++;
-        if (switch_from_forward_to_jump_up_count >= 80)
+        if (switch_from_forward_to_jump_up_count >= 55)
         {
             current_state = STATE_JUMP_UP;
             switch_from_forward_to_jump_up = 0;
