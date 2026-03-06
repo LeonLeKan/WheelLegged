@@ -11,7 +11,6 @@ void control_state_switch(void)
     static uint32_t switch_from_single_side_to_forward_count = 0;
 
     static uint32_t switch_from_forward_to_jump_up = 0;
-    static uint32_t switch_from_forward_to_jump_up_count = 0;
 
     if (current_state == STATE_ACCELERATE && fabs(speed_loop.Target - speed_loop.Actual) < 0.1f)
     {
@@ -45,7 +44,7 @@ void control_state_switch(void)
     if (switch_from_single_side_to_forward == 1)
     {
         switch_from_single_side_to_forward_count++;
-        if (switch_from_single_side_to_forward_count >= 80)
+        if (switch_from_single_side_to_forward_count >= 50)
         {
             current_state = STATE_FORWARD;
             switch_from_single_side_to_forward = 0;
@@ -64,13 +63,7 @@ void control_state_switch(void)
     {
         image_block = 0;
         error = 0;
-        switch_from_forward_to_jump_up_count++;
-        if (switch_from_forward_to_jump_up_count >= 55)
-        {
-            current_state = STATE_JUMP_UP;
-            switch_from_forward_to_jump_up = 0;
-            switch_from_forward_to_jump_up_count = 0;
-        }
+        current_state = STATE_ACCUMULATE;
     }
 }
 
@@ -104,6 +97,9 @@ void control_state_update(void)
         break;
     case STATE_THUNDER:
         control_state_thunder();
+        break;
+    case STATE_ACCUMULATE:
+        control_state_accumulate();
         break;
     case STATE_JUMP_UP:
         control_state_jump_up();

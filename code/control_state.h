@@ -11,6 +11,7 @@ typedef enum {
     STATE_STAND_FRONT_SINGLE_SIDE,
     STATE_SINGLE_SIDE,
     STATE_THUNDER,
+    STATE_ACCUMULATE,
     STATE_JUMP_UP,
     STATE_STOP
 } control_state_t;
