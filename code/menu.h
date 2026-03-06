@@ -73,5 +73,6 @@ void menu_save1(void);
 void menu_load1(void);
 void menu_zero(void);
 static void image_show(void);
+void ins_to_control_menu(void);
 
 #endif /* CODE_MENU_H_ */
