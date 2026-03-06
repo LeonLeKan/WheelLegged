@@ -13,12 +13,13 @@ save_manager_t save_manager_instance;
 
 
 // ==================== 接口函数 ======================
-void save_manager_init(void)
+void save_manager_init(void (*exit_callback)(void))
 {
     save_manager_instance.active_save = NULL;
     save_manager_instance.active_save_idx = 0;
     save_manager_instance.total_saves = 5;
     save_manager_instance.showing_points = 0;
+    save_manager_instance.exit_callback = exit_callback;
 }
 
 void save_manager_show(void)
@@ -34,7 +35,8 @@ void save_manager_show(void)
 // 显示存档管理器主界面
 void show_saves()
 {
-    for (int i = 0; i < save_manager_instance.total_saves; i++)
+    int i;
+    for (i = 0; i < save_manager_instance.total_saves; i++)
     {
         if(i == save_manager_instance.active_save_idx)
             ips200_set_color(RGB565_BLACK, RGB565_CYAN);
@@ -42,6 +44,7 @@ void show_saves()
             ips200_set_color(RGB565_BLACK, RGB565_WHITE);
         screen_printf(16, 16 * (i + 1), "Save %2d", i);
     }
+    screen_printf(16, 16 * (i + 1), "Exit");
 }
 
 // 启动ahrs显点
@@ -92,7 +95,8 @@ void save_manager_key_down_pressed(void)
         return;
     }
     save_manager_instance.active_save_idx++;
-    if(save_manager_instance.active_save_idx >= save_manager_instance.total_saves)
+    // 最后一个是Exit菜单
+    if(save_manager_instance.active_save_idx > save_manager_instance.total_saves)
         save_manager_instance.active_save_idx = 0;
     show_saves();
 }
@@ -102,6 +106,12 @@ void save_manager_key_ok_pressed(void)
     if(save_manager_instance.showing_points)
     {
         points_display_key_ok_pressed();
+        return;
+    }
+    if(save_manager_instance.active_save_idx == save_manager_instance.total_saves)
+    {
+        // 当前选中的是Exit项
+        save_manager_instance.exit_callback();
         return;
     }
     // todo: 根据类型加载
