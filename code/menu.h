@@ -2,7 +2,6 @@
 #define CODE_MENU_H_
 
 #include "zf_common_headfile.h"
-#include <math.h>
 
 #define BUTTON_LF (P20_0)
 #define BUTTON_RT (P20_1)

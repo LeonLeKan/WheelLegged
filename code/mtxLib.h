@@ -29,7 +29,7 @@
 #define MTXLIB_FILE
 
 #include "System_Types.h"
-#include <math.h>
+#include "arm_math.h"
 #include <stdlib.h>
 /*---------------------------------------------*/
 /*         Macros definiton                    */

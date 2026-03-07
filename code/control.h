@@ -3,7 +3,7 @@
 
 #include "zf_common_headfile.h"
 #include "imu.h"
-#include "math.h"
+#include "arm_math.h"
 #include "menu.h"
 
 typedef struct
@@ -41,7 +41,7 @@ void control_init(void);
 void PID_Update_Lo(volatile PID_t *p);
 void PID_Update_In(volatile PID_t *p);
 
-// PID²ÎÊý¸üÐÂÓë¹éÁãº¯Êý
+// PIDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ãº¯ï¿½ï¿½
 void an1pid_update(float kp, float ki, float kd);
 void an1_zero(void);
 void an2pid_update(float kp, float ki, float kd);
@@ -58,11 +58,11 @@ void as_zero(void);
 void snpid_update(float kp, float ki, float kd);
 void sn_zero(void);
 
-// ²ÎÊýÓëÊä³ö¹éÁãº¯Êý£¨»ã×Ü£©
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ãº¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü£ï¿½
 void para_zero(void);
 void out_zero(void);
 
-// ¿ØÖÆ×´Ì¬º¯Êý
+// ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½
 void control_state_idle(void);
 void control_state_stand_up(void);
 void control_state_stand_still(void);

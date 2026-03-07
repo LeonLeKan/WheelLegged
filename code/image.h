@@ -8,7 +8,7 @@
 #include "zf_common_headfile.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <arm_math.h>
 extern uint32 out_check_flag;
 #else
 
