@@ -36,6 +36,7 @@ typedef struct {
     // 校准参数
     struct {
         float gyro_bias[3];      // 陀螺仪零偏
+        float acc_sum[3];        // 加速度校准期间的累积和，用于计算初始姿态
         uint32_t sample_count;   // 已采集样本数
         uint32_t target_samples; // 目标样本数
         bool is_calibrated;      // 校准完成标志
