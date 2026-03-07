@@ -23,11 +23,6 @@
 // 全局点显示实例(单例)
 points_display_instance_t points_display_instance;
 
-
-// 接口函数
-points_display_info_t* points_display_create(points_display_create_info_t* create_info);
-void points_display_show(points_display_info_t* info);
-void points_display_update_current_position(void);
 // 坐标转换函数
 void update_display_params(void);
 void plane_to_screen(double plane_x, double plane_y, int* screen_x, int* screen_y);
@@ -63,10 +58,10 @@ void show_current_cordinates(void);
 
 // ===================== 接口函数 =====================
 // 创建点显示信息结构体
-points_display_info_t* points_display_create(points_display_create_info_t* create_info)
+void points_display_configure(points_display_config_t* create_info)
 {
-    points_display_info_t* info = (points_display_info_t*)malloc(sizeof(points_display_info_t));
-    if(!info) return NULL;
+    points_display_info_t* info = &points_display_instance.info;
+    // if(!info) return NULL;
 
     info->waypoint_list = create_info->waypoint_list;
     // 回调函数
@@ -87,15 +82,11 @@ points_display_info_t* points_display_create(points_display_create_info_t* creat
     // 菜单功能
     info->total_funcs = 0;
     info->active_func_idx = 0;
-
-    return info;
 }
 
-void points_display_show(points_display_info_t* info)
+void points_display_show(void)
 {
-    // 初始化实例
-    points_display_instance.info = info;
-
+    points_display_info_t* info = &points_display_instance.info;
     ips200_set_color(COLOR_MENU_TEXT, COLOR_BACKGROUND);
     ips200_clear();
 
@@ -118,7 +109,7 @@ void points_display_show(points_display_info_t* info)
 
 void points_display_update_current_position(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     // 擦除之前定位点的十字标识
     draw_cross_marker(points_display_instance.screen_x, points_display_instance.screen_y, COLOR_BACKGROUND);
     // 绘制选中点的十字标识（防止被一起擦除）
@@ -147,7 +138,7 @@ void points_display_update_current_position(void)
 // ====================== 坐标转换函数 ======================
 void update_display_params(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     if (info->waypoint_list->size < 1) return;
     
     // 找到点集的边界
@@ -196,7 +187,7 @@ void update_display_params(void)
 // 将一个点的平面坐标转换为屏幕坐标
 void plane_to_screen(double plane_x, double plane_y, int* screen_x, int* screen_y)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     *screen_x = (int)(plane_x * info->scale_factor + info->offset_x);
     *screen_y = (int)(SCREEN_HEIGHT - (plane_y * info->scale_factor + info->offset_y));
     // 边界检查
@@ -210,7 +201,7 @@ void plane_to_screen(double plane_x, double plane_y, int* screen_x, int* screen_
 // 更新所有节点的屏幕坐标
 void update_screen_coordinates(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     waypoint_node_t* current = info->waypoint_list->head;
 
     while (current)
@@ -261,7 +252,7 @@ void draw_cross_marker(int x, int y, uint16 color)
 // 绘制所有点和路径
 void draw_all_points_and_path(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     // 绘制连接线
     waypoint_node_t* current = info->waypoint_list->head;
     while (current && current->next) {
@@ -314,7 +305,7 @@ void clear_all_previous_display(void)
     // 清除之前实时定位点的标识
     draw_cross_marker(points_display_instance.screen_x, points_display_instance.screen_y, COLOR_BACKGROUND);
     // 清除之前显示的路径图
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     waypoint_node_t* current = info->waypoint_list->head;
     while (current)
     {
@@ -326,7 +317,7 @@ void clear_all_previous_display(void)
 // 更新节点显示（可以指定颜色）
 void update_point_display(waypoint_node_t* node, uint16 color)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     if (!node || !node->waypoint) return;
     
     // 绘制点标记
@@ -364,7 +355,7 @@ void show_path(void)
 
 // 移动选中的点
 void move_selected_point(int dx, int dy) {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     if (!info->selected_node) return;
     
     // 清除旧显示
@@ -410,7 +401,7 @@ void move_selected_point(int dx, int dy) {
 // 选择下一个点
 void select_next_point(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     if (!info->selected_node->next) return;
     
     // 清除十字标记
@@ -429,7 +420,7 @@ void select_next_point(void)
 // 选择上一个点
 void select_prev_point(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     if (!info->selected_node->prev) return;
     if (!info->selected_node->prev->waypoint) return;
     
@@ -449,7 +440,7 @@ void select_prev_point(void)
 // ====================== 坐标显示 =========================
 void show_selected_cordinates(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     ips200_set_color(COLOR_MENU_TEXT, COLOR_MENU_BACKGROUND);
     screen_printf(0, 15 * 16, "Point Index: %d", (int)info->selected_node_idx);
     if(info->selected_node->waypoint)
@@ -461,7 +452,7 @@ void show_selected_cordinates(void)
 
 void show_current_cordinates(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     ips200_set_color(COLOR_MENU_TEXT, COLOR_MENU_BACKGROUND);
     screen_printf(120, 15 * 16, "Current:", (int)info->selected_node_idx);    
     screen_printf(120, 17 * 16, "X/LAT %.6f", points_display_instance.current_position.x);
@@ -471,7 +462,7 @@ void show_current_cordinates(void)
 // ====================== 菜单功能函数实现 ======================
 void func_move_point(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     info->moving_point = 1;
     ips200_set_color(COLOR_MENU_TEXT, COLOR_MENU_HIGHLIGHT);
     ips200_show_string(0, 304, "Moving Point...");
@@ -480,7 +471,7 @@ void func_move_point(void)
 void func_add_current_point_next(void)
 {
     clear_all_previous_display();
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     waypoint_t current_position = points_display_instance.current_position;
     // 添加点并修改选中的点
     info->add_point_next_callback(info->waypoint_list, info->selected_node,
@@ -492,7 +483,7 @@ void func_add_current_point_next(void)
 
 void func_remove_point(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     // 特殊的头节点不可删除
     if (info->selected_node == info->waypoint_list->head) return;
 
@@ -507,14 +498,14 @@ void func_remove_point(void)
 
 void func_save_and_quit(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     info->save_callback();
     func_quit();
 }
 
 void func_quit(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     // 关闭中断
     pit_disable(SCREEN_UPDATE_PIT);
     info->quit_callback();
@@ -523,7 +514,7 @@ void func_quit(void)
 // ====================== 底部菜单实现 ========================
 void new_func(char* name, void(*func)(void))
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     info->funcs[info->total_funcs].name = name;
     info->funcs[info->total_funcs].func = func;
     info->total_funcs++;
@@ -531,7 +522,7 @@ void new_func(char* name, void(*func)(void))
 
 void funcs_init(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     info->total_funcs = 0;
     info->active_func_idx = 0;
     new_func("Move Point", func_move_point);
@@ -543,14 +534,14 @@ void funcs_init(void)
 
 void show_func(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     ips200_set_color(COLOR_MENU_TEXT, COLOR_MENU_BACKGROUND);
     screen_printf(0, 16 * 19, info->funcs[info->active_func_idx].name);
 }
 
 void show_next_func(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     info->active_func_idx++;
     if(info->active_func_idx >= info->total_funcs)
         info->active_func_idx = 0;
@@ -559,7 +550,7 @@ void show_next_func(void)
 
 void show_prev_func(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     info->active_func_idx--;
     if(info->active_func_idx < 0)
         info->active_func_idx = info->total_funcs - 1;
@@ -570,7 +561,7 @@ void show_prev_func(void)
 // ====================== 按键功能函数实现 ======================
 void points_display_key_down_pressed(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     if(!info->moving_point) 
         select_next_point();
     else
@@ -579,7 +570,7 @@ void points_display_key_down_pressed(void)
 
 void points_display_key_up_pressed(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     if (!info->moving_point)
         select_prev_point();
     else
@@ -588,7 +579,7 @@ void points_display_key_up_pressed(void)
 
 void points_display_key_left_pressed(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     if(info->moving_point)
         move_selected_point(-1, 0);
     else
@@ -598,7 +589,7 @@ void points_display_key_left_pressed(void)
 
 void points_display_key_right_pressed(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     if (info->moving_point)
         move_selected_point(1, 0);
     else
@@ -607,7 +598,7 @@ void points_display_key_right_pressed(void)
 
 void points_display_key_ok_pressed(void)
 {
-    points_display_info_t* info = points_display_instance.info;
+    points_display_info_t* info = &points_display_instance.info;
     if(info->moving_point)
     {
         info->moving_point = 0;

@@ -19,7 +19,7 @@ typedef struct
     waypoint_node_t* (*add_point_next_callback)(waypoint_list_t* list, waypoint_node_t* node, waypoint_t waypoint);
     void (*save_callback)(void);
     void (*quit_callback)(void);
-}points_display_create_info_t;
+}points_display_config_t;
 
 
 typedef struct
@@ -49,7 +49,7 @@ typedef struct
 
 typedef struct
 {
-    points_display_info_t* info;
+    points_display_info_t info;
     waypoint_t current_position; // 当前定位点
     int screen_x, screen_y; // 当前定位点屏幕坐标
 }points_display_instance_t;
@@ -59,8 +59,8 @@ extern points_display_instance_t points_display_instance;
 
 
 // 创建点显示信息结构体
-points_display_info_t* points_display_create(points_display_create_info_t* create_info);
-void points_display_show(points_display_info_t* info);
+void points_display_configure(points_display_config_t* create_info);
+void points_display_show(void);
 void points_display_update_current_position(void);
 
 // 按键功能函数

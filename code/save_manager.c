@@ -58,17 +58,17 @@ void show_saves()
 void show_ahrs_points(void)
 {
     // 初始化点显示模块
-    points_display_create_info_t create_info;
-    create_info.waypoint_list = save_manager_instance.active_save;
-    create_info.get_current_position_callback = ahrs_get_current_position; // 获取当前定位点的回调
-    create_info.plane_to_waypoint_callback = ahrs_plane_to_waypoint;   // 平面坐标转换为航点的回调
-    create_info.add_point_next_callback = ahrs_add_current;          // 添加当前点的回调
-    create_info.save_callback = ahrs_save_callback;                 // 保存回调
-    create_info.quit_callback = save_manager_show;                 // 退出回调
+    points_display_config_t config;
+    config.waypoint_list = save_manager_instance.active_save;
+    config.get_current_position_callback = ahrs_get_current_position; // 获取当前定位点的回调
+    config.plane_to_waypoint_callback = ahrs_plane_to_waypoint;   // 平面坐标转换为航点的回调
+    config.add_point_next_callback = ahrs_add_current;          // 添加当前点的回调
+    config.save_callback = ahrs_save_callback;                 // 保存回调
+    config.quit_callback = save_manager_show;                 // 退出回调
 
-    points_display_info_t* info = points_display_create(&create_info);
+    points_display_configure(&config);
 
-    points_display_show(info);
+    points_display_show();
 }
 
 // ==================== 辅助函数 ========================
