@@ -12,7 +12,7 @@ void control_state_switch(void)
 
     if (current_state == STATE_ACCELERATE && fabs(speed_loop.Target - speed_loop.Actual) < 0.1f)
     {
-        current_state = STATE_JOLT;
+        current_state = STATE_FORWARD;
     }
 
     if ((current_state != STATE_DECLINE_FRONT_SINGLE_SIDE &&

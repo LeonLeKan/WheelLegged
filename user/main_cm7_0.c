@@ -189,9 +189,8 @@ void wifi_init(void)
 void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
-    oscilloscope_data.data[0] = turn_loop2.Target;
-    oscilloscope_data.data[1] = turn_loop2.Actual;
-    oscilloscope_data.channel_num = 2;
+    oscilloscope_data.data[0] = imu.output.euler[1];
+    oscilloscope_data.channel_num = 1;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 
