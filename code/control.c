@@ -395,8 +395,8 @@ void control_state_decline_front_single_side(void)
         speed_loop.Target = 2.5f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
-        servo_set(100.0f, 80.0f,
-                  100.0f, 80.0f);
+        servo_set(95.0f, 85.0f,
+                  95.0f, 85.0f);
 
         turn_loop1.Target = 0.0f; // outer
         turn_loop1.Actual = (float)error;
