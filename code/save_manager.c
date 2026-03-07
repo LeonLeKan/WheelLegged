@@ -130,12 +130,9 @@ void save_manager_key_ok_pressed(void)
     );
     if (!ret)
     {
-        ips200_set_color(RGB565_BLACK, RGB565_RED);
-        ips200_show_string(0, 160, "Failed");
-        return;
+        // 加载失败，清空当前数据
+        waypoint_list_clear(save_manager_instance.active_save);
     }
-    // 测试用
-    // save_manager_instance.active_save = waypoint_list_create((waypoint_t) { 0, 0 }, (waypoint_screen_param_t) { 0, 0 });
 
     save_manager_instance.showing_points = 1;
     show_ahrs_points();
