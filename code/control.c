@@ -254,7 +254,7 @@ void control_state_stand_still(void)
     if (count >= 50)
     {
         count = 0;
-        current_state = STATE_ACCELERATE;
+        current_state = STATE_ACCUMULATE;
     }
 
     angle_loop2.Target = pzero->data_float;
@@ -605,7 +605,7 @@ void control_state_accumulate(void)
     static uint32_t accumulate_count = 0;
     accumulate_count++;
 
-    if (accumulate_count >= 60)
+    if (accumulate_count >= 20)
     {
         current_state = STATE_JUMP_UP;
         accumulate_count = 0;

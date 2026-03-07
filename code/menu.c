@@ -2,21 +2,23 @@
 #include "image.h"
 #include "imu.h"
 #include "screen_interface.h"
+#include "save_manager.h"
 
 volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
-MENU *RootMenu, *Balance, *Image, *currentMenu;
+MENU *RootMenu, *Balance, *Image, *Element, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *pzero, *pinit, *show,
-     *thre, *farl, *nearl, *saveim;
+    *thre, *farl, *nearl, *saveim,
+    *change;
 MENU *an1kp, *an1ki, *an1kd,
-     *an2kp, *an2ki, *an2kd,
-     *spkp, *spki, *spkd,
-     *tu1kp, *tu1ki, *tu1kd,
-     *tu2kp, *tu2ki, *tu2kd,
-     *askp, *aski, *askd,
-     *snkp, *snki, *snkd,
-     *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn,
-     *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn;
+    *an2kp, *an2ki, *an2kd,
+    *spkp, *spki, *spkd,
+    *tu1kp, *tu1ki, *tu1kd,
+    *tu2kp, *tu2ki, *tu2kd,
+    *askp, *aski, *askd,
+    *snkp, *snki, *snkd,
+    *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn,
+    *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn;
 
 #define MENU_POOL_SIZE 128
 
@@ -85,15 +87,19 @@ void create_1st_menu(void)
     RootMenu = createMenu("RootMenu", 0, 1, MENU_TYPE_NORMAL, NULL);
     Balance = createMenu("Balance", 1, 1, MENU_TYPE_NORMAL, NULL);
     Image = createMenu("Image", 1, 2, MENU_TYPE_NORMAL, NULL);
+    Element = createMenu("Element", 1, 3, MENU_TYPE_NORMAL, NULL);
 
     RootMenu->child = Balance;
     Balance->parent = RootMenu;
     Image->parent = RootMenu;
+    Element->parent = RootMenu;
 
     Balance->next = Image;
     Image->last = Balance;
-    Image->next = Balance;
-    Balance->last = Image;
+    Image->next = Element;
+    Element->last = Image;
+    Element->next = Balance;
+    Balance->last = Element;
 
     currentMenu = RootMenu->child;
 }
@@ -116,6 +122,8 @@ void create_2nd_menu(void)
     farl = createMenu("farl", 2, 2, MENU_TYPE_INT, NULL);
     nearl = createMenu("nearl", 2, 3, MENU_TYPE_INT, NULL);
     saveim = createMenu("save", 2, 4, MENU_TYPE_FUNCTION, menu_save1);
+
+    change = createMenu("change", 2, 1, MENU_TYPE_FUNCTION, control_to_ins_menu);
 
     speed->next = anloop1;
     anloop1->last = speed;
@@ -149,6 +157,9 @@ void create_2nd_menu(void)
     saveim->next = thre;
     thre->last = saveim;
 
+    change->next = change;
+    change->last = change;
+
     Balance->child = speed;
     speed->parent = Balance;
     anloop1->parent = Balance;
@@ -167,6 +178,9 @@ void create_2nd_menu(void)
     farl->parent = Image;
     nearl->parent = Image;
     saveim->parent = Image;
+
+    Element->child = change;
+    change->parent = Element;
 }
 
 void create_3rd_menu(void)
@@ -911,4 +925,60 @@ static void image_show(void)
 void ins_to_control_menu(void)
 {
     menu_current_state = MENU_STATE_CONTROL;
+    ips200_clear();
+}
+
+void control_to_ins_menu(void)
+{
+    menu_current_state = MENU_STATE_INS;
+    ips200_clear();
+    save_manager_show();
+}
+
+void key_handle_ins(void)
+{
+    static uint8_t last_switch_state = 1; // 上电前拉回高电平
+    uint8_t current_switch_state = gpio_get_level(BUTTON_OK);
+
+    uint8_t switch_changed = (last_switch_state != current_switch_state);
+
+    if (switch_changed)
+    {
+        save_manager_key_ok_pressed();
+        last_switch_state = current_switch_state;
+        return;
+    }
+
+    if (gpio_get_level(BUTTON_DN) == 0)
+    {
+        system_delay_ms(80);
+        if (gpio_get_level(BUTTON_DN) == 0)
+        {
+            save_manager_key_down_pressed();
+        }
+    }
+    else if (gpio_get_level(BUTTON_UP) == 0)
+    {
+        system_delay_ms(80);
+        if (gpio_get_level(BUTTON_UP) == 0)
+        {
+            save_manager_key_up_pressed();
+        }
+    }
+    else if (gpio_get_level(BUTTON_LF) == 0)
+    {
+        system_delay_ms(80);
+        if (gpio_get_level(BUTTON_LF) == 0)
+        {
+            save_manager_key_left_pressed();
+        }
+    }
+    else if (gpio_get_level(BUTTON_RT) == 0)
+    {
+        system_delay_ms(80);
+        if (gpio_get_level(BUTTON_RT) == 0)
+        {
+            save_manager_key_right_pressed();
+        }
+    }
 }
