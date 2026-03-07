@@ -9,6 +9,7 @@
 #include "control.h"
 #include "control_state.h"
 #include "connecting_rod.h"
+#include "save_manager.h"
 
 #define WIFI_SSID_TEST "Hhhyt"
 #define WIFI_PASSWORD_TEST "18273645"
@@ -72,6 +73,8 @@ int main(void)
     create_3rd_menu();
     menu_load1();
 
+    save_manager_init(ins_to_control_menu);
+
     // 如有需要，添加wifi
     //wifi_init();
 
@@ -116,7 +119,7 @@ int main(void)
                 }
                 else if (menu_current_state == MENU_STATE_INS)
                 {
-                    // 显示存点
+                    key_handle_ins();
                 }
 
                 // 如果需要，添加wifi
@@ -132,10 +135,10 @@ int main(void)
             while (true)
             {
                 // 跑
-                // if (image_block == 1)
-                // {
-                //     image_main();
-                // }
+                if (image_block == 1)
+                {
+                    image_main();
+                }
                 // 如果需要，添加wifi
                 //wifi_send_data();
             }
@@ -145,7 +148,7 @@ int main(void)
 
 void start_imu_calibration(void)
 {
-    system_delay_ms(1500);       // 等待1秒，确保系统稳定
+    system_delay_ms(100);       // 确保系统稳定
     imu_start_calibration(3000); // 采集3000个样本进行校准
 }
 

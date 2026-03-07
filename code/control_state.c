@@ -53,6 +53,7 @@ void control_state_switch(void)
     }
 
     if (current_state != STATE_JUMP_UP 
+     && current_state != STATE_ACCUMULATE
      && traverse_state != 0
      && switch_from_forward_to_jump_up == 0)
     {
