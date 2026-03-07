@@ -5,5 +5,8 @@
 #include "arm_math.h"
 #include "small_driver_uart_control.h"
 #include "config.h"
+#include "imu.h"
+
+extern volatile PID_t location_loop;
 
 #endif

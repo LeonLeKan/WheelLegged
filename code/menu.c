@@ -367,7 +367,7 @@ void key_handle_menu(void)
     {
         if (!edit_mode)
         {
-            if (currentMenu->type == MENU_TYPE_FUNCTION && currentMenu->Function != NULL)
+            if (currentMenu->type == MENU_TYPE_FUNCTION && currentMenu->Function != NULL && currentMenu != change)
             {
                 currentMenu->Function();
                 currentMenu->exec_flag = 1;
@@ -419,6 +419,10 @@ void key_handle_menu(void)
             ips200_clear();
             if (gpio_get_level(BUTTON_RT) == 0)
             {
+                if (currentMenu == change)
+                {
+                    currentMenu->Function();
+                }
                 if (currentMenu->type == MENU_TYPE_INT || currentMenu->type == MENU_TYPE_FLOAT)
                 {
                     edit_mode = 1;
@@ -925,6 +929,7 @@ static void image_show(void)
 void ins_to_control_menu(void)
 {
     menu_current_state = MENU_STATE_CONTROL;
+    ips200_set_color(RGB565_BLACK, RGB565_WHITE);
     ips200_clear();
 }
 
