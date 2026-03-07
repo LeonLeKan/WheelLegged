@@ -15,7 +15,10 @@ save_manager_t save_manager_instance;
 // ==================== 接口函数 ======================
 void save_manager_init(void (*exit_callback)(void))
 {
-    save_manager_instance.active_save = NULL;
+    save_manager_instance.active_save = waypoint_list_create(
+        (waypoint_t) {0, 0},
+        (waypoint_screen_param_t) {0, 0, 0, 0}
+    );
     save_manager_instance.active_save_idx = 0;
     save_manager_instance.total_saves = 5;
     save_manager_instance.showing_points = 0;
@@ -121,11 +124,6 @@ void save_manager_key_ok_pressed(void)
         return;
     }
     // todo: 根据类型加载
-    // 创建新的链表
-    save_manager_instance.active_save = waypoint_list_create(
-        (waypoint_t) {0, 0},
-        (waypoint_screen_param_t) {0, 0, 0, 0}
-    );
     // bool ret = waypoint_list_load_from_flash(
     //     save_manager_instance.active_save,
     //     AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx
@@ -137,7 +135,7 @@ void save_manager_key_ok_pressed(void)
     //     return;
     // }
     // 测试用
-    save_manager_instance.active_save = waypoint_list_create((waypoint_t) { 0, 0 }, (waypoint_screen_param_t) { 0, 0 });
+    // save_manager_instance.active_save = waypoint_list_create((waypoint_t) { 0, 0 }, (waypoint_screen_param_t) { 0, 0 });
 
     save_manager_instance.showing_points = 1;
     show_ahrs_points();
