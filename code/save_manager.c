@@ -44,6 +44,10 @@ void show_saves()
             ips200_set_color(RGB565_BLACK, RGB565_WHITE);
         screen_printf(16, 16 * (i + 1), "Save %2d", i);
     }
+    if(save_manager_instance.active_save_idx == save_manager_instance.total_saves)
+        ips200_set_color(RGB565_BLACK, RGB565_CYAN);
+    else 
+        ips200_set_color(RGB565_BLACK, RGB565_WHITE);
     screen_printf(16, 16 * (i + 1), "Exit");
 }
 
