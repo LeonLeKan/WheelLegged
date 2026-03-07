@@ -10,8 +10,6 @@ void control_state_switch(void)
     static uint32_t switch_from_single_side_to_forward = 0;
     static uint32_t switch_from_single_side_to_forward_count = 0;
 
-    static uint32_t switch_from_forward_to_jump_up = 0;
-
     if (current_state == STATE_ACCELERATE && fabs(speed_loop.Target - speed_loop.Actual) < 0.1f)
     {
         current_state = STATE_JOLT;
@@ -54,16 +52,8 @@ void control_state_switch(void)
 
     if (current_state != STATE_JUMP_UP 
      && current_state != STATE_ACCUMULATE
-     && traverse_state != 0
-     && switch_from_forward_to_jump_up == 0)
+     && traverse_state != 0)
     {
-        switch_from_forward_to_jump_up = 1;
-    }
-
-    if (switch_from_forward_to_jump_up == 1)
-    {
-        image_block = 0;
-        error = 0;
         current_state = STATE_ACCUMULATE;
     }
 }
