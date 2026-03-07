@@ -192,7 +192,9 @@ void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
     oscilloscope_data.data[0] = imu.output.euler[1];
-    oscilloscope_data.channel_num = 1;
+    oscilloscope_data.data[1] = imu.body.acc[1];
+    oscilloscope_data.data[2] = imu.body.gyro[1];
+    oscilloscope_data.channel_num = 3;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 
