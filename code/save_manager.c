@@ -115,6 +115,8 @@ void save_manager_key_ok_pressed(void)
     if(save_manager_instance.active_save_idx == save_manager_instance.total_saves)
     {
         // 当前选中的是Exit项
+        // 先改回画笔颜色
+        ips200_set_color(RGB565_BLACK, RGB565_WHITE);
         save_manager_instance.exit_callback();
         return;
     }
@@ -124,18 +126,18 @@ void save_manager_key_ok_pressed(void)
         (waypoint_t) {0, 0},
         (waypoint_screen_param_t) {0, 0, 0, 0}
     );
-    bool ret = waypoint_list_load_from_flash(
-        save_manager_instance.active_save,
-        AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx
-    );
-    if (!ret)
-    {
-        ips200_set_color(RGB565_BLACK, RGB565_RED);
-        ips200_show_string(0, 160, "Failed");
-        return;
-    }
+    // bool ret = waypoint_list_load_from_flash(
+    //     save_manager_instance.active_save,
+    //     AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx
+    // );
+    // if (!ret)
+    // {
+    //     ips200_set_color(RGB565_BLACK, RGB565_RED);
+    //     ips200_show_string(0, 160, "Failed");
+    //     return;
+    // }
     // 测试用
-    // save_manager_instance.active_save = waypoint_list_create((waypoint_t) { 0, 0 }, (waypoint_screen_param_t) { 0, 0 });
+    save_manager_instance.active_save = waypoint_list_create((waypoint_t) { 0, 0 }, (waypoint_screen_param_t) { 0, 0 });
 
     save_manager_instance.showing_points = 1;
     show_ahrs_points();
