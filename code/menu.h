@@ -40,23 +40,25 @@ typedef struct Menu
     struct Menu *child;
 } MENU;
 
-typedef enum {
+typedef enum
+{
     MENU_STATE_CONTROL,
     MENU_STATE_INS,
 } menu_state_t;
 
-extern MENU *RootMenu, *Balance, *Image, *currentMenu;
+extern MENU *RootMenu, *Balance, *Image, *Element, *currentMenu;
 extern MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *pzero, *pinit, *show,
-            *thre, *farl, *nearl, *saveim;
+    *thre, *farl, *nearl, *saveim,
+    *change, *snspeed;
 extern MENU *an1kp, *an1ki, *an1kd,
-            *an2kp, *an2ki, *an2kd,
-            *spkp, *spki, *spkd,
-            *tu1kp, *tu1ki, *tu1kd,
-            *tu2kp, *tu2ki, *tu2kd,
-            *askp, *aski, *askd,
-            *snkp, *snki, *snkd,
-            *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn,
-            *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn;
+    *an2kp, *an2ki, *an2kd,
+    *spkp, *spki, *spkd,
+    *tu1kp, *tu1ki, *tu1kd,
+    *tu2kp, *tu2ki, *tu2kd,
+    *askp, *aski, *askd,
+    *snkp, *snki, *snkd,
+    *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn,
+    *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn;
 
 extern volatile menu_state_t menu_current_state;
 
@@ -69,7 +71,7 @@ void create_3rd_menu(void);
 void show_menu(void);
 void key_handle_menu(void);
 
-void menu_save1(void);
+void menu_save(void);
 void menu_load1(void);
 void menu_zero(void);
 static void image_show(void);

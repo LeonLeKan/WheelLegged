@@ -9,7 +9,7 @@ volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 MENU *RootMenu, *Balance, *Image, *Element, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *pzero, *pinit, *show,
     *thre, *farl, *nearl, *saveim,
-    *change;
+    *change, *snspeed, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
@@ -121,9 +121,11 @@ void create_2nd_menu(void)
     thre = createMenu("thre", 2, 1, MENU_TYPE_INT, NULL);
     farl = createMenu("farl", 2, 2, MENU_TYPE_INT, NULL);
     nearl = createMenu("nearl", 2, 3, MENU_TYPE_INT, NULL);
-    saveim = createMenu("save", 2, 4, MENU_TYPE_FUNCTION, menu_save1);
+    saveim = createMenu("save", 2, 4, MENU_TYPE_FUNCTION, menu_save);
 
     change = createMenu("change", 2, 1, MENU_TYPE_FUNCTION, control_to_ins_menu);
+    snspeed = createMenu("snspeed", 2, 2, MENU_TYPE_FLOAT, NULL);
+    saveel = createMenu("save", 2, 3, MENU_TYPE_FUNCTION, menu_save);
 
     speed->next = anloop1;
     anloop1->last = speed;
@@ -157,8 +159,12 @@ void create_2nd_menu(void)
     saveim->next = thre;
     thre->last = saveim;
 
-    change->next = change;
-    change->last = change;
+    change->next = snspeed;
+    snspeed->last = change;
+    snspeed->next = saveel;
+    saveel->last = snspeed;
+    saveel->next = change;
+    change->last = saveel;
 
     Balance->child = speed;
     speed->parent = Balance;
@@ -181,6 +187,8 @@ void create_2nd_menu(void)
 
     Element->child = change;
     change->parent = Element;
+    snspeed->parent = Element;
+    saveel->parent = Element;
 }
 
 void create_3rd_menu(void)
@@ -213,13 +221,13 @@ void create_3rd_menu(void)
     snki = createMenu("snki", 3, 2, MENU_TYPE_FLOAT, NULL);
     snkd = createMenu("snkd", 3, 3, MENU_TYPE_FLOAT, NULL);
 
-    savean1 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save1);
-    savean2 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save1);
-    savesp = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save1);
-    savetu1 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save1);
-    savetu2 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save1);
-    saveas = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save1);
-    savesn = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save1);
+    savean1 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
+    savean2 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
+    savesp = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
+    savetu1 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
+    savetu2 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
+    saveas = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
+    savesn = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
 
     zeroan1 = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
     zeroan2 = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
@@ -678,7 +686,7 @@ void show_menu(void)
     ips200_show_string(168, 224, buf_float_kd);
 }
 
-void menu_save1(void)
+void menu_save(void)
 {
     flash_erase_page(0, MENU1_FLASH_PAGE);
 
@@ -751,8 +759,47 @@ void menu_save1(void)
                 node_count++;
             }
 
+            else if (tmp->type == MENU_TYPE_FLOAT)
+            {
+                union
+                {
+                    float f;
+                    uint32_t u;
+                } fu;
+                fu.f = tmp->data_float;
+                flash_union_buffer[index++].uint32_type = fu.u;
+                node_count++;
+            }
+
             tmp = tmp->next;
         } while (tmp != img);
+    }
+
+    MENU *ele = Element->child;
+    if (ele != NULL)
+    {
+        MENU *tmp = ele;
+        do
+        {
+            if (tmp->type == MENU_TYPE_INT)
+            {
+                flash_union_buffer[index++].int32_type = tmp->data_int;
+                node_count++;
+            }
+            else if(tmp->type == MENU_TYPE_FLOAT)
+            {
+                union
+                {
+                    float f;
+                    uint32_t u;
+                } fu;
+                fu.f = tmp->data_float;
+                flash_union_buffer[index++].uint32_type = fu.u;
+                node_count++;
+            }
+
+            tmp = tmp->next;
+        } while (tmp != ele);
     }
 
     flash_union_buffer[0].float_type = menu_magic;
@@ -858,6 +905,40 @@ void menu_load1(void)
             }
             tmp = tmp->next;
         } while (tmp != img);
+    }
+
+    MENU *ele = Element->child;
+    if (ele != NULL)
+    {
+        MENU *tmp = ele;
+        do
+        {
+            if (tmp->type == MENU_TYPE_INT)
+            {
+                tmp->data_int = (int)flash_union_buffer[idx++].int32_type;
+                if (fabs((float)tmp->data_int) >= 100000)
+                {
+                    tmp->data_int = 0;
+                }
+                real_count++;
+            }
+            else if (tmp->type == MENU_TYPE_FLOAT)
+            {
+                union
+                {
+                    float f;
+                    uint32_t u;
+                } fu;
+                fu.u = flash_union_buffer[idx++].uint32_type;
+                tmp->data_float = fu.f;
+                if (fabs(tmp->data_float) >= 100000)
+                {
+                    tmp->data_float = 0;
+                }
+                real_count++;
+            }
+            tmp = tmp->next;
+        } while (tmp != ele);
     }
 }
 
