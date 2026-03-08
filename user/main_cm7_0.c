@@ -73,6 +73,7 @@ int main(void)
     create_3rd_menu();
     menu_load1();
 
+    // 存点初始化
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi

@@ -7,6 +7,6 @@
 #include "config.h"
 #include "imu.h"
 
-extern volatile PID_t location_loop;
+extern volatile PID_t direction_loop;
 
 #endif
