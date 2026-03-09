@@ -1,4 +1,5 @@
 #include "location.h"
+#include "pid.h"
 
 volatile PID_t direction_loop;
 

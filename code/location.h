@@ -6,6 +6,7 @@
 #include "small_driver_uart_control.h"
 #include "config.h"
 #include "imu.h"
+#include "pid.h"
 
 extern volatile PID_t direction_loop;
 
