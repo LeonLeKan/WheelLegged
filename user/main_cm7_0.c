@@ -152,8 +152,8 @@ int main(void)
 
 void start_imu_calibration(void)
 {
-    system_delay_ms(100);       // 确保系统稳定
-    imu_start_calibration(3000); // 采集3000个样本进行校准
+    system_delay_ms(300);       // 确保系统稳定
+    imu_start_calibration(500); // 采集3000个样本进行校准
 }
 
 void gpio_init_all(void)
