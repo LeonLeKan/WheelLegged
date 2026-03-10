@@ -10,7 +10,7 @@
 #define SCREEN_UPDATE_INTERVAL_MS 100 // 显点屏幕更新间隔，单位毫秒
 
 // 车辆尺寸参数
-#define WHEEL_D     0.064   // 轮胎直径
-#define WHEELBASE   0.185   // 轮距
+#define WHEEL_D     0.072   // 轮胎直径
+#define WHEELBASE   0.174   // 轮距
 
 #endif

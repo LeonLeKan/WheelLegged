@@ -10,6 +10,7 @@
 #include "control_state.h"
 #include "connecting_rod.h"
 #include "save_manager.h"
+#include "pid.h"
 
 #define WIFI_SSID_TEST "Hhhyt"
 #define WIFI_PASSWORD_TEST "18273645"
@@ -77,7 +78,7 @@ int main(void)
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi
-    //wifi_init();
+    wifi_init();
 
     // 屏幕初始化
     pit_ms_init(SCREEN_UPDATE_PIT, SCREEN_UPDATE_INTERVAL_MS);
@@ -124,7 +125,7 @@ int main(void)
                 }
 
                 // 如果需要，添加wifi
-                //wifi_send_data();
+                wifi_send_data();
             }
         }
 
@@ -141,7 +142,7 @@ int main(void)
                     //image_main();
                 }
                 // 如果需要，添加wifi
-                //wifi_send_data();
+                wifi_send_data();
             }
         }
     }

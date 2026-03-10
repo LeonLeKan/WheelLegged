@@ -8,6 +8,8 @@
 #include "imu.h"
 #include "pid.h"
 
-extern volatile PID_t direction_loop;
+#define XYMIN_BIAS 0.05f
+
+static double direction_calculate(double x_target, double y_target, double x_now, double y_now, double current_yaw);
 
 #endif
