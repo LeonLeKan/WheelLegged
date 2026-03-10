@@ -12,6 +12,6 @@
 
 // 车辆尺寸参数
 #define WHEEL_D     0.072   // 轮胎直径
-#define WHEELBASE   0.185   // 轮距
+#define WHEELBASE   0.174   // 轮距
 
 #endif
