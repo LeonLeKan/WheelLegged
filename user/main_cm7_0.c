@@ -40,8 +40,8 @@ MahonyFilterParam mahony_filter_param = {
     .dt = IMU_UPDATE_INTERVAL_MS / 1000.0f};
 
 ukf_filter_param_t ukf_filter_param = {
-    .dt = IMU_UPDATE_INTERVAL_MS / 1000.0,
-    .q = {0.0001, 0.0001, 0.000015, 0.0002, 0.0005},
+    .dt = UKF_UPDATE_INTERVAL_MS / 1000.0,
+    .q = {0.0001, 0.0001, 0.000015, 0.0005, 0.01},
     .r = {0.0001, 0.05, 0.001}};
 
 bool showing_points = false;
@@ -105,6 +105,8 @@ int main(void)
                 cali_flag = 0;
             }
             imu_state_show();
+            // 如有需要，添加wifi
+            wifi_send_data();
         }
 
         else if (motion_mode1 == 0 && motion_mode2 == 1)
