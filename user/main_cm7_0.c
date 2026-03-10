@@ -41,8 +41,8 @@ MahonyFilterParam mahony_filter_param = {
 
 ukf_filter_param_t ukf_filter_param = {
     .dt = UKF_UPDATE_INTERVAL_MS / 1000.0,
-    .q = {0.0001, 0.0001, 0.000015, 0.0005, 0.01},
-    .r = {0.0001, 0.05, 0.001}};
+    .q = {0.0001, 0.0001, 0.000015, 0.001, 0.01},
+    .r = {0.0001, 0.005, 0.0005}};
 
 bool showing_points = false;
 // 用于实现校准后的分层启动
