@@ -216,7 +216,7 @@ static void process_filter_update(void)
 
     // yaw和yaw角速度采用ukf输出
     imu.output.euler[2] = imu.ukf_filter.output.yaw;
-    imu.output.gyro[2] = imu.ukf_filter.output.yaw_rate;
+    imu.output.gyro[2] = imu.mahony_filter.output.euler[2];
     // 位置和速度采用ukf输出
     imu.output.position_x = imu.ukf_filter.output.position_x;
     imu.output.position_y = imu.ukf_filter.output.position_y;
