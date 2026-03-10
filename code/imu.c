@@ -186,6 +186,8 @@ static void process_calibration(void)
 
 static void process_filter_update(void)
 {
+    static uint32_t ukf_update_counter = 0;
+    ukf_update_counter++;
     // mahony更新
     Mahony_Update(&imu.mahony_filter, imu.body.gyro, imu.body.acc);
 
@@ -196,6 +198,14 @@ static void process_filter_update(void)
     imu.output.gyro[0] = imu.body.gyro[0];
     imu.output.gyro[1] = imu.body.gyro[1];
 
+    if (ukf_update_counter * IMU_UPDATE_INTERVAL_MS >= UKF_UPDATE_INTERVAL_MS)
+    {
+        ukf_update_counter = 0;
+    }
+    else
+    {
+        return; // 不到更新周期，跳过UKF更新
+    }
     // ukf更新
     float ukf_measurement[3];
     ukf_measurement[0] = imu.encoder.speed;                     // 速度

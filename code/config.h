@@ -5,12 +5,13 @@
 
 #define IMU_UPDATE_PIT PIT_CH0
 #define IMU_UPDATE_INTERVAL_MS 2  // IMU更新间隔，单位毫秒
+#define UKF_UPDATE_INTERVAL_MS 20 // UKF更新间隔，单位毫秒，需要为IMU更新间隔的整数倍
 
 #define SCREEN_UPDATE_PIT PIT_CH15
 #define SCREEN_UPDATE_INTERVAL_MS 100 // 显点屏幕更新间隔，单位毫秒
 
 // 车辆尺寸参数
-#define WHEEL_D     0.064   // 轮胎直径
+#define WHEEL_D     0.072   // 轮胎直径
 #define WHEELBASE   0.185   // 轮距
 
 #endif
