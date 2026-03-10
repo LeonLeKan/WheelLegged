@@ -1,6 +1,7 @@
 #include "control_state.h"
 #include "control.h"
 #include "image.h"
+#include "pid.h"
 
 volatile control_state_t current_state = STATE_IDLE;
 
@@ -49,13 +50,6 @@ void control_state_switch(void)
             switch_from_single_side_to_forward_count = 0;
         }
     }
-
-    if (current_state != STATE_JUMP_UP 
-     && current_state != STATE_ACCUMULATE
-     && traverse_state != 0)
-    {
-        current_state = STATE_ACCUMULATE;
-    }
 }
 
 void control_state_update(void)
@@ -88,9 +82,6 @@ void control_state_update(void)
         break;
     case STATE_THUNDER:
         control_state_thunder();
-        break;
-    case STATE_ACCUMULATE:
-        control_state_accumulate();
         break;
     case STATE_JUMP_UP:
         control_state_jump_up();

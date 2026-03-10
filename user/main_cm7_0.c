@@ -10,6 +10,7 @@
 #include "control_state.h"
 #include "connecting_rod.h"
 #include "save_manager.h"
+#include "pid.h"
 
 #define WIFI_SSID_TEST "Hhhyt"
 #define WIFI_PASSWORD_TEST "18273645"
@@ -73,6 +74,7 @@ int main(void)
     create_3rd_menu();
     menu_load1();
 
+    // 存点初始化
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi
@@ -125,7 +127,7 @@ int main(void)
                 }
 
                 // 如果需要，添加wifi
-                //wifi_send_data();
+                wifi_send_data();
             }
         }
 
@@ -139,10 +141,10 @@ int main(void)
                 // 跑
                 if (image_block == 1)
                 {
-                    image_main();
+                    //image_main();
                 }
                 // 如果需要，添加wifi
-                //wifi_send_data();
+                wifi_send_data();
             }
         }
     }
@@ -191,10 +193,8 @@ void wifi_init(void)
 void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
-    oscilloscope_data.data[0] = imu.output.euler[1];
-    oscilloscope_data.data[1] = imu.body.acc[1];
-    oscilloscope_data.data[2] = imu.body.gyro[1];
-    oscilloscope_data.channel_num = 3;
+    oscilloscope_data.data[0] = imu.output.euler[2];
+    oscilloscope_data.channel_num = 1;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 

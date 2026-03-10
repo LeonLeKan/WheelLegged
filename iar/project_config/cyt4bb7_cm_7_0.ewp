@@ -1157,6 +1157,12 @@
                 <name>$PROJ_DIR$\..\..\code\location.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\..\code\pid.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\pid.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\code\servo.c</name>
             </file>
             <file>

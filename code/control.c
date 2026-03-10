@@ -3,15 +3,7 @@
 #include "servo.h"
 #include "image.h"
 #include "control_state.h"
-#include "menu.h"
-
-volatile PID_t angle_loop1;
-volatile PID_t angle_loop2;
-volatile PID_t speed_loop;
-volatile PID_t turn_loop1;
-volatile PID_t turn_loop2;
-volatile PID_t aspeed_loop;
-volatile PID_t single_loop;
+#include "pid.h"
 
 volatile uint8_t image_block = 1;
 
@@ -20,199 +12,7 @@ void control_init(void)
     servo_init();
     small_driver_uart_init();
     pit_ms_init(PIT_CH1, 5);
-}
-
-void PID_Update_Lo(volatile PID_t *p)
-{
-    p->Error1 = p->Error0;
-    p->Error0 = p->Target - p->Actual;
-
-    p->ErrorInt += p->Error0;
-
-    if (p->ErrorInt > p->ErrorIntMax)
-    {
-        p->ErrorInt = p->ErrorIntMax;
-    }
-    else if (p->ErrorInt < -p->ErrorIntMax)
-    {
-        p->ErrorInt = -p->ErrorIntMax;
-    }
-
-    p->Out = p->Kp * p->Error0 + p->Ki * p->ErrorInt + p->Kd * (p->Error0 - p->Error1);
-
-    if (p->Out > p->OutMax)
-    {
-        p->Out = p->OutMax;
-    }
-    if (p->Out < p->OutMin)
-    {
-        p->Out = p->OutMin;
-    }
-}
-
-void PID_Update_In(volatile PID_t *p)
-{
-    p->Error1 = p->Error0;
-    p->Error0 = p->Target - p->Actual;
-    p->Error2 = p->Error1;
-
-    p->Out += p->Kp * (p->Error0 - p->Error1) + p->Ki * p->Error0 + p->Kd * (p->Error0 - 2 * p->Error1 + p->Error2);
-
-    if (p->Out > p->OutMax)
-    {
-        p->Out = p->OutMax;
-    }
-    if (p->Out < p->OutMin)
-    {
-        p->Out = p->OutMin;
-    }
-}
-
-void an1pid_update(float kp, float ki, float kd)
-{
-    angle_loop1.Kp = kp;
-    angle_loop1.Ki = ki;
-    angle_loop1.Kd = kd;
-    angle_loop1.OutMax = +7000;
-    angle_loop1.OutMin = -7000;
-}
-
-void an1_zero(void)
-{
-    angle_loop1.Kp = 0;
-    angle_loop1.Ki = 0;
-    angle_loop1.Kd = 0;
-}
-
-void an2pid_update(float kp, float ki, float kd)
-{
-    angle_loop2.Kp = kp;
-    angle_loop2.Ki = ki;
-    angle_loop2.Kd = kd;
-    angle_loop2.OutMax = +500;
-    angle_loop2.OutMin = -500;
-    angle_loop2.ErrorIntMax = 600;
-}
-
-void an2_zero(void)
-{
-    angle_loop2.Kp = 0;
-    angle_loop2.Ki = 0;
-    angle_loop2.Kd = 0;
-}
-
-void acpid_update(float ki, float kd)
-{
-    speed_loop.Kp = 3.0f;
-    speed_loop.Ki = ki;
-    speed_loop.Kd = kd;
-    speed_loop.OutMax = +30;
-    speed_loop.OutMin = -30;
-    speed_loop.ErrorIntMax = 300;
-}
-
-void sppid_update(float kp, float ki, float kd)
-{
-    speed_loop.Kp = kp;
-    speed_loop.Ki = ki;
-    speed_loop.Kd = kd;
-    speed_loop.OutMax = +30;
-    speed_loop.OutMin = -30;
-    speed_loop.ErrorIntMax = 300;
-}
-
-void sp_zero(void)
-{
-    speed_loop.Kp = 0;
-    speed_loop.Ki = 0;
-    speed_loop.Kd = 0;
-}
-
-void tu1pid_update(float kp, float ki, float kd)
-{
-    turn_loop1.Kp = kp;
-    turn_loop1.Ki = ki;
-    turn_loop1.Kd = kd;
-    turn_loop1.OutMax = +2500;
-    turn_loop1.OutMin = -2500;
-}
-
-void tu1_zero(void)
-{
-    turn_loop1.Kp = 0;
-    turn_loop1.Ki = 0;
-    turn_loop1.Kd = 0;
-}
-
-void tu2pid_update(float kp, float ki, float kd)
-{
-    turn_loop2.Kp = kp;
-    turn_loop2.Ki = ki;
-    turn_loop2.Kd = kd;
-    turn_loop2.OutMax = +2500;
-    turn_loop2.OutMin = -2500;
-    turn_loop2.ErrorIntMax = 200;
-}
-
-void tu2_zero(void)
-{
-    turn_loop2.Kp = 0;
-    turn_loop2.Ki = 0;
-    turn_loop2.Kd = 0;
-}
-
-void aspid_update(float kp, float ki, float kd)
-{
-    aspeed_loop.Kp = kp;
-    aspeed_loop.Ki = ki;
-    aspeed_loop.Kd = kd;
-    aspeed_loop.OutMax = +7000;
-    aspeed_loop.OutMin = -7000;
-}
-
-void as_zero(void)
-{
-    aspeed_loop.Kp = 0;
-    aspeed_loop.Ki = 0;
-    aspeed_loop.Kd = 0;
-}
-
-void snpid_update(float kp, float ki, float kd)
-{
-    single_loop.Kp = kp;
-    single_loop.Ki = ki;
-    single_loop.Kd = kd;
-    single_loop.OutMax = +100;
-    single_loop.OutMin = -100;
-}
-
-void sn_zero(void)
-{
-    single_loop.Kp = 0;
-    single_loop.Ki = 0;
-    single_loop.Kd = 0;
-}
-
-void para_zero(void)
-{
-    an1_zero();
-    an2_zero();
-    sp_zero();
-    tu1_zero();
-    tu2_zero();
-    as_zero();
-    sn_zero();
-}
-
-void out_zero(void)
-{
-    angle_loop1.Out = 0.0f;
-    angle_loop2.Out = 0.0f;
-    speed_loop.Out = 0.0f;
-    turn_loop1.Out = 0.0f;
-    turn_loop2.Out = 0.0f;
-    aspeed_loop.Out = 0.0f;
-    single_loop.Out = 0.0f;
+    pit_ms_init(PIT_CH2, 20);
 }
 
 void control_state_idle(void)
@@ -251,7 +51,7 @@ void control_state_stand_still(void)
     
     static uint32_t count = 0;
     count++;
-    if (count >= 50)
+    if (count >= 400)
     {
         count = 0;
         current_state = STATE_ACCELERATE;
@@ -274,7 +74,8 @@ void control_state_accelerate(void)
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
 
     acpid_update(spki->data_float, spkd->data_float);
-    tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
+    yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
+    // tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     // threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
@@ -301,12 +102,12 @@ void control_state_accelerate(void)
         servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
                   90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
 
-        turn_loop1.Target = 0.0f; // outer
-        turn_loop1.Actual = (float)error;
-        PID_Update_Lo(&turn_loop1);
+        // yaw_loop.Target = 0.0f; // outer
+        yaw_loop.Actual = imu.output.euler[2];
+        PID_Update_Lo(&yaw_loop);
     }
 
-    turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual; // inner
+    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual; // inner
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 
@@ -327,7 +128,8 @@ void control_state_forward(void)
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
 
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
-    tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
+    yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
+    // tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     // threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
@@ -354,12 +156,12 @@ void control_state_forward(void)
         servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
                   90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
 
-        turn_loop1.Target = 0.0f; // outer
-        turn_loop1.Actual = (float)error;
-        PID_Update_Lo(&turn_loop1);
+        // yaw_loop.Target = 0.0f; // outer
+        yaw_loop.Actual = imu.output.euler[2];
+        PID_Update_Lo(&yaw_loop);
     }
 
-    turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual; // inner
+    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual; // inner
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 
@@ -576,68 +378,6 @@ void control_state_thunder(void)
     }
 
     turn_loop2.Target = 180.0f;
-    turn_loop2.Actual = -imu.body.gyro[2];
-    PID_Update_Lo(&turn_loop2);
-
-    angle_loop2.Target = pzero->data_float;
-    angle_loop2.Actual = imu.output.euler[1];
-    PID_Update_Lo(&angle_loop2);
-
-    aspeed_loop.Target = angle_loop2.Out;
-    aspeed_loop.Actual = imu.output.gyro[1];
-    PID_Update_Lo(&aspeed_loop);
-
-    small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
-}
-
-void control_state_accumulate(void)
-{
-    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
-    aspid_update(askp->data_float, aski->data_float, askd->data_float);
-
-    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
-    tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
-    tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
-    // threshold = (uint8_t)thre->data_int;
-    error_calc_far_line = (uint8_t)farl->data_int;
-    error_calc_near_line = (uint8_t)nearl->data_int;
-
-    static uint32_t accumulate_count = 0;
-    accumulate_count++;
-
-    if (accumulate_count >= 20)
-    {
-        current_state = STATE_JUMP_UP;
-        accumulate_count = 0;
-    }
-
-    static uint32_t count = 0;
-    count++;
-    if (count >= 4)
-    {
-        count = 0;
-
-        speed_loop.Target = speed->data_float / 100.0f;
-        speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
-
-        PID_Update_Lo(&speed_loop);
-
-        // 对speed_loop.Out进行低通滤波
-        static float filtered_speed_out = 0.0f;
-        static const float speed_alpha = 0.1f; // 速度环滤波系数，可调整
-
-        // 更新滤波器
-        filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
-
-        servo_set(45.0f - filtered_speed_out, 45.0f + filtered_speed_out,
-                  135.0f - filtered_speed_out, 135.0f + filtered_speed_out);
-
-        turn_loop1.Target = 0.0f; // outer
-        turn_loop1.Actual = (float)error;
-        PID_Update_Lo(&turn_loop1);
-    }
-
-    turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual; // inner
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 
