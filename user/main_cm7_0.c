@@ -42,7 +42,7 @@ MahonyFilterParam mahony_filter_param = {
 ukf_filter_param_t ukf_filter_param = {
     .dt = UKF_UPDATE_INTERVAL_MS / 1000.0,
     .q = {0.0001, 0.0001, 0.000015, 0.001, 0.01},
-    .r = {0.0001, 0.005, 0.0005}};
+    .r = {0.0001, 0.000, 0.0000}};
 
 bool showing_points = false;
 // 用于实现校准后的分层启动
@@ -153,7 +153,7 @@ int main(void)
 void start_imu_calibration(void)
 {
     system_delay_ms(300);       // 确保系统稳定
-    imu_start_calibration(500); // 采集3000个样本进行校准
+    imu_start_calibration(3000); // 采集3000个样本进行校准
 }
 
 void gpio_init_all(void)
@@ -193,10 +193,10 @@ void wifi_init(void)
 void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
-    oscilloscope_data.data[0] = imu.output.euler[2];
-    oscilloscope_data.data[1] = imu.encoder.yaw_rate;
-    oscilloscope_data.data[2] = imu.body.gyro[2];
-    oscilloscope_data.channel_num = 3;
+    oscilloscope_data.data[0] = imu.ukf_filter.output.yaw;
+    oscilloscope_data.data[1] = imu.mahony_filter.output.euler[2];
+    // oscilloscope_data.data[2] = imu.body.gyro[2];
+    oscilloscope_data.channel_num = 2;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 

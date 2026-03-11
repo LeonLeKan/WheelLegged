@@ -198,14 +198,14 @@ static void process_filter_update(void)
     imu.output.gyro[0] = imu.body.gyro[0];
     imu.output.gyro[1] = imu.body.gyro[1];
 
-    if (ukf_update_counter * IMU_UPDATE_INTERVAL_MS >= UKF_UPDATE_INTERVAL_MS)
-    {
-        ukf_update_counter = 0;
-    }
-    else
-    {
-        return; // 不到更新周期，跳过UKF更新
-    }
+    // if (ukf_update_counter * IMU_UPDATE_INTERVAL_MS >= UKF_UPDATE_INTERVAL_MS)
+    // {
+    //     ukf_update_counter = 0;
+    // }
+    // else
+    // {
+    //     return; // 不到更新周期，跳过UKF更新
+    // }
     // ukf更新
     float ukf_measurement[3];
     ukf_measurement[0] = imu.encoder.speed;                     // 速度
@@ -216,8 +216,8 @@ static void process_filter_update(void)
     ukf_filter_update(&imu.ukf_filter, ukf_measurement);
 
     // yaw和yaw角速度采用ukf输出
-    imu.output.euler[2] = imu.ukf_filter.output.yaw;
-    imu.output.gyro[2] = imu.ukf_filter.output.yaw_rate;
+    imu.output.euler[2] = imu.mahony_filter.output.euler[2];
+    imu.output.gyro[2] = imu.body.gyro[2];
     // 位置和速度采用ukf输出
     imu.output.position_x = imu.ukf_filter.output.position_x;
     imu.output.position_y = imu.ukf_filter.output.position_y;
