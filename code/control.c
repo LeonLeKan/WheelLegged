@@ -51,7 +51,7 @@ void control_state_stand_still(void)
     
     static uint32_t count = 0;
     count++;
-    if (count >= 400)
+    if (count >= 50)
     {
         count = 0;
         current_state = STATE_ACCELERATE;
