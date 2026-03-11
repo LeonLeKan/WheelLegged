@@ -185,8 +185,8 @@ void yapid_update(float kp, float ki, float kd)
     yaw_loop.Kp = kp;
     yaw_loop.Ki = ki;
     yaw_loop.Kd = kd;
-    yaw_loop.OutMax = +100;
-    yaw_loop.OutMin = -100;
+    yaw_loop.OutMax = +2500;
+    yaw_loop.OutMin = -2500;
 }
 
 void ya_zero(void)

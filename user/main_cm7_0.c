@@ -78,7 +78,7 @@ int main(void)
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi
-    wifi_init();
+    // wifi_init();
 
     // 屏幕初始化
     pit_ms_init(SCREEN_UPDATE_PIT, SCREEN_UPDATE_INTERVAL_MS);
@@ -106,7 +106,7 @@ int main(void)
             }
             imu_state_show();
             // 如有需要，添加wifi
-            wifi_send_data();
+            // wifi_send_data();
         }
 
         else if (motion_mode1 == 0 && motion_mode2 == 1)
@@ -127,7 +127,7 @@ int main(void)
                 }
 
                 // 如果需要，添加wifi
-                wifi_send_data();
+                // wifi_send_data();
             }
         }
 
@@ -144,7 +144,7 @@ int main(void)
                     //image_main();
                 }
                 // 如果需要，添加wifi
-                wifi_send_data();
+                // wifi_send_data();
             }
         }
     }
@@ -193,10 +193,10 @@ void wifi_init(void)
 void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
-    oscilloscope_data.data[0] = imu.ukf_filter.output.yaw;
-    oscilloscope_data.data[1] = imu.mahony_filter.output.euler[2];
-    // oscilloscope_data.data[2] = imu.body.gyro[2];
-    oscilloscope_data.channel_num = 2;
+    oscilloscope_data.data[0] = imu.output.euler[0];
+    oscilloscope_data.data[1] = imu.output.euler[1];
+    oscilloscope_data.data[2] = imu.output.euler[2];
+    oscilloscope_data.channel_num = 3;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 

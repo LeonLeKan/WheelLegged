@@ -102,7 +102,7 @@ void control_state_accelerate(void)
         servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
                   90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
 
-        // yaw_loop.Target = 0.0f; // outer
+        yaw_loop.Target = 0.0f; // outer
         yaw_loop.Actual = imu.output.euler[2];
         PID_Update_Lo(&yaw_loop);
     }
@@ -156,7 +156,7 @@ void control_state_forward(void)
         servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
                   90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
 
-        // yaw_loop.Target = 0.0f; // outer
+        yaw_loop.Target = 0.0f; // outer
         yaw_loop.Actual = imu.output.euler[2];
         PID_Update_Lo(&yaw_loop);
     }
