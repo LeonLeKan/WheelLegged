@@ -610,30 +610,30 @@ void control_state_jump_up(void)
 
     small_driver_set_duty((int16)(aspeed_loop.Out), (int16)(-(aspeed_loop.Out)));
 
-    if (count < 20)
+    if (count < 17)
     {
         servo_set(160.0f, 160.0f,
                    20.0f, 20.0f);
     }
 
-    else if (count >= 20 && count < 30)
+    else if (count >= 17 && count < 42)
     {
-        servo_set(60.0f, 60.0f,
-                  120.0f, 120.0f);
+        servo_set(45.0f, 45.0f,
+                  135.0f, 135.0f);
     }
 
-    else if (count >= 30 && count < 60)
+    else if (count >= 42 && count < 50)
     {
         servo_set(120.0f, 120.0f,
                    60.0f, 60.0f);
     }
 
-    else if (count >= 60)
+    else if(count >= 50)
     {
         count = 0;
+        image_block = 1;
         servo_set(90.0f, 90.0f,
                   90.0f, 90.0f);
-        image_block = 1;
         traverse_state = 0;
         angle_loop2.ErrorInt = 0.0f;
         current_state = STATE_FORWARD;
