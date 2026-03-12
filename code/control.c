@@ -76,10 +76,10 @@ void control_state_accelerate(void)
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
 
     acpid_update(spki->data_float, spkd->data_float);
-    yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
-    // tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
+    //yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
+    tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
-    // threshold = (uint8_t)thre->data_int;
+    //threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
     error_calc_near_line = (uint8_t)nearl->data_int;
 
@@ -104,12 +104,12 @@ void control_state_accelerate(void)
         servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
                   90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
 
-        yaw_loop.Target = 0.0f; // outer
-        yaw_loop.Actual = imu.output.euler[2];
-        PID_Update_Lo(&yaw_loop);
+        turn_loop1.Target = 0.0f; // outer
+        turn_loop1.Actual = imu.output.euler[2];
+        PID_Update_Lo(&turn_loop1);
     }
 
-    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual; // inner
+    turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual; // inner
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 
@@ -130,10 +130,10 @@ void control_state_forward(void)
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
 
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
-    yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
-    // tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
+    //yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
+    tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
-    // threshold = (uint8_t)thre->data_int;
+    //threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
     error_calc_near_line = (uint8_t)nearl->data_int;
 
@@ -158,12 +158,12 @@ void control_state_forward(void)
         servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
                   90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
 
-        yaw_loop.Target = 0.0f; // outer
-        yaw_loop.Actual = imu.output.euler[2];
-        PID_Update_Lo(&yaw_loop);
+        turn_loop1.Target = 0.0f; // outer
+        turn_loop1.Actual = imu.output.euler[2];
+        PID_Update_Lo(&turn_loop1);
     }
 
-    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual; // inner
+    turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual; // inner
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 
@@ -199,8 +199,8 @@ void control_state_decline_front_single_side(void)
         speed_loop.Target = snspeed->data_float / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
-        servo_set(95.0f, 85.0f,
-                  95.0f, 85.0f);
+        servo_set(110.0f, 70.0f,
+                  110.0f, 70.0f);
 
         turn_loop1.Target = 0.0f; // outer
         turn_loop1.Actual = (float)error;

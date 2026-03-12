@@ -10,10 +10,8 @@ void control_state_switch(void)
     // 临时变量
     static uint32_t switch_from_single_side_to_forward = 0;
     static uint32_t switch_from_single_side_to_forward_count = 0;
-    static uint32_t single_side_entry_count = 0;
-    static uint32_t single_side_entry_triggered = 0;
 
-    if (current_state == STATE_ACCELERATE && fabs(speed_loop.Target - speed_loop.Actual) < 0.1f)
+    if (current_state == STATE_ACCELERATE && (speed_loop.Target < speed_loop.Actual))
     {
         current_state = STATE_FORWARD;
     }
@@ -23,37 +21,16 @@ void control_state_switch(void)
          current_state != STATE_SINGLE_SIDE) 
       && single_side_state != 0)
     {
-        if (single_side_entry_triggered == 0)
-        {
-            single_side_entry_triggered = 1;
-            single_side_entry_count = 0;
-        }
-
-        single_side_entry_count++;
-        
-        if (single_side_entry_count >= 20)
-        {
-            current_state = STATE_DECLINE_FRONT_SINGLE_SIDE;
-            single_side_entry_triggered = 0;
-            single_side_entry_count = 0;
-        }
-    }
-    else
-    {
-        single_side_entry_triggered = 0;
-        single_side_entry_count = 0;
+        current_state = STATE_DECLINE_FRONT_SINGLE_SIDE;
     }
 
     if (current_state == STATE_DECLINE_FRONT_SINGLE_SIDE
-      && single_side_state != 0
       && speed_loop.Actual < snspeed->data_float / 100.0f)
     {
         current_state = STATE_STAND_FRONT_SINGLE_SIDE;
     }
 
-    if ((current_state == STATE_DECLINE_FRONT_SINGLE_SIDE ||
-         current_state == STATE_STAND_FRONT_SINGLE_SIDE || 
-         current_state == STATE_SINGLE_SIDE) 
+    if ((current_state == STATE_SINGLE_SIDE) 
       && single_side_state == 0
       && switch_from_single_side_to_forward == 0)
     {
