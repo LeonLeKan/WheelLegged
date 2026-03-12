@@ -1,6 +1,7 @@
 #include "control_state.h"
 #include "control.h"
 #include "image.h"
+#include "pid.h"
 
 volatile control_state_t current_state = STATE_IDLE;
 

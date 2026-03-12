@@ -5,8 +5,8 @@
 #include "control_state.h"
 #include "pid.h"
 
+// relevant variables
 volatile uint8_t image_block = 1;
-
 volatile float roll_base = 0.0f;
 
 void control_init(void)
@@ -280,7 +280,7 @@ void control_state_stand_front_single_side(void)
     if (single_delay >= 60)
     {
         single_delay = 0;
-        roll_base = imu.output.euler[0];
+        roll_base = rollba->data_float;
         current_state = STATE_SINGLE_SIDE;
     }
 }
