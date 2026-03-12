@@ -74,8 +74,6 @@ void control_state_accelerate(void)
 {
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
-
-    acpid_update(spki->data_float, spkd->data_float);
     //yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
@@ -91,18 +89,9 @@ void control_state_accelerate(void)
 
         speed_loop.Target = speed->data_float / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
-
-        PID_Update_Lo(&speed_loop);
-
-        // 对speed_loop.Out进行低通滤波
-        static float filtered_speed_out = 0.0f;
-        static const float speed_alpha = 0.1f; // 速度环滤波系数，可调整
-
-        // 更新滤波器
-        filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
-
-        servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
-                  90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
+        
+        servo_set(75.0f, 105.0f,
+                  75.0f, 105.0f);
 
         turn_loop1.Target = 0.0f; // outer
         turn_loop1.Actual = (float)error;

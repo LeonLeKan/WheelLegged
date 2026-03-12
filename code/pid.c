@@ -88,16 +88,6 @@ void an2_zero(void)
     angle_loop2.Kd = 0;
 }
 
-void acpid_update(float ki, float kd)
-{
-    speed_loop.Kp = 3.0f;
-    speed_loop.Ki = ki;
-    speed_loop.Kd = kd;
-    speed_loop.OutMax = +30;
-    speed_loop.OutMin = -30;
-    speed_loop.ErrorIntMax = 300;
-}
-
 void sppid_update(float kp, float ki, float kd)
 {
     speed_loop.Kp = kp;

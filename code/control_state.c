@@ -11,7 +11,7 @@ void control_state_switch(void)
     static uint32_t switch_from_single_side_to_forward = 0;
     static uint32_t switch_from_single_side_to_forward_count = 0;
 
-    if (current_state == STATE_ACCELERATE && (speed_loop.Target < speed_loop.Actual))
+    if (current_state == STATE_ACCELERATE && (speed_loop.Actual > speed_loop.Target))
     {
         current_state = STATE_FORWARD;
     }
