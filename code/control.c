@@ -316,7 +316,10 @@ void control_state_single_side(void)
     // 单边桥控制
     single_loop.Target = roll_base;
     single_loop.Actual = imu.output.euler[0];
-    PID_Update_Lo(&single_loop);
+    if (fabs(single_loop.Target - single_loop.Actual) > 2.0f)
+    {
+        PID_Update_Lo(&single_loop);
+    }
 
     // 使用滤波后的速度输出
     servo_set(100.0f - filtered_speed_out - single_loop.Out, 100.0f + filtered_speed_out + single_loop.Out,
