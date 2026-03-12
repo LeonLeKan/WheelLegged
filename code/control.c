@@ -105,7 +105,8 @@ void control_state_accelerate(void)
                   90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
 
         turn_loop1.Target = 0.0f; // outer
-        turn_loop1.Actual = imu.output.euler[2];
+        turn_loop1.Actual = (float)error;
+        //yaw_loop.Actual = imu.output.euler[2];
         PID_Update_Lo(&turn_loop1);
     }
 
@@ -159,7 +160,8 @@ void control_state_forward(void)
                   90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
 
         turn_loop1.Target = 0.0f; // outer
-        turn_loop1.Actual = imu.output.euler[2];
+        turn_loop1.Actual = (float)error;
+        //yaw_loop.Actual = imu.output.euler[2];
         PID_Update_Lo(&turn_loop1);
     }
 
