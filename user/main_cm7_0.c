@@ -141,7 +141,7 @@ int main(void)
                 // 跑
                 if (image_block == 1)
                 {
-                    //image_main();
+                    image_main();
                 }
                 // 如果需要，添加wifi
                 // wifi_send_data();
