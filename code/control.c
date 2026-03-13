@@ -99,7 +99,7 @@ void control_state_accelerate(void)
         PID_Update_Lo(&turn_loop1);
     }
 
-    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual; // inner
+    turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual; // inner
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 
@@ -154,7 +154,7 @@ void control_state_forward(void)
         PID_Update_Lo(&turn_loop1);
     }
 
-    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual; // inner
+    turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual; // inner
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 
