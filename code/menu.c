@@ -235,6 +235,10 @@ void create_3rd_menu(void)
     yaki = createMenu("yaki", 3, 2, MENU_TYPE_FLOAT, NULL);
     yakd = createMenu("yakd", 3, 3, MENU_TYPE_FLOAT, NULL);
 
+    yakp = createMenu("yakp", 3, 1, MENU_TYPE_FLOAT, NULL);
+    yaki = createMenu("yaki", 3, 2, MENU_TYPE_FLOAT, NULL);
+    yakd = createMenu("yakd", 3, 3, MENU_TYPE_FLOAT, NULL);
+
     savean1 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
     savean2 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
     savesp = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);

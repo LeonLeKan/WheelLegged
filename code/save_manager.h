@@ -15,6 +15,8 @@ typedef struct
     void (*exit_callback)(void);
 }save_manager_t;
 
+extern save_manager_t save_manager_instance;
+
 void save_manager_init(void (*exit_callback)(void));
 void save_manager_show(void);
 

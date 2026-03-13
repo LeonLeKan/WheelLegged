@@ -40,9 +40,9 @@ MahonyFilterParam mahony_filter_param = {
     .dt = IMU_UPDATE_INTERVAL_MS / 1000.0f};
 
 ukf_filter_param_t ukf_filter_param = {
-    .dt = IMU_UPDATE_INTERVAL_MS / 1000.0,
-    .q = {0.0001, 0.0001, 0.000015, 0.0002, 0.0005},
-    .r = {0.0001, 0.05, 0.001}};
+    .dt = UKF_UPDATE_INTERVAL_MS / 1000.0,
+    .q = {0.0001, 0.0001, 0.000015, 0.001, 0.01},
+    .r = {0.0001, 0.000, 0.0000}};
 
 bool showing_points = false;
 // 用于实现校准后的分层启动
@@ -74,10 +74,11 @@ int main(void)
     create_3rd_menu();
     menu_load1();
 
+    // 存点初始化
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi
-    //wifi_init();
+    // wifi_init();
 
     // 屏幕初始化
     pit_ms_init(SCREEN_UPDATE_PIT, SCREEN_UPDATE_INTERVAL_MS);
@@ -126,7 +127,7 @@ int main(void)
                 }
 
                 // 如果需要，添加wifi
-                //wifi_send_data();
+                // wifi_send_data();
             }
         }
 
@@ -140,10 +141,10 @@ int main(void)
                 // 跑
                 if (image_block == 1)
                 {
-                    image_main();
+                    //image_main();
                 }
                 // 如果需要，添加wifi
-                //wifi_send_data();
+                // wifi_send_data();
             }
         }
     }
@@ -151,7 +152,7 @@ int main(void)
 
 void start_imu_calibration(void)
 {
-    system_delay_ms(100);       // 确保系统稳定
+    system_delay_ms(300);       // 确保系统稳定
     imu_start_calibration(3000); // 采集3000个样本进行校准
 }
 

@@ -1,6 +1,6 @@
 #include "System_Types.h"
 #include "stdio.h"
-#include "math.h"
+#include "arm_math.h"
 #include "mtxLib.h"
 
 #ifndef UKFLIB_FILE

@@ -45,7 +45,7 @@ static ObservFcn_t ObservFcn[3] = { &Hy1, &Hy2, &Hy3 };
 //-----------------------
 //UKF Processing matrix
 //-----------------------
-static double Sc_vector[1][3] = {{1, 2, -2}};
+static double Sc_vector[1][3] = {{0.001, 2, 0}};
 // 均值权重 Wm
 static double Wm_weight_vector[1][11] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
@@ -91,9 +91,9 @@ static double Pxx0_init_error_covariance[5][5]=
 {/*  x1,    x2,    x3,    x4,    x5         */
     {0.001,    0,     0,     0,     0}, /* x1 */
     {0,    0.001,     0,     0,     0}, /* x2 */
-    {0,    0,     0.0001,     0,     0}, /* x3 */
-    {0,    0,     0,     0.001,     0}, /* x4 */
-    {0,    0,     0,     0,     0.0001}, /* x5 */
+    {0,    0,     0.1,     0,     0}, /* x3 */
+    {0,    0,     0,     0.1,     0}, /* x4 */
+    {0,    0,     0,     0,     0.1}, /* x5 */
 };
 
 //Process noise covariance Q : initial noise assumptions

@@ -45,8 +45,8 @@ waypoint_node_t* waypoint_list_add_next(waypoint_list_t* list, waypoint_node_t* 
 
 void waypoint_list_remove(waypoint_list_t *list, waypoint_node_t *pNode)
 {
-    pNode->prev->next = pNode->next;
-    pNode->next->prev = pNode->prev;
+    if(pNode->prev) pNode->prev->next = pNode->next;
+    if(pNode->next) pNode->next->prev = pNode->prev;
     if(pNode->next == NULL)
     {
         // 移除的点为最后一点，修改tail
@@ -71,7 +71,7 @@ void waypoint_list_clear(waypoint_list_t *list)
         waypoint_list_remove(list, temp);
     }
     list->tail = list->head;
-    list->size = 0;
+    list->size = 1;
 }
 
 union double_converter
@@ -86,7 +86,7 @@ void waypoint_list_save_to_flash(waypoint_list_t *list, uint32 flash_page)
     flash_buffer_clear();
     waypoint_node_t *now_node = list->head->next;
     
-    int index = 1; // 从1开始, 0用来存一共有几个点
+    int index = 1; // 从1开始, 0用来存一共有几个uint32的数据
     union double_converter converter;
     
     while(now_node)
@@ -101,7 +101,7 @@ void waypoint_list_save_to_flash(waypoint_list_t *list, uint32 flash_page)
         flash_union_buffer[index++].uint32_type = converter.buf[1];
         now_node = now_node->next;
     }
-    // flash_union_buffer[0] : 一共有几个点
+    // flash_union_buffer[0] : 一共有几个uint32的数据
     flash_union_buffer[0].int32_type = index;
     
     flash_erase_page(0, flash_page);
@@ -118,8 +118,6 @@ bool waypoint_list_load_from_flash(waypoint_list_t *list, uint32 flash_page)
     int points_cnt = (flash_union_buffer[0].int32_type - 1) / 4;
     if(points_cnt < 0 || points_cnt > 10000) // 点数非法，失败
         return false;
-    // 设置总点数
-    list->size = points_cnt + 1;
     double t_x, t_y;
     int index = 1;
     union double_converter converter;

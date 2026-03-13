@@ -15,7 +15,10 @@ save_manager_t save_manager_instance;
 // ==================== 接口函数 ======================
 void save_manager_init(void (*exit_callback)(void))
 {
-    save_manager_instance.active_save = NULL;
+    save_manager_instance.active_save = waypoint_list_create(
+        (waypoint_t) {0, 0},
+        (waypoint_screen_param_t) {0, 0, 0, 0}
+    );
     save_manager_instance.active_save_idx = 0;
     save_manager_instance.total_saves = 5;
     save_manager_instance.showing_points = 0;
@@ -55,17 +58,17 @@ void show_saves()
 void show_ahrs_points(void)
 {
     // 初始化点显示模块
-    points_display_create_info_t create_info;
-    create_info.waypoint_list = save_manager_instance.active_save;
-    create_info.get_current_position_callback = ahrs_get_current_position; // 获取当前定位点的回调
-    create_info.plane_to_waypoint_callback = ahrs_plane_to_waypoint;   // 平面坐标转换为航点的回调
-    create_info.add_point_next_callback = ahrs_add_current;          // 添加当前点的回调
-    create_info.save_callback = ahrs_save_callback;                 // 保存回调
-    create_info.quit_callback = save_manager_show;                 // 退出回调
+    points_display_config_t config;
+    config.waypoint_list = save_manager_instance.active_save;
+    config.get_current_position_callback = ahrs_get_current_position; // 获取当前定位点的回调
+    config.plane_to_waypoint_callback = ahrs_plane_to_waypoint;   // 平面坐标转换为航点的回调
+    config.add_point_next_callback = ahrs_add_current;          // 添加当前点的回调
+    config.save_callback = ahrs_save_callback;                 // 保存回调
+    config.quit_callback = save_manager_show;                 // 退出回调
 
-    points_display_info_t* info = points_display_create(&create_info);
+    points_display_configure(&config);
 
-    points_display_show(info);
+    points_display_show();
 }
 
 // ==================== 辅助函数 ========================
@@ -115,27 +118,21 @@ void save_manager_key_ok_pressed(void)
     if(save_manager_instance.active_save_idx == save_manager_instance.total_saves)
     {
         // 当前选中的是Exit项
+        // 先改回画笔颜色
+        ips200_set_color(RGB565_BLACK, RGB565_WHITE);
         save_manager_instance.exit_callback();
         return;
     }
     // todo: 根据类型加载
-    // 创建新的链表
-    save_manager_instance.active_save = waypoint_list_create(
-        (waypoint_t) {0, 0},
-        (waypoint_screen_param_t) {0, 0, 0, 0}
-    );
     bool ret = waypoint_list_load_from_flash(
         save_manager_instance.active_save,
         AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx
     );
     if (!ret)
     {
-        ips200_set_color(RGB565_BLACK, RGB565_RED);
-        ips200_show_string(0, 160, "Failed");
-        return;
+        // 加载失败，清空当前数据
+        waypoint_list_clear(save_manager_instance.active_save);
     }
-    // 测试用
-    // save_manager_instance.active_save = waypoint_list_create((waypoint_t) { 0, 0 }, (waypoint_screen_param_t) { 0, 0 });
 
     save_manager_instance.showing_points = 1;
     show_ahrs_points();

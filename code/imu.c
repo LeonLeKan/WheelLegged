@@ -113,6 +113,31 @@ static void read_encoder_data(void)
     imu.encoder.yaw_rate = (imu.encoder.v_right - imu.encoder.v_left) / WHEELBASE * RAD_TO_DEG;
 }
 
+static void set_mahony_initial_estimation(void)
+{
+    // 使用校准期间的平均加速度作为初始姿态估计
+    float ax = imu.calib.acc_sum[0] / imu.calib.sample_count;
+    float ay = imu.calib.acc_sum[1] / imu.calib.sample_count;
+    float az = imu.calib.acc_sum[2] / imu.calib.sample_count;
+    // 转换至FLU坐标系
+    ax = ax;
+    ay = -ay;
+    az = -az;
+    // 计算初始四元数
+    float roll = atan2f(ay, az);
+    float pitch = atan2f(-ax, sqrtf(ay * ay + az * az));
+    float yaw = 0.0f; // 初始航向角假设为0
+    float cy = cosf(yaw * 0.5f);
+    float sy = sinf(yaw * 0.5f);
+    float cp = cosf(pitch * 0.5f);
+    float sp = sinf(pitch * 0.5f);
+    float cr = cosf(roll * 0.5f);
+    float sr = sinf(roll * 0.5f);
+    imu.mahony_filter.q[0] = cr * cp * cy + sr * sp * sy; // q0
+    imu.mahony_filter.q[1] = sr * cp * cy - cr * sp * sy; // q1
+    imu.mahony_filter.q[2] = cr * sp * cy + sr * cp * sy; // q2
+    imu.mahony_filter.q[3] = cr * cp * sy - sr * sp * cy; // q3
+}
 
 // 按照传感器安装方向转换到机体坐标系
 static void apply_bias_and_cordinate_transform(void)
@@ -140,6 +165,10 @@ static void process_calibration(void)
     imu.calib.gyro_bias[0] += imu.raw.gyro[0];
     imu.calib.gyro_bias[1] += imu.raw.gyro[1];
     imu.calib.gyro_bias[2] += imu.raw.gyro[2];
+    // 累加加速度数据（用于初始姿态估计）
+    imu.calib.acc_sum[0] += imu.raw.acc[0];
+    imu.calib.acc_sum[1] += imu.raw.acc[1];
+    imu.calib.acc_sum[2] += imu.raw.acc[2];
     imu.calib.sample_count++;
     // 检查是否完成校准
     if (imu.calib.sample_count >= imu.calib.target_samples)
@@ -148,6 +177,7 @@ static void process_calibration(void)
         imu.calib.gyro_bias[0] /= imu.calib.target_samples;
         imu.calib.gyro_bias[1] /= imu.calib.target_samples;
         imu.calib.gyro_bias[2] /= imu.calib.target_samples;
+        set_mahony_initial_estimation();
         imu.calib.is_calibrated = true;
         imu.state = IMU_STATE_RUNNING;
     }
@@ -156,6 +186,8 @@ static void process_calibration(void)
 
 static void process_filter_update(void)
 {
+    static uint32_t ukf_update_counter = 0;
+    ukf_update_counter++;
     // mahony更新
     Mahony_Update(&imu.mahony_filter, imu.body.gyro, imu.body.acc);
 
@@ -166,17 +198,26 @@ static void process_filter_update(void)
     imu.output.gyro[0] = imu.body.gyro[0];
     imu.output.gyro[1] = imu.body.gyro[1];
 
+    // if (ukf_update_counter * IMU_UPDATE_INTERVAL_MS >= UKF_UPDATE_INTERVAL_MS)
+    // {
+    //     ukf_update_counter = 0;
+    // }
+    // else
+    // {
+    //     return; // 不到更新周期，跳过UKF更新
+    // }
     // ukf更新
     float ukf_measurement[3];
     ukf_measurement[0] = imu.encoder.speed;                     // 速度
     // mahony解算的yaw角输入ukf
     ukf_measurement[1] = imu.body.gyro[2] * DEG_TO_RAD;         // IMU角速度 (rad/s)
-    ukf_measurement[2] = imu.encoder.yaw_rate * DEG_TO_RAD;     // 编码器角速度 (rad/s)
+    // 测试：只用imu
+    ukf_measurement[2] = imu.body.gyro[2] * DEG_TO_RAD;     // 编码器角速度 (rad/s)
     ukf_filter_update(&imu.ukf_filter, ukf_measurement);
 
     // yaw和yaw角速度采用ukf输出
-    imu.output.euler[2] = imu.ukf_filter.output.yaw;
-    imu.output.gyro[2] = imu.ukf_filter.output.yaw_rate;
+    imu.output.euler[2] = imu.mahony_filter.output.euler[2];
+    imu.output.gyro[2] = imu.body.gyro[2];
     // 位置和速度采用ukf输出
     imu.output.position_x = imu.ukf_filter.output.position_x;
     imu.output.position_y = imu.ukf_filter.output.position_y;
