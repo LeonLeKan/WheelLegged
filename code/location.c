@@ -4,7 +4,7 @@
 #include "save_manager.h"
 #include "control_state.h"
 
-static waypoint_node_t *current_target = NULL;
+waypoint_node_t *current_target = NULL;
 
 static double direction_calculate(double x_target, double y_target, double x_now, double y_now, double current_yaw)
 {
@@ -79,7 +79,7 @@ void location_update(void)
 
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
-    if (sqrt(dx * dx + dy * dy) < XYMIN_BIAS)
+    if (sqrt(x_now * x_now + y_now * y_now) > sqrt(x_tgt * x_tgt+ y_tgt * y_tgt)) 
     {
         advance_to_next_waypoint();
     }

@@ -11,6 +11,8 @@
 
 #define XYMIN_BIAS 0.01f
 
+extern waypoint_node_t *current_target;
+
 void location_update(void);
 void location_reset(void);
 
