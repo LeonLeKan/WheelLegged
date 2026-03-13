@@ -7,6 +7,7 @@
 #include "menu.h"
 
 extern volatile uint8_t image_block;
+extern volatile float roll_base;
 
 void control_init(void);
 

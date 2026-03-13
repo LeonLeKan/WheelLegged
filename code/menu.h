@@ -45,10 +45,9 @@ typedef enum
     MENU_STATE_INS,
 } menu_state_t;
 
-extern MENU *RootMenu, *Balance, *Image, *Element, *currentMenu;
-extern MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *pzero, *pinit, *show,
-    *thre, *farl, *nearl, *saveim,
-    *change;
+extern MENU *RootMenu, *Balance, *Image, *currentMenu;
+extern MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *pzero, *pinit, *show,
+            *thre, *farl, *nearl, *saveim;
 extern MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
@@ -71,7 +70,7 @@ void create_3rd_menu(void);
 void show_menu(void);
 void key_handle_menu(void);
 
-void menu_save1(void);
+void menu_save(void);
 void menu_load1(void);
 void menu_zero(void);
 static void image_show(void);
