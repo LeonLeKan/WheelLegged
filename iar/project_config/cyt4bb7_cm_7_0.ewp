@@ -1170,6 +1170,57 @@
             </file>
         </group>
         <group>
+            <name>navigation</name>
+            <group>
+                <name>mahony</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\mahony_filter.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\mahony_filter.h</name>
+                </file>
+            </group>
+            <group>
+                <name>ukf</name>
+                <group>
+                    <name>ukfLib</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\mtxLib.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\mtxLib.h</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\ukfLib.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\..\code\ukfLib.h</name>
+                    </file>
+                </group>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\System_Types.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\ukf_filter.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\ukf_filter.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\ukfCfg1.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\code\ukfCfg1.h</name>
+                </file>
+            </group>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\ins.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\ins.h</name>
+            </file>
+        </group>
+        <group>
             <name>ui</name>
             <group>
                 <name>ahrs_ui</name>
@@ -1205,39 +1256,6 @@
                 <name>$PROJ_DIR$\..\..\code\screen_interface.h</name>
             </file>
         </group>
-        <group>
-            <name>ukf_filter</name>
-            <group>
-                <name>ukfLib</name>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\mtxLib.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\mtxLib.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\System_Types.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\ukfLib.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\ukfLib.h</name>
-                </file>
-            </group>
-            <file>
-                <name>$PROJ_DIR$\..\..\code\ukf_filter.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\code\ukf_filter.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\code\ukfCfg1.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\code\ukfCfg1.h</name>
-            </file>
-        </group>
         <file>
             <name>$PROJ_DIR$\..\..\code\config.h</name>
         </file>
@@ -1252,12 +1270,6 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\code\imu.h</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\code\mahony_filter.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\code\mahony_filter.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\code\small_driver_uart_control.c</name>
