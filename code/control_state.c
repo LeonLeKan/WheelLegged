@@ -40,7 +40,7 @@ void control_state_switch(void)
     if (switch_from_single_side_to_forward == 1)
     {
         switch_from_single_side_to_forward_count++;
-        if (switch_from_single_side_to_forward_count >= 60)
+        if (switch_from_single_side_to_forward_count >= 100)
         {
             current_state = STATE_ACCELERATE;
             roll_base = 0.0f;
