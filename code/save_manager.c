@@ -34,6 +34,11 @@ void save_manager_show(void)
     show_saves();
 }
 
+waypoint_list_t* save_manager_get_active_save(void)
+{
+    return save_manager_instance.active_save;
+}
+
 // ==================== 屏幕显示函数 ======================
 // 显示存档管理器主界面
 void show_saves()

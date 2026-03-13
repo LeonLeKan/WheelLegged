@@ -19,6 +19,7 @@ extern save_manager_t save_manager_instance;
 
 void save_manager_init(void (*exit_callback)(void));
 void save_manager_show(void);
+waypoint_list_t* save_manager_get_active_save(void);
 
 void save_manager_key_up_pressed(void);
 void save_manager_key_down_pressed(void);
