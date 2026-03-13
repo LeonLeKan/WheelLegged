@@ -65,7 +65,11 @@ void pit0_ch2_isr() // 定时器通道 2 周期中断服务函数
 {
     pit_isr_flag_clear(PIT_CH2);
     // 中断2: 惯导位置更新
-    // pos_update([现在x]，[现在y]，[当前航向角]);
+    if (current_state == STATE_ACCELERATE ||
+        current_state == STATE_FORWARD)
+    {
+        location_update();
+    }
 }
 
 void pit0_ch10_isr() // 定时器通道 10 周期中断服务函数

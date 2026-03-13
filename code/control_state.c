@@ -16,6 +16,11 @@ void control_state_switch(void)
         current_state = STATE_FORWARD;
     }
 
+    if (current_state == STATE_DEACCELERATE && (speed_loop.Actual < 0.5f))
+    {
+        current_state = STATE_STOP;
+    }
+
     if ((current_state != STATE_DECLINE_FRONT_SINGLE_SIDE &&
          current_state != STATE_STAND_FRONT_SINGLE_SIDE &&  
          current_state != STATE_SINGLE_SIDE) 
@@ -65,6 +70,9 @@ void control_state_update(void)
         break;
     case STATE_ACCELERATE:
         control_state_accelerate();
+        break;
+    case STATE_DEACCELERATE:
+        control_state_deaccelerate();
         break;
     case STATE_FORWARD:
         control_state_forward();
