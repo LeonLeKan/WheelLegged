@@ -11,7 +11,7 @@ void control_state_switch(void)
     static uint32_t switch_from_single_side_to_forward = 0;
     static uint32_t switch_from_single_side_to_forward_count = 0;
 
-    if (current_state == STATE_ACCELERATE && fabs(speed_loop.Target - speed_loop.Actual) < 0.1f)
+    if (current_state == STATE_ACCELERATE && (speed_loop.Actual > speed_loop.Target))
     {
         current_state = STATE_FORWARD;
     }
@@ -25,15 +25,12 @@ void control_state_switch(void)
     }
 
     if (current_state == STATE_DECLINE_FRONT_SINGLE_SIDE
-      && single_side_state != 0
-      && speed_loop.Actual < 2.5f + 0.2f)
+      && speed_loop.Actual < snspeed->data_float / 100.0f)
     {
         current_state = STATE_STAND_FRONT_SINGLE_SIDE;
     }
 
-    if ((current_state == STATE_DECLINE_FRONT_SINGLE_SIDE ||
-         current_state == STATE_STAND_FRONT_SINGLE_SIDE || 
-         current_state == STATE_SINGLE_SIDE) 
+    if ((current_state == STATE_SINGLE_SIDE) 
       && single_side_state == 0
       && switch_from_single_side_to_forward == 0)
     {
@@ -43,9 +40,10 @@ void control_state_switch(void)
     if (switch_from_single_side_to_forward == 1)
     {
         switch_from_single_side_to_forward_count++;
-        if (switch_from_single_side_to_forward_count >= 50)
+        if (switch_from_single_side_to_forward_count >= 60)
         {
-            current_state = STATE_FORWARD;
+            current_state = STATE_ACCELERATE;
+            roll_base = 0.0f;
             switch_from_single_side_to_forward = 0;
             switch_from_single_side_to_forward_count = 0;
         }

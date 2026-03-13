@@ -105,8 +105,8 @@ int main(void)
                 cali_flag = 0;
             }
             imu_state_show();
-            // 如有需要，添加wifi
-            // wifi_send_data();
+            // 如果需要，添加wifi
+            //wifi_send_data();
         }
 
         else if (motion_mode1 == 0 && motion_mode2 == 1)
@@ -194,9 +194,7 @@ void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
     oscilloscope_data.data[0] = imu.output.euler[0];
-    oscilloscope_data.data[1] = imu.output.euler[1];
-    oscilloscope_data.data[2] = imu.output.euler[2];
-    oscilloscope_data.channel_num = 3;
+    oscilloscope_data.channel_num = 1;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 
