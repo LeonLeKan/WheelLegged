@@ -78,7 +78,7 @@ int main(void)
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi
-    wifi_init();
+    //wifi_init();
 
     // 屏幕初始化
     pit_ms_init(SCREEN_UPDATE_PIT, SCREEN_UPDATE_INTERVAL_MS);
@@ -106,7 +106,7 @@ int main(void)
             }
             imu_state_show();
             // 如果需要，添加wifi
-            wifi_send_data();
+            //wifi_send_data();
         }
 
         else if (motion_mode1 == 0 && motion_mode2 == 1)
@@ -127,7 +127,7 @@ int main(void)
                 }
 
                 // 如果需要，添加wifi
-                wifi_send_data();
+                //wifi_send_data();
             }
         }
 
