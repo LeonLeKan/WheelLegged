@@ -525,11 +525,11 @@ void funcs_init(void)
     points_display_info_t* info = &points_display_instance.info;
     info->total_funcs = 0;
     info->active_func_idx = 0;
-    new_func("Move Point", func_move_point);
-    new_func("Add Current Point", func_add_current_point_next);
-    new_func("Remove Point", func_remove_point);
-    new_func("Save and Quit", func_save_and_quit);
-    new_func("Quit Without Save", func_quit);
+    new_func("Move Point        ", func_move_point);
+    new_func("Add Current Point ", func_add_current_point_next);
+    new_func("Remove Point      ", func_remove_point);
+    new_func("Save and Quit     ", func_save_and_quit);
+    new_func("Quit Without Save ", func_quit);
 }
 
 void show_func(void)
