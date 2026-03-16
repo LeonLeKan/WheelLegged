@@ -16,7 +16,7 @@ void control_state_switch(void)
         current_state = STATE_FORWARD;
     }
 
-    if (current_state == STATE_DEACCELERATE && (speed_loop.Actual < 0.5f))
+    if (current_state == STATE_DEACCELERATE && (speed_loop.Actual < 0.1f))
     {
         current_state = STATE_STOP;
     }
