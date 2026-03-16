@@ -136,17 +136,7 @@ void control_state_deaccelerate(void)
         
         servo_set(120.0f, 60.0f,
                   120.0f, 60.0f);
-
-        //turn_loop1.Target = 0.0f; // outer
-        //turn_loop1.Actual = (float)error;
-        //yaw_loop.Actual = imu.output.euler[2];
-        PID_Update_Lo(&yaw_loop);
     }
-
-    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual; // inner
-    turn_loop2.Actual = -imu.body.gyro[2];
-    PID_Update_Lo(&turn_loop2);
-
     angle_loop2.Target = pzero->data_float;
     angle_loop2.Actual = imu.output.euler[1];
     PID_Update_Lo(&angle_loop2);
