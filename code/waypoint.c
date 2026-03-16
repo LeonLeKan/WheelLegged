@@ -133,7 +133,9 @@ bool waypoint_list_load_from_flash(waypoint_list_t *list, uint32 flash_page)
         
         waypoint_list_add_next(list, list->tail,
             (waypoint_t) { t_x, t_y }, (waypoint_screen_param_t) { t_x, t_y, 0, 0 });
+        ips200_clear();
     }
+    ips200_clear();
     return true;
 }
 
