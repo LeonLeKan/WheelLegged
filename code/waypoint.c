@@ -1,31 +1,59 @@
 #include "waypoint.h"
 
-waypoint_list_t* waypoint_list_create(waypoint_t waypoint, waypoint_screen_param_t screen_param)
-{
-    waypoint_list_t* list = (waypoint_list_t*)malloc(sizeof(waypoint_list_t));
-    list->head = (waypoint_node_t*)malloc(sizeof(waypoint_node_t));
-    list->head->prev = NULL;
-    list->head->next = NULL;
-    list->head->waypoint = (waypoint_t*)malloc(sizeof(waypoint_t));
-    list->head->screen_param = (waypoint_screen_param_t*)malloc(sizeof(waypoint_screen_param_t));
-    
-    *(list->head->waypoint) = waypoint;
-    *(list->head->screen_param) = screen_param;
+waypoint_node_t pool[MAX_NODES];
+waypoint_node_t* free_node_head;
 
-    list->size = 1;
-    list->tail = list->head;
-    return list;
+waypoint_list_t waypoints;
+
+static waypoint_node_t* allocate_node(void)
+{
+    waypoint_node_t* newNode = free_node_head;
+    free_node_head = free_node_head->next;
+
+    newNode->allocated = 1;
+    newNode->next = NULL;
+    newNode->prev = NULL;
+
+    return newNode;
+}
+
+static void free_node(waypoint_node_t* pNode)
+{
+    pNode->allocated = 0;
+    pNode->next = free_node_head;
+    pNode->prev = NULL;
+    free_node_head = pNode;
+}
+
+void waypoint_list_init(void)
+{
+    // 初始化节点池
+    for(int i = 0; i < MAX_NODES - 1; i++)
+    {
+        pool[i].allocated = 0;
+        pool[i].next = &pool[i + 1];
+        pool[i].prev = NULL;
+    }
+    free_node_head = &pool[0];
+
+    // 初始化waypoint_list
+    waypoints.head = allocate_node();
+    waypoints.tail = waypoints.head;
+    waypoints.size = 1;
+
+    waypoints.head->next = NULL;
+    waypoints.head->prev = NULL;
+    waypoints.head->waypoint = (waypoint_t) { 0, 0 };
+    waypoints.head->screen_param = (waypoint_screen_param_t) { 0, 0, 0, 0 };
 }
 
 waypoint_node_t* waypoint_list_add_next(waypoint_list_t* list, waypoint_node_t* pNode,
                                         waypoint_t waypoint, waypoint_screen_param_t screen_param)
 {
-    waypoint_node_t *newNode = (waypoint_node_t*)malloc(sizeof(waypoint_node_t));
+    waypoint_node_t *newNode = allocate_node();
     
-    newNode->waypoint = (waypoint_t*)malloc(sizeof(waypoint_t));
-    newNode->screen_param = (waypoint_screen_param_t*)malloc(sizeof(waypoint_screen_param_t));
-    *(newNode->waypoint) = waypoint;
-    *(newNode->screen_param) = screen_param;
+    newNode->waypoint = waypoint;
+    newNode->screen_param = screen_param;
     newNode->prev = pNode;
     newNode->next = pNode->next;
 
@@ -53,9 +81,7 @@ void waypoint_list_remove(waypoint_list_t *list, waypoint_node_t *pNode)
         list->tail = pNode->prev;
     }
     
-    free(pNode->waypoint);
-    free(pNode->screen_param);
-    free(pNode);
+    free_node(pNode);
     list->size--;
 }
 
@@ -92,11 +118,11 @@ void waypoint_list_save_to_flash(waypoint_list_t *list, uint32 flash_page)
     while(now_node)
     {
         // double 占用两个uint32
-        converter.d = now_node->waypoint->x;
+        converter.d = now_node->waypoint.x;
         flash_union_buffer[index++].uint32_type = converter.buf[0];
         flash_union_buffer[index++].uint32_type = converter.buf[1];
         
-        converter.d = now_node->waypoint->y;
+        converter.d = now_node->waypoint.y;
         flash_union_buffer[index++].uint32_type = converter.buf[0];
         flash_union_buffer[index++].uint32_type = converter.buf[1];
         now_node = now_node->next;
@@ -133,7 +159,9 @@ bool waypoint_list_load_from_flash(waypoint_list_t *list, uint32 flash_page)
         
         waypoint_list_add_next(list, list->tail,
             (waypoint_t) { t_x, t_y }, (waypoint_screen_param_t) { t_x, t_y, 0, 0 });
+        // ips200_clear();
     }
+    // ips200_clear();
     return true;
 }
 

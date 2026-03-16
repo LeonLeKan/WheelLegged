@@ -59,7 +59,7 @@ void location_update(void)
         current_target = list->head->next;
     }
         
-    if (!current_target || !current_target->waypoint)
+    if (!current_target)
     {
         return;
     }
@@ -68,8 +68,8 @@ void location_update(void)
     double y_now = imu.output.position_y;
     float yaw_now = imu.output.euler[2];
 
-    double x_tgt = current_target->waypoint->x;
-    double y_tgt = current_target->waypoint->y;
+    double x_tgt = current_target->waypoint.x;
+    double y_tgt = current_target->waypoint.y;
 
     double target_deg = direction_calculate(x_tgt, y_tgt, x_now, y_now, yaw_now);
     target_deg = normalize_deg(target_deg);

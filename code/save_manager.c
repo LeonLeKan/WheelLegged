@@ -15,10 +15,8 @@ save_manager_t save_manager_instance;
 // ==================== 接口函数 ======================
 void save_manager_init(void (*exit_callback)(void))
 {
-    save_manager_instance.active_save = waypoint_list_create(
-        (waypoint_t) {0, 0},
-        (waypoint_screen_param_t) {0, 0, 0, 0}
-    );
+    waypoint_list_init();
+    save_manager_instance.active_save = &waypoints;
     // 默认先加载0号存档
     bool ret = waypoint_list_load_from_flash(
         save_manager_instance.active_save,

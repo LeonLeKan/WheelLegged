@@ -3,6 +3,8 @@
 
 #include "zf_common_headfile.h"
 
+#define MAX_NODES 50
+
 typedef struct
 {
     double x, y;  
@@ -16,8 +18,9 @@ typedef struct
 
 typedef struct _waypoint_node
 {
-    waypoint_t* waypoint;               // 点数据
-    waypoint_screen_param_t* screen_param; // 显示相关属性
+    bool allocated;
+    waypoint_t waypoint;               // 点数据
+    waypoint_screen_param_t screen_param; // 显示相关属性
     struct _waypoint_node* next, * prev; // 前后指针
 } waypoint_node_t;
 
@@ -28,8 +31,10 @@ typedef struct
     int size;               // 点的数量（包括head）
 }waypoint_list_t;
 
+extern waypoint_list_t waypoints;
 
-waypoint_list_t* waypoint_list_create(waypoint_t waypoint, waypoint_screen_param_t screen_param);
+void waypoint_list_init(void);
+
 waypoint_node_t* waypoint_list_add_next(waypoint_list_t* list, waypoint_node_t* pNode,
                                 waypoint_t waypoint, waypoint_screen_param_t screen_param);
 void waypoint_list_remove(waypoint_list_t* list, waypoint_node_t* pNode);

@@ -79,7 +79,7 @@ int main(void)
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi
-    wifi_init();
+    // wifi_init();
 
     // 屏幕初始化
     pit_ms_init(SCREEN_UPDATE_PIT, SCREEN_UPDATE_INTERVAL_MS);
@@ -196,8 +196,8 @@ void wifi_send_data(void)
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
     oscilloscope_data.data[0] = imu.output.position_x;
     oscilloscope_data.data[1] = imu.output.position_y;
-    oscilloscope_data.data[2] = current_target->waypoint->x;
-    oscilloscope_data.data[3] = current_target->waypoint->y;
+    oscilloscope_data.data[2] = current_target->waypoint.x;
+    oscilloscope_data.data[3] = current_target->waypoint.y;
     oscilloscope_data.channel_num = 4;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
