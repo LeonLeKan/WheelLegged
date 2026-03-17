@@ -79,7 +79,7 @@ void location_update(void)
 
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
-    if (sqrt(x_now * x_now + y_now * y_now) > sqrt(x_tgt * x_tgt+ y_tgt * y_tgt)) 
+    if (dx < XYMIN_BIAS && dy < XYMIN_BIAS) 
     {
         advance_to_next_waypoint();
     }

@@ -15,8 +15,8 @@
 
 #define WIFI_SSID_TEST "Hhhyt"
 #define WIFI_PASSWORD_TEST "18273645"
-#define UDP_TARGET_IP "192.168.137.1"
-#define UDP_TARGET_PORT "8086"
+#define TCP_TARGET_IP "192.168.137.1"
+#define TCP_TARGET_PORT "8086"
 #define WIFI_LOCAL_PORT "6666"
 
 #define BUTTON_LF (P20_0)
@@ -79,7 +79,7 @@ int main(void)
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi
-    // wifi_init();
+    //wifi_init();
 
     // 屏幕初始化
     pit_ms_init(SCREEN_UPDATE_PIT, SCREEN_UPDATE_INTERVAL_MS);
@@ -145,7 +145,7 @@ int main(void)
                     //image_main();
                 }
                 // 如果需要，添加wifi
-                wifi_send_data();
+                //wifi_send_data();
             }
         }
     }
@@ -178,9 +178,9 @@ void wifi_init(void)
     if (0 == WIFI_SPI_AUTO_CONNECT)
     {
         while (wifi_spi_socket_connect(
-            "UDP",
-            UDP_TARGET_IP,
-            UDP_TARGET_PORT,
+            "TCP",
+            TCP_TARGET_IP,
+            TCP_TARGET_PORT,
             WIFI_LOCAL_PORT))
         {
             printf("\r\n Connect UDP Servers error, try again.");
@@ -198,7 +198,8 @@ void wifi_send_data(void)
     oscilloscope_data.data[1] = imu.output.position_y;
     oscilloscope_data.data[2] = current_target->waypoint.x;
     oscilloscope_data.data[3] = current_target->waypoint.y;
-    oscilloscope_data.channel_num = 4;
+    oscilloscope_data.data[4] = turn_loop2.Out;
+    oscilloscope_data.channel_num = 5;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 
