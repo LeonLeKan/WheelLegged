@@ -4,23 +4,26 @@
 #include "pid.h"
 
 volatile control_state_t current_state = STATE_IDLE;
+volatile uint8_t test_state = 0;
 
-void control_state_switch(void)
+static void accelerate_to_forward(void)
 {
-    // 临时变量
-    static uint32_t switch_from_single_side_to_forward = 0;
-    static uint32_t switch_from_single_side_to_forward_count = 0;
-
     if (current_state == STATE_ACCELERATE && (speed_loop.Actual > speed_loop.Target))
     {
         current_state = STATE_FORWARD;
     }
+}
 
+static void deaccelerate_to_stop(void)
+{
     if (current_state == STATE_DEACCELERATE && (speed_loop.Actual < 0.1f))
     {
         current_state = STATE_STOP;
     }
+}
 
+static void to_single_side_decline(void)
+{
     if ((current_state != STATE_DECLINE_FRONT_SINGLE_SIDE &&
          current_state != STATE_STAND_FRONT_SINGLE_SIDE &&  
          current_state != STATE_SINGLE_SIDE) 
@@ -28,12 +31,21 @@ void control_state_switch(void)
     {
         current_state = STATE_DECLINE_FRONT_SINGLE_SIDE;
     }
+}
 
+static void to_single_side_stand(void)
+{
     if (current_state == STATE_DECLINE_FRONT_SINGLE_SIDE
       && speed_loop.Actual < snspeed->data_float / 100.0f)
     {
         current_state = STATE_STAND_FRONT_SINGLE_SIDE;
     }
+}
+
+static void quit_single_side(void)
+{
+    static uint32_t switch_from_single_side_to_forward = 0;
+    static uint32_t switch_from_single_side_to_forward_count = 0;
 
     if ((current_state == STATE_SINGLE_SIDE) 
       && single_side_state == 0
@@ -53,6 +65,15 @@ void control_state_switch(void)
             switch_from_single_side_to_forward_count = 0;
         }
     }
+}
+
+void control_state_switch(void)
+{
+    accelerate_to_forward();
+    deaccelerate_to_stop();
+    to_single_side_decline();
+    to_single_side_stand();
+    quit_single_side();
 }
 
 void control_state_update(void)
@@ -94,6 +115,9 @@ void control_state_update(void)
         break;
     case STATE_JOLT:
         control_state_jolt();
+        break;
+    case STATE_TEST:
+        control_state_test();
         break;
     case STATE_STOP:
         control_state_stop();

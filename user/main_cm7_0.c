@@ -31,6 +31,9 @@ void start_imu_calibration(void);
 
 void wifi_init(void);
 void wifi_send_data(void);
+void wifi_send_image(void);
+
+void remote_control(void);
 
 uint8_t motion_mode1 = 0;
 uint8_t motion_mode2 = 0;
@@ -51,6 +54,8 @@ bool car_run_state = false;
 
 uint8_t cali_flag = 1;
 
+uint8 image_copy[MT9V03X_H][MT9V03X_W];
+
 int main(void)
 {
     clock_init(SYSTEM_CLOCK_250M); // 时钟配置及系统初始化<务必保留>
@@ -68,6 +73,7 @@ int main(void)
     car_balance();
     gpio_init_all();
     para_zero();
+    uart_receiver_init();
 
     // 菜单初始化
     create_1st_menu();
@@ -79,7 +85,7 @@ int main(void)
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi
-    //wifi_init();
+    // wifi_init();
 
     // 屏幕初始化
     pit_ms_init(SCREEN_UPDATE_PIT, SCREEN_UPDATE_INTERVAL_MS);
@@ -106,8 +112,10 @@ int main(void)
                 cali_flag = 0;
             }
             imu_state_show();
+
             // 如果需要，添加wifi
-            //wifi_send_data();
+            // wifi_send_data();
+            // wifi_send_image();
         }
 
         else if (motion_mode1 == 0 && motion_mode2 == 1)
@@ -129,23 +137,26 @@ int main(void)
 
                 // 如果需要，添加wifi
                 // wifi_send_data();
+                // wifi_send_image();
             }
         }
 
-        else if ((motion_mode1 == 1 && motion_mode2 == 0)
-              || (motion_mode1 == 0 && motion_mode2 == 0))
+        else if ((motion_mode1 == 1 && motion_mode2 == 0) || (motion_mode1 == 0 && motion_mode2 == 0))
         {
             ips200_clear();
             current_state = STATE_STAND_UP;
             while (true)
             {
                 // 跑
+                remote_control();
                 if (image_block == 1)
                 {
-                    //image_main();
+                    // image_main();
                 }
+
                 // 如果需要，添加wifi
-                //wifi_send_data();
+                // wifi_send_data();
+                // wifi_send_image();
             }
         }
     }
@@ -153,7 +164,7 @@ int main(void)
 
 void start_imu_calibration(void)
 {
-    system_delay_ms(300);       // 确保系统稳定
+    system_delay_ms(300);        // 确保系统稳定
     imu_start_calibration(3000); // 采集3000个样本进行校准
 }
 
@@ -189,18 +200,27 @@ void wifi_init(void)
     }
 
     seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_WIFI_SPI);
+    seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, image_copy[0], MT9V03X_W, MT9V03X_H);
 }
 
 void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
-    oscilloscope_data.data[0] = imu.output.position_x;
-    oscilloscope_data.data[1] = imu.output.position_y;
-    oscilloscope_data.data[2] = current_target->waypoint.x;
-    oscilloscope_data.data[3] = current_target->waypoint.y;
-    oscilloscope_data.data[4] = turn_loop2.Out;
-    oscilloscope_data.channel_num = 5;
+    oscilloscope_data.data[0] = imu.output.euler[0];
+    oscilloscope_data.channel_num = 1;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
+}
+
+void wifi_send_image(void)
+{
+    if (mt9v03x_finish_flag)
+    {
+        mt9v03x_finish_flag = 0;
+
+        memcpy(image_copy[0], mt9v03x_image[0], MT9V03X_IMAGE_SIZE);
+
+        seekfree_assistant_camera_send();
+    }
 }
 
 void imu_state_show(void)
@@ -222,5 +242,26 @@ void imu_state_show(void)
     default:
         screen_printf(0, 0, "IMU State: UNKNOWN    ");
         break;
+    }
+}
+
+void remote_control(void)
+{
+    if (1 == uart_receiver.finsh_flag)
+    {
+        if (1 == uart_receiver.state)
+        {
+            speed_loop.Target = (uart_receiver.channel[1] - 800) / 200.0f;
+            yaw_loop.Target += (uart_receiver.channel[0] - 800) / 100.0f;
+            if (uart_receiver.channel[3] >= 1200 && test_state == 0)
+            {
+                test_state = 1;
+            }
+        }
+        else
+        {
+            current_state = STATE_DEACCELERATE;
+        }
+        uart_receiver.finsh_flag = 0;
     }
 }

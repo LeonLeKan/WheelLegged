@@ -24,6 +24,7 @@ void control_state_thunder(void);
 void control_state_accumulate(void);
 void control_state_jump_up(void);
 void control_state_jolt(void);
+void control_state_test(void);
 void control_state_stop(void);
 
 #endif
