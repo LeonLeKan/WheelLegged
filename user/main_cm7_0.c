@@ -251,6 +251,36 @@ void imu_state_show(void)
     }
 }
 
+void handle_channel_245(void)
+{
+    static uint16 last_ch2 = 0, last_ch4 = 0, last_ch5 = 0;
+
+    if(last_ch2 == 0) {last_ch2 = uart_receiver.channel[2]; return;}
+    if(last_ch4 == 0) {last_ch4 = uart_receiver.channel[4]; return;}
+    if(last_ch5 == 0) {last_ch5 = uart_receiver.channel[5]; return;}
+
+    if(last_ch2 != uart_receiver.channel[2])
+    {
+        // Channel 2: 在末尾添加当前位置点
+        waypoint_t point;
+        ahrs_get_current_position(&point.x, &point.y);
+        ahrs_add_current(&waypoints, waypoints.tail, point);
+    }
+
+    else if(last_ch4 != uart_receiver.channel[4])
+    {
+        // Channel 4: 删除末尾的点
+        waypoint_list_remove(&waypoints, waypoints.tail);
+    }
+
+    else if(last_ch4 != uart_receiver.channel[5])
+    {
+        // Channel 5: 保存到Flash，存入当前激活的存档（开机默认为0号存档）
+        waypoint_list_save_to_flash(&waypoints, 
+            AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx);
+    }
+}
+
 void remote_control(void)
 {
     if (1 == uart_receiver.finsh_flag)
@@ -261,6 +291,8 @@ void remote_control(void)
         {
             test_state = 1;
         }
+        // 2, 4, 5频道当作按钮使用
+        handle_channel_245();
         uart_receiver.finsh_flag = 0;
     }
 }
