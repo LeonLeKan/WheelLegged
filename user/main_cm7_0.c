@@ -206,8 +206,14 @@ void wifi_init(void)
 void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
-    oscilloscope_data.data[0] = imu.output.euler[0];
-    oscilloscope_data.channel_num = 1;
+    oscilloscope_data.data[0] = uart_receiver.channel[0];
+    oscilloscope_data.data[1] = uart_receiver.channel[1];
+    oscilloscope_data.data[2] = uart_receiver.channel[2];
+    oscilloscope_data.data[3] = uart_receiver.channel[3];
+    oscilloscope_data.data[4] = uart_receiver.channel[4];
+    oscilloscope_data.data[5] = uart_receiver.channel[5];
+    oscilloscope_data.data[6] = yaw_loop.Target;
+    oscilloscope_data.channel_num = 7;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 
@@ -249,18 +255,11 @@ void remote_control(void)
 {
     if (1 == uart_receiver.finsh_flag)
     {
-        if (1 == uart_receiver.state)
+        speed_loop.Target = (uart_receiver.channel[1] - 800) / 200.0f;
+        yaw_loop.Target += (uart_receiver.channel[0] - 800) / 800.0f;
+        if (uart_receiver.channel[3] == 1792 && test_state == 0)
         {
-            speed_loop.Target = (uart_receiver.channel[1] - 800) / 200.0f;
-            yaw_loop.Target += (uart_receiver.channel[0] - 800) / 100.0f;
-            if (uart_receiver.channel[3] >= 1200 && test_state == 0)
-            {
-                test_state = 1;
-            }
-        }
-        else
-        {
-            current_state = STATE_DEACCELERATE;
+            test_state = 1;
         }
         uart_receiver.finsh_flag = 0;
     }
