@@ -126,8 +126,8 @@ void tu2pid_update(float kp, float ki, float kd)
     turn_loop2.Kp = kp;
     turn_loop2.Ki = ki;
     turn_loop2.Kd = kd;
-    turn_loop2.OutMax = +300;
-    turn_loop2.OutMin = -300;
+    turn_loop2.OutMax = +500;
+    turn_loop2.OutMin = -500;
     turn_loop2.ErrorIntMax = 200;
 }
 

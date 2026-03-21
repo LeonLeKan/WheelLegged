@@ -9,7 +9,7 @@
 #include "pid.h"
 #include "save_manager.h" 
 
-#define XYMIN_BIAS 0.01f
+#define XYMIN_BIAS 0.1f
 
 extern waypoint_node_t *current_target;
 

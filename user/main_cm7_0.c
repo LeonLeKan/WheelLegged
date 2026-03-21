@@ -15,8 +15,8 @@
 
 #define WIFI_SSID_TEST "Hhhyt"
 #define WIFI_PASSWORD_TEST "18273645"
-#define TCP_TARGET_IP "192.168.137.1"
-#define TCP_TARGET_PORT "8086"
+#define UDP_TARGET_IP "192.168.137.1"
+#define UDP_TARGET_PORT "8086"
 #define WIFI_LOCAL_PORT "6666"
 
 #define BUTTON_LF (P20_0)
@@ -156,6 +156,7 @@ int main(void)
 
                 // 如果需要，添加wifi
                 wifi_send_data();
+                system_delay_ms(10);
                 // wifi_send_image();
             }
         }
@@ -189,9 +190,9 @@ void wifi_init(void)
     if (0 == WIFI_SPI_AUTO_CONNECT)
     {
         while (wifi_spi_socket_connect(
-            "TCP",
-            TCP_TARGET_IP,
-            TCP_TARGET_PORT,
+            "UDP",
+            UDP_TARGET_IP,
+            UDP_TARGET_PORT,
             WIFI_LOCAL_PORT))
         {
             printf("\r\n Connect UDP Servers error, try again.");
@@ -206,20 +207,20 @@ void wifi_init(void)
 void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
-    // oscilloscope_data.data[0] = imu.output.position_x;
-    // oscilloscope_data.data[1] = imu.output.position_y;
-    // oscilloscope_data.data[2] = current_target->waypoint.x;
-    // oscilloscope_data.data[3] = current_target->waypoint.y;
+    oscilloscope_data.data[0] = imu.output.position_x;
+    oscilloscope_data.data[1] = imu.output.position_y;
+    oscilloscope_data.data[2] = current_target->waypoint.x;
+    oscilloscope_data.data[3] = current_target->waypoint.y;
     // oscilloscope_data.data[0] = uart_receiver.channel[0];
     // oscilloscope_data.data[1] = uart_receiver.channel[1];
     // oscilloscope_data.data[2] = uart_receiver.channel[2];
     // oscilloscope_data.data[3] = uart_receiver.channel[3];
     // oscilloscope_data.data[4] = uart_receiver.channel[4];
     // oscilloscope_data.data[5] = uart_receiver.channel[5];
-    oscilloscope_data.data[0] = yaw_loop.Target;
-    oscilloscope_data.data[1] = yaw_loop.Actual;
+    // oscilloscope_data.data[0] = yaw_loop.Target;
+    // oscilloscope_data.data[1] = yaw_loop.Actual;
     // oscilloscope_data.data[0] = imu.output.euler[2];
-    oscilloscope_data.channel_num = 2;
+    oscilloscope_data.channel_num = 4;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 

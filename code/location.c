@@ -8,6 +8,7 @@ waypoint_node_t *current_target = NULL;
 
 static double direction_calculate(double x_target, double y_target, double x_now, double y_now, double current_yaw)
 {
+    static float last_raw_yaw = 0.0f, target_yaw = 0.0f;
     double dx = x_target - x_now;
     double dy = y_target - y_now;
 
@@ -16,8 +17,16 @@ static double direction_calculate(double x_target, double y_target, double x_now
         return 0.0;
     }
 
-    double target_angle = atan2(dy, dx);
-    return target_angle * RAD_TO_DEG;
+    double yaw = atan2(dy, dx) * RAD_TO_DEG;
+
+    double delta = yaw - last_raw_yaw;
+    if(delta > 180.f) delta -= 360;
+    if(delta < -180.f) delta += 360;
+
+    last_raw_yaw = yaw;
+
+    target_yaw += delta;
+    return target_yaw;
 }
 
 static void advance_to_next_waypoint(void)
@@ -61,10 +70,11 @@ void location_update(void)
     double target_deg = direction_calculate(x_tgt, y_tgt, x_now, y_now, yaw_now);
 
     yaw_loop.Target = target_deg;
+    yaw_loop.Actual = imu.output.euler[2];
 
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
-    if (dx < XYMIN_BIAS && dy < XYMIN_BIAS) 
+    if (fabs(dx) < XYMIN_BIAS && fabs(dy) < XYMIN_BIAS)
     {
         advance_to_next_waypoint();
     }
