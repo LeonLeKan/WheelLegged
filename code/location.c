@@ -76,6 +76,7 @@ void location_update(void)
     double dy = y_tgt - y_now;
     if (fabs(dx) < XYMIN_BIAS && fabs(dy) < XYMIN_BIAS)
     {
+        current_state = STATE_THUNDER;
         advance_to_next_waypoint();
     }
 
