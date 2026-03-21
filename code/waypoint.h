@@ -15,7 +15,7 @@ typedef enum {
 typedef struct
 {
     double x, y;  
-    point_type_t type;
+    // point_type_t type;
 } waypoint_t;
 
 typedef struct
