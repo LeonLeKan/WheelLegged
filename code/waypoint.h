@@ -5,9 +5,17 @@
 
 #define MAX_NODES 50
 
+typedef enum {
+    ELEMENT_NORMAL,
+    ELEMENT_THUNDER,
+    ELEMENT_SINGLE_SIDE,
+    ELEMENT_STAIRS
+} point_type_t;
+
 typedef struct
 {
     double x, y;  
+    point_type_t type;
 } waypoint_t;
 
 typedef struct
