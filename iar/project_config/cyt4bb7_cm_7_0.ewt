@@ -1551,23 +1551,32 @@
                 </file>
             </group>
             <file>
+                <name>$PROJ_DIR$\..\..\code\imu.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\imu.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\code\ins.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\code\ins.h</name>
             </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\save_manager.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\save_manager.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\waypoint.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\waypoint.h</name>
+            </file>
         </group>
         <group>
             <name>ui</name>
-            <group>
-                <name>ahrs_ui</name>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\ahrs_ui.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\ahrs_ui.h</name>
-                </file>
-            </group>
             <file>
                 <name>$PROJ_DIR$\..\..\code\menu.c</name>
             </file>
@@ -1581,10 +1590,10 @@
                 <name>$PROJ_DIR$\..\..\code\points_display.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\code\save_manager.c</name>
+                <name>$PROJ_DIR$\..\..\code\save_manager_ui.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\code\save_manager.h</name>
+                <name>$PROJ_DIR$\..\..\code\save_manager_ui.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\code\screen_interface.c</name>
@@ -1603,22 +1612,10 @@
             <name>$PROJ_DIR$\..\..\code\image.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\code\imu.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\code\imu.h</name>
-        </file>
-        <file>
             <name>$PROJ_DIR$\..\..\code\small_driver_uart_control.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\code\small_driver_uart_control.h</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\code\waypoint.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\code\waypoint.h</name>
         </file>
     </group>
     <group>

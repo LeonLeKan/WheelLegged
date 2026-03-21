@@ -50,6 +50,6 @@ void waypoint_list_clear(waypoint_list_t* list);
 
 void waypoint_list_save_to_flash(waypoint_list_t *list, uint32 flash_page);
 bool waypoint_list_load_from_flash(waypoint_list_t *list, uint32 flash_page);
-
+void waypoint_list_clear_flash_page(uint32 flash_page);
 
 #endif

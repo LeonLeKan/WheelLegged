@@ -2,14 +2,14 @@
 #include "imu.h"
 #include "small_driver_uart_control.h"
 #include "screen_interface.h"
-#include "ahrs_ui.h"
+#include "ins.h"
 #include "menu.h"
 #include "image.h"
 #include "servo.h"
 #include "control.h"
 #include "control_state.h"
 #include "connecting_rod.h"
-#include "save_manager.h"
+#include "save_manager_ui.h"
 #include "pid.h"
 #include "location.h"
 
@@ -271,8 +271,8 @@ void handle_channel_245(void)
     {
         // Channel 2: 在末尾添加当前位置点
         waypoint_t point;
-        ahrs_get_current_position(&point.x, &point.y);
-        ahrs_add_current(&waypoints, waypoints.tail, point);
+        ins_get_current_position(&point.x, &point.y);
+        ins_add_current(&waypoints, waypoints.tail, point);
     }
 
     else if (last_ch4 != uart_receiver.channel[4])
@@ -285,7 +285,7 @@ void handle_channel_245(void)
     {
         // Channel 5: 保存到Flash，存入当前激活的存档（开机默认为0号存档）
         waypoint_list_save_to_flash(&waypoints,
-                                    AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx);
+                                    INS_FLASH_START_PAGE + save_manager_instance.active_save_idx);
     }
     last_ch2 = uart_receiver.channel[2];
     last_ch4 = uart_receiver.channel[4];

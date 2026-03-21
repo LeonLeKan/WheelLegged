@@ -127,7 +127,7 @@ void waypoint_list_save_to_flash(waypoint_list_t *list, uint32 flash_page)
         flash_union_buffer[index++].uint32_type = converter.buf[1];
         now_node = now_node->next;
     }
-    // flash_union_buffer[0] : 一共有几个uint32的数据
+    // flash_union_buffer[0] : 一共有几个uint32的数据(包括第0个位置)
     flash_union_buffer[0].int32_type = index;
     
     flash_erase_page(0, flash_page);
@@ -142,7 +142,7 @@ bool waypoint_list_load_from_flash(waypoint_list_t *list, uint32 flash_page)
     flash_read_page_to_buffer(0, flash_page, FLASH_PAGE_LENGTH);
     // 先读取一共有几个点
     int points_cnt = (flash_union_buffer[0].int32_type - 1) / 4;
-    if(points_cnt < 0 || points_cnt > 10000) // 点数非法，失败
+    if(points_cnt < 1 || points_cnt > 10000) // 点数非法，失败
         return false;
     double t_x, t_y;
     int index = 1;
@@ -161,5 +161,13 @@ bool waypoint_list_load_from_flash(waypoint_list_t *list, uint32 flash_page)
             (waypoint_t) { t_x, t_y }, (waypoint_screen_param_t) { t_x, t_y, 0, 0 });
     }
     return true;
+}
+
+void waypoint_list_clear_flash_page(uint32 flash_page)
+{
+    flash_buffer_clear();
+    flash_union_buffer[0].uint32_type = 1;
+    flash_erase_page(0, flash_page);
+    flash_write_page_from_buffer(0, flash_page, 1);
 }
 
