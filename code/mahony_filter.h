@@ -17,6 +17,8 @@ typedef struct {
     float integralFB[3];  // 误差积分项
     MahonyFilterParam param;
 
+    float last_yaw; // 保存上一次yaw角，用于unwrap
+
     // 欧拉角输出
     struct {
         float euler[3];   // 欧拉角 [roll, pitch, yaw] (deg)
