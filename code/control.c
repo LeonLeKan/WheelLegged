@@ -83,7 +83,7 @@ void control_state_accelerate(void)
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
     yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
     //tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
-    tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     //threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
     error_calc_near_line = (uint8_t)nearl->data_int;
@@ -127,7 +127,7 @@ void control_state_deaccelerate(void)
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
     yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
     //tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
-    tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     //threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
     error_calc_near_line = (uint8_t)nearl->data_int;
@@ -163,7 +163,7 @@ void control_state_forward(void)
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
     //tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
-    tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     //threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
     error_calc_near_line = (uint8_t)nearl->data_int;
@@ -217,7 +217,7 @@ void control_state_decline_front_single_side(void)
 
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
-    tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     // threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
     error_calc_near_line = (uint8_t)nearl->data_int;
@@ -261,7 +261,7 @@ void control_state_stand_front_single_side(void)
 
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
-    tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     // threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
     error_calc_near_line = (uint8_t)nearl->data_int;
@@ -324,7 +324,7 @@ void control_state_single_side(void)
 
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
-    tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     snpid_update(snkp->data_float, snki->data_float, snkd->data_float);
     // threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
@@ -388,7 +388,7 @@ void control_state_thunder(void)
 
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
-    tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     // threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
     error_calc_near_line = (uint8_t)nearl->data_int;
@@ -484,7 +484,7 @@ void control_state_jolt(void)
 
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
-    tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     snpid_update(snkp->data_float, snki->data_float, snkd->data_float);
     // threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
@@ -546,7 +546,7 @@ void control_state_test(void)
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
     //tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
-    tu2pid_update(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    tu2pid_update_t(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     //threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
     error_calc_near_line = (uint8_t)nearl->data_int;

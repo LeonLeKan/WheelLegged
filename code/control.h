@@ -21,7 +21,6 @@ void control_state_decline_front_single_side(void);
 void control_state_stand_front_single_side(void);
 void control_state_single_side(void);
 void control_state_thunder(void);
-void control_state_accumulate(void);
 void control_state_jump_up(void);
 void control_state_jolt(void);
 void control_state_test(void);

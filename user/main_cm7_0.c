@@ -85,7 +85,7 @@ int main(void)
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi
-    wifi_init();
+    //wifi_init();
 
     // 屏幕初始化
     pit_ms_init(SCREEN_UPDATE_PIT, SCREEN_UPDATE_INTERVAL_MS);
@@ -156,7 +156,6 @@ int main(void)
 
                 // 如果需要，添加wifi
                 wifi_send_data();
-                system_delay_ms(10);
                 // wifi_send_image();
             }
         }
@@ -222,6 +221,7 @@ void wifi_send_data(void)
     // oscilloscope_data.data[0] = imu.output.euler[2];
     oscilloscope_data.channel_num = 4;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
+    system_delay_ms(10);
 }
 
 void wifi_send_image(void)

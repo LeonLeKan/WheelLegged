@@ -1,4 +1,5 @@
 #include "pid.h"
+#include "menu.h"
 
 volatile PID_t angle_loop1;
 volatile PID_t angle_loop2;
@@ -121,13 +122,23 @@ void tu1_zero(void)
     turn_loop1.Kd = 0;
 }
 
-void tu2pid_update(float kp, float ki, float kd)
+void tu2pid_update_f(float kp, float ki, float kd)
 {
     turn_loop2.Kp = kp;
     turn_loop2.Ki = ki;
     turn_loop2.Kd = kd;
-    turn_loop2.OutMax = +500;
-    turn_loop2.OutMin = -500;
+    turn_loop2.OutMax = +turnamf->data_int;
+    turn_loop2.OutMin = -turnamf->data_int;
+    turn_loop2.ErrorIntMax = 200;
+}
+
+void tu2pid_update_t(float kp, float ki, float kd)
+{
+    turn_loop2.Kp = kp;
+    turn_loop2.Ki = ki;
+    turn_loop2.Kd = kd;
+    turn_loop2.OutMax = +turnamt->data_int;
+    turn_loop2.OutMin = -turnamt->data_int;
     turn_loop2.ErrorIntMax = 200;
 }
 
