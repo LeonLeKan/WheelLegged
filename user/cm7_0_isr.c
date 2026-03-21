@@ -68,7 +68,7 @@ void pit0_ch2_isr() // 定时器通道 2 周期中断服务函数
     if (current_state == STATE_ACCELERATE ||
         current_state == STATE_FORWARD)
     {
-        location_update();
+        //location_update();
     }
 }
 
