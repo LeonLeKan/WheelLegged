@@ -41,7 +41,7 @@ void show_saves()
     screen_printf(16, 16 * (i + 1), "Exit");
 }
 
-// 启动ahrs显点
+// 启动惯性导航显点
 void show_ins_points(void)
 {
     // 初始化点显示模块
