@@ -9,6 +9,7 @@ void Mahony_Init(MahonyFilter* filter, MahonyFilterParam* param) {
     filter->param.Kp = param->Kp;
     filter->param.Ki = param->Ki;
     filter->param.dt = param->dt;
+    filter->last_yaw = 0;
 }
 
 // 核心更新函数
@@ -72,5 +73,13 @@ void Mahony_Update(MahonyFilter* filter, float gyro[3], float acc[3]) {
     
     filter->output.euler[0] = atan2f(2.0f * (q0 * q1 + q2 * q3), q0 * q0 - q1 * q1 - q2 * q2 + q3 * q3) * RAD_TO_DEG;
     filter->output.euler[1] = asinf(2.0f * (q0 * q2 - q1 * q3)) * RAD_TO_DEG;
-    filter->output.euler[2] = atan2f(2.0f * (q0 * q3 + q1 * q2), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * RAD_TO_DEG;
+    float yaw = atan2f(2.0f * (q0 * q3 + q1 * q2), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * RAD_TO_DEG;
+    
+    // yaw unwrap
+    float delta = yaw - filter->last_yaw;
+    if(delta > 180.f) delta -= 360;
+    if(delta < -180.f) delta += 380;
+
+    filter->output.euler[2] = filter->last_yaw + delta;
+    filter->last_yaw = yaw;
 }
