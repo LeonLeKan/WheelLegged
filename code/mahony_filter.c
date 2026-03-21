@@ -80,6 +80,10 @@ void Mahony_Update(MahonyFilter* filter, float gyro[3], float acc[3]) {
     if(delta > 180.f) delta -= 360;
     if(delta < -180.f) delta += 360;
 
-    filter->output.euler[2] += delta;
+    float yaw_output = filter->output.euler[2] + delta;
+    // 防止输出大于360
+    if(yaw_output > 360.f) yaw_output -= 360;
+    if(yaw_output < -360.f) yaw_output += 360;
+    
     filter->last_yaw = yaw;
 }
