@@ -19,7 +19,7 @@ bool save_manager_load(void)
 {
     bool ret = waypoint_list_load_from_flash(
         save_manager_instance.active_save,
-        AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx
+        INS_FLASH_START_PAGE + save_manager_instance.active_save_idx
     );
     return ret;
 }

@@ -1577,15 +1577,6 @@
         </group>
         <group>
             <name>ui</name>
-            <group>
-                <name>ahrs_ui</name>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\ahrs_ui.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\ahrs_ui.h</name>
-                </file>
-            </group>
             <file>
                 <name>$PROJ_DIR$\..\..\code\menu.c</name>
             </file>

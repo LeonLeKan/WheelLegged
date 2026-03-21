@@ -1,13 +1,13 @@
 #include "save_manager_ui.h"
 #include "points_display.h"
 #include "screen_interface.h"
-#include "ahrs_ui.h"
+#include "ins.h"
 
 // 屏幕显示函数
 void show_saves();
-void show_ahrs_points(void);
+void show_ins_points(void);
 // 回调函数
-void ahrs_save_callback(void);
+void ins_save_callback(void);
 
 
 // ==================== 接口函数 ======================
@@ -17,7 +17,7 @@ void save_manager_show(void)
     ips200_set_color(RGB565_BLACK, RGB565_WHITE);
     ips200_clear();
     save_manager_instance.showing_points = 0;
-    screen_printf(0, 0, "AHRS Saves:");
+    screen_printf(0, 0, "Saves:");
     show_saves();
 }
 
@@ -42,15 +42,15 @@ void show_saves()
 }
 
 // 启动ahrs显点
-void show_ahrs_points(void)
+void show_ins_points(void)
 {
     // 初始化点显示模块
     points_display_config_t config;
     config.waypoint_list = save_manager_instance.active_save;
-    config.get_current_position_callback = ahrs_get_current_position; // 获取当前定位点的回调
-    config.plane_to_waypoint_callback = ahrs_plane_to_waypoint;   // 平面坐标转换为航点的回调
-    config.add_point_next_callback = ahrs_add_current;          // 添加当前点的回调
-    config.save_callback = ahrs_save_callback;                 // 保存回调
+    config.get_current_position_callback = ins_get_current_position; // 获取当前定位点的回调
+    config.plane_to_waypoint_callback = ins_plane_to_waypoint;   // 平面坐标转换为航点的回调
+    config.add_point_next_callback = ins_add_current;          // 添加当前点的回调
+    config.save_callback = ins_save_callback;                 // 保存回调
     config.quit_callback = save_manager_show;                 // 退出回调
 
     points_display_configure(&config);
@@ -59,11 +59,11 @@ void show_ahrs_points(void)
 }
 
 // ==================== 辅助函数 ========================
-void ahrs_save_callback(void)
+void ins_save_callback(void)
 {
     waypoint_list_save_to_flash(
         save_manager_instance.active_save,
-        AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx
+        INS_FLASH_START_PAGE + save_manager_instance.active_save_idx
     );
 }
 // ==================== 按键处理函数 ======================
@@ -113,7 +113,7 @@ void save_manager_key_ok_pressed(void)
     // todo: 根据类型加载
     bool ret = waypoint_list_load_from_flash(
         save_manager_instance.active_save,
-        AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx
+        INS_FLASH_START_PAGE + save_manager_instance.active_save_idx
     );
     if (!ret)
     {
@@ -122,7 +122,7 @@ void save_manager_key_ok_pressed(void)
     }
 
     save_manager_instance.showing_points = 1;
-    show_ahrs_points();
+    show_ins_points();
 }
 
 void save_manager_key_left_pressed(void)

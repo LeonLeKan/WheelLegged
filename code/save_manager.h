@@ -3,7 +3,7 @@
 
 #include "waypoint.h"
 
-#define AHRS_FLASH_START_PAGE 2
+#define INS_FLASH_START_PAGE 2
 #define GPS_FLASH_START_PAGE 10
 
 typedef struct
