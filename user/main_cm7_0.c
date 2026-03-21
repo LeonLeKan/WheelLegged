@@ -277,12 +277,15 @@ void handle_channel_245(void)
         waypoint_list_remove(&waypoints, waypoints.tail);
     }
 
-    else if(last_ch4 != uart_receiver.channel[5])
+    else if(last_ch5 != uart_receiver.channel[5])
     {
         // Channel 5: 保存到Flash，存入当前激活的存档（开机默认为0号存档）
         waypoint_list_save_to_flash(&waypoints, 
             AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx);
     }
+    last_ch2 = uart_receiver.channel[2];
+    last_ch4 = uart_receiver.channel[4];
+    last_ch5 = uart_receiver.channel[5];
 }
 
 void remote_control(void)
