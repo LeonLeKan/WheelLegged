@@ -24,6 +24,11 @@ bool save_manager_load(int save_idx)
     return ret;
 }
 
+void save_manager_clear_save(int save_idx)
+{
+    waypoint_list_clear_flash_page(INS_FLASH_START_PAGE + save_manager_instance.active_save_idx);
+}
+
 waypoint_list_t* save_manager_get_active_save(void)
 {
     return save_manager_instance.active_save;
