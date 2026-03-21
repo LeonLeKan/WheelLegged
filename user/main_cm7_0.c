@@ -114,7 +114,7 @@ int main(void)
             imu_state_show();
 
             // 如果需要，添加wifi
-            // wifi_send_data();
+            wifi_send_data();
             // wifi_send_image();
         }
 
@@ -210,14 +210,15 @@ void wifi_send_data(void)
     // oscilloscope_data.data[1] = imu.output.position_y;
     // oscilloscope_data.data[2] = current_target->waypoint.x;
     // oscilloscope_data.data[3] = current_target->waypoint.y;
-    oscilloscope_data.data[0] = uart_receiver.channel[0];
-    oscilloscope_data.data[1] = uart_receiver.channel[1];
-    oscilloscope_data.data[2] = uart_receiver.channel[2];
-    oscilloscope_data.data[3] = uart_receiver.channel[3];
-    oscilloscope_data.data[4] = uart_receiver.channel[4];
-    oscilloscope_data.data[5] = uart_receiver.channel[5];
-    oscilloscope_data.data[6] = yaw_loop.Target;
-    oscilloscope_data.channel_num = 7;
+    // oscilloscope_data.data[0] = uart_receiver.channel[0];
+    // oscilloscope_data.data[1] = uart_receiver.channel[1];
+    // oscilloscope_data.data[2] = uart_receiver.channel[2];
+    // oscilloscope_data.data[3] = uart_receiver.channel[3];
+    // oscilloscope_data.data[4] = uart_receiver.channel[4];
+    // oscilloscope_data.data[5] = uart_receiver.channel[5];
+    // oscilloscope_data.data[0] = yaw_loop.Target;
+    oscilloscope_data.data[0] = imu.output.euler[2];
+    oscilloscope_data.channel_num = 1;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 
