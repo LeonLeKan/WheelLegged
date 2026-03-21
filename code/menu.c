@@ -10,7 +10,7 @@ volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 MENU *RootMenu, *Balance, *Image, *Element, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *pzero, *pinit, *show,
     *thre, *farl, *nearl, *saveim,
-    *change, *snspeed, *rollba, *turnamf, *turnamt, *saveel;
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *testnum, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
@@ -131,7 +131,8 @@ void create_2nd_menu(void)
     rollba = createMenu("rollba", 2, 3, MENU_TYPE_FLOAT, NULL);
     turnamf = createMenu("turnamf", 2, 4, MENU_TYPE_INT, NULL);
     turnamt = createMenu("turnamt", 2, 5, MENU_TYPE_INT, NULL);
-    saveel = createMenu("save", 2, 6, MENU_TYPE_FUNCTION, menu_save);
+    testnum = createMenu("testnum", 2, 6, MENU_TYPE_INT, NULL);
+    saveel = createMenu("save", 2, 7, MENU_TYPE_FUNCTION, menu_save);
 
     speed->next = anloop1;
     anloop1->last = speed;
@@ -175,8 +176,10 @@ void create_2nd_menu(void)
     turnamf->last = rollba;
     turnamf->next = turnamt;
     turnamt->last = turnamf;
-    turnamt->next = saveel;
-    saveel->last = turnamt;
+    turnamt->next = testnum;
+    testnum->last = turnamt;
+    testnum->next = saveel;
+    saveel->last = testnum;
     saveel->next = change;
     change->last = saveel;
 
@@ -206,6 +209,7 @@ void create_2nd_menu(void)
     rollba->parent = Element;
     turnamf->parent = Element;
     turnamt->parent = Element;
+    testnum->parent = Element;
     saveel->parent = Element;
 }
 

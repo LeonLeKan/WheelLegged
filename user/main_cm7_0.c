@@ -85,7 +85,7 @@ int main(void)
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi
-    //wifi_init();
+    // wifi_init();
 
     // 屏幕初始化
     pit_ms_init(SCREEN_UPDATE_PIT, SCREEN_UPDATE_INTERVAL_MS);
@@ -114,7 +114,7 @@ int main(void)
             imu_state_show();
 
             // 如果需要，添加wifi
-            wifi_send_data();
+            // wifi_send_data();
             // wifi_send_image();
         }
 
@@ -155,7 +155,7 @@ int main(void)
                 }
 
                 // 如果需要，添加wifi
-                wifi_send_data();
+                // wifi_send_data();
                 // wifi_send_image();
             }
         }
@@ -206,20 +206,20 @@ void wifi_init(void)
 void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
-    oscilloscope_data.data[0] = imu.output.position_x;
-    oscilloscope_data.data[1] = imu.output.position_y;
-    oscilloscope_data.data[2] = current_target->waypoint.x;
-    oscilloscope_data.data[3] = current_target->waypoint.y;
+    // oscilloscope_data.data[0] = imu.output.position_x;
+    // oscilloscope_data.data[1] = imu.output.position_y;
+    // oscilloscope_data.data[2] = current_target->waypoint.x;
+    // oscilloscope_data.data[3] = current_target->waypoint.y;
     // oscilloscope_data.data[0] = uart_receiver.channel[0];
     // oscilloscope_data.data[1] = uart_receiver.channel[1];
     // oscilloscope_data.data[2] = uart_receiver.channel[2];
     // oscilloscope_data.data[3] = uart_receiver.channel[3];
     // oscilloscope_data.data[4] = uart_receiver.channel[4];
     // oscilloscope_data.data[5] = uart_receiver.channel[5];
-    // oscilloscope_data.data[0] = yaw_loop.Target;
-    // oscilloscope_data.data[1] = yaw_loop.Actual;
+    oscilloscope_data.data[0] = yaw_loop.Target;
+    oscilloscope_data.data[1] = yaw_loop.Actual;
     // oscilloscope_data.data[0] = imu.output.euler[2];
-    oscilloscope_data.channel_num = 4;
+    oscilloscope_data.channel_num = 2;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
     system_delay_ms(10);
 }
@@ -262,11 +262,23 @@ void handle_channel_245(void)
 {
     static uint16 last_ch2 = 0, last_ch4 = 0, last_ch5 = 0;
 
-    if(last_ch2 == 0) {last_ch2 = uart_receiver.channel[2]; return;}
-    if(last_ch4 == 0) {last_ch4 = uart_receiver.channel[4]; return;}
-    if(last_ch5 == 0) {last_ch5 = uart_receiver.channel[5]; return;}
+    if (last_ch2 == 0)
+    {
+        last_ch2 = uart_receiver.channel[2];
+        return;
+    }
+    if (last_ch4 == 0)
+    {
+        last_ch4 = uart_receiver.channel[4];
+        return;
+    }
+    if (last_ch5 == 0)
+    {
+        last_ch5 = uart_receiver.channel[5];
+        return;
+    }
 
-    if(last_ch2 != uart_receiver.channel[2])
+    if (last_ch2 != uart_receiver.channel[2])
     {
         // Channel 2: 在末尾添加当前位置点
         waypoint_t point;
@@ -274,17 +286,17 @@ void handle_channel_245(void)
         ahrs_add_current(&waypoints, waypoints.tail, point);
     }
 
-    else if(last_ch4 != uart_receiver.channel[4])
+    else if (last_ch4 != uart_receiver.channel[4])
     {
         // Channel 4: 删除末尾的点
         waypoint_list_remove(&waypoints, waypoints.tail);
     }
 
-    else if(last_ch5 != uart_receiver.channel[5])
+    else if (last_ch5 != uart_receiver.channel[5])
     {
         // Channel 5: 保存到Flash，存入当前激活的存档（开机默认为0号存档）
-        waypoint_list_save_to_flash(&waypoints, 
-            AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx);
+        waypoint_list_save_to_flash(&waypoints,
+                                    AHRS_FLASH_START_PAGE + save_manager_instance.active_save_idx);
     }
     last_ch2 = uart_receiver.channel[2];
     last_ch4 = uart_receiver.channel[4];
