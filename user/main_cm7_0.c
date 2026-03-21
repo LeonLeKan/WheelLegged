@@ -216,9 +216,10 @@ void wifi_send_data(void)
     // oscilloscope_data.data[3] = uart_receiver.channel[3];
     // oscilloscope_data.data[4] = uart_receiver.channel[4];
     // oscilloscope_data.data[5] = uart_receiver.channel[5];
-    // oscilloscope_data.data[0] = yaw_loop.Target;
-    oscilloscope_data.data[0] = imu.output.euler[2];
-    oscilloscope_data.channel_num = 1;
+    oscilloscope_data.data[0] = yaw_loop.Target;
+    oscilloscope_data.data[1] = yaw_loop.Actual;
+    // oscilloscope_data.data[0] = imu.output.euler[2];
+    oscilloscope_data.channel_num = 2;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 

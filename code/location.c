@@ -20,19 +20,6 @@ static double direction_calculate(double x_target, double y_target, double x_now
     return target_angle * RAD_TO_DEG;
 }
 
-static float normalize_deg(float ang)
-{
-    while (ang > 180.0f)
-    {
-        ang -= 360.0f;
-    }
-    while (ang <= -180.0f)
-    {
-        ang += 360.0f;
-    }
-    return ang;
-}
-
 static void advance_to_next_waypoint(void)
 {
     if (current_target->next)
@@ -72,10 +59,8 @@ void location_update(void)
     double y_tgt = current_target->waypoint.y;
 
     double target_deg = direction_calculate(x_tgt, y_tgt, x_now, y_now, yaw_now);
-    target_deg = normalize_deg(target_deg);
 
     yaw_loop.Target = target_deg;
-    yaw_loop.Actual = normalize_deg(yaw_now);
 
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
