@@ -114,7 +114,7 @@ int main(void)
             imu_state_show();
 
             // 如果需要，添加wifi
-            // wifi_send_data();
+            wifi_send_data();
             // wifi_send_image();
         }
 
@@ -155,7 +155,7 @@ int main(void)
                 }
 
                 // 如果需要，添加wifi
-                // wifi_send_data();
+                wifi_send_data();
                 // wifi_send_image();
             }
         }
@@ -208,9 +208,8 @@ void wifi_send_data(void)
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
     oscilloscope_data.data[0] = yaw_loop.Target;
     oscilloscope_data.data[1] = yaw_loop.Actual;
-    oscilloscope_data.channel_num = 2;
+    oscilloscope_data.channel_num = 4;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
-    system_delay_ms(10);
 }
 
 void wifi_send_image(void)

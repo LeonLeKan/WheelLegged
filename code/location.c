@@ -5,8 +5,9 @@
 #include "control_state.h"
 
 waypoint_node_t *current_target = NULL;
+float yaw_memory = 0.0f;
 
-static double direction_calculate(double x_target, double y_target, double x_now, double y_now, double current_yaw)
+static double direction_calculate(double x_target, double y_target, double x_now, double y_now)
 {
     static float last_raw_yaw = 0.0f, target_yaw = 0.0f;
     double dx = x_target - x_now;
@@ -41,11 +42,6 @@ static void advance_to_next_waypoint(void)
     }
 }
 
-void location_reset(void)
-{
-    current_target = NULL;
-}
-
 void location_update(void)
 {
     waypoint_list_t *list = save_manager_get_active_save();
@@ -67,7 +63,7 @@ void location_update(void)
     double x_tgt = current_target->waypoint.x;
     double y_tgt = current_target->waypoint.y;
 
-    double target_deg = direction_calculate(x_tgt, y_tgt, x_now, y_now, yaw_now);
+    double target_deg = direction_calculate(x_tgt, y_tgt, x_now, y_now);
 
     yaw_loop.Target = target_deg;
     yaw_loop.Actual = imu.output.euler[2];
@@ -76,6 +72,7 @@ void location_update(void)
     double dy = y_tgt - y_now;
     if (fabs(dx) < XYMIN_BIAS && fabs(dy) < XYMIN_BIAS)
     {
+        yaw_memory = yaw_loop.Actual;
         current_state = STATE_THUNDER;
         advance_to_next_waypoint();
     }
