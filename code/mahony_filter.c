@@ -84,6 +84,8 @@ void Mahony_Update(MahonyFilter* filter, float gyro[3], float acc[3]) {
     // 防止输出大于360
     if(yaw_output > 360.f) yaw_output -= 360;
     if(yaw_output < -360.f) yaw_output += 360;
+
+    filter->output.euler[2] = yaw_output;
     
     filter->last_yaw = yaw;
 }
