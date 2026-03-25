@@ -36,7 +36,7 @@ MahonyFilterParam mahony_filter_param = {
 
 RotationCompensationParam rotation_compensation_param = {
     .rotation_thre = 180,
-    .yaw_compensate = -2.8};
+    .yaw_compensate = 2.8};
 
 bool showing_points = false;
 // 用于实现校准后的分层启动
