@@ -52,13 +52,13 @@ void Mahony_Update(MahonyFilter* filter, double gyro[3], double acc[3]) {
     gz += filter->param.Kp * ez;
     
     // 6. 使用校正后的角速度积分更新四元数
-    double q0 = filter->q[0], q1 = filter->q[1], q2 = filter->q[2], q3 = filter->q[3];
+    double q0_last = filter->q[0], q1_last = filter->q[1], q2_last = filter->q[2], q3_last = filter->q[3];
     double half_dt = 0.5f * filter->param.dt;
     
-    q0 += (-q1*gx - q2*gy - q3*gz) * half_dt;
-    q1 += ( q0*gx + q2*gz - q3*gy) * half_dt;
-    q2 += ( q0*gy - q1*gz + q3*gx) * half_dt;
-    q3 += ( q0*gz + q1*gy - q2*gx) * half_dt;
+    float q0 = q0_last + (-q1_last*gx - q2_last*gy - q3_last*gz) * half_dt;
+    float q1 = q1_last + ( q0_last*gx + q2_last*gz - q3_last*gy) * half_dt;
+    float q2 = q2_last + ( q0_last*gy - q1_last*gz + q3_last*gx) * half_dt;
+    float q3 = q3_last + ( q0_last*gz + q1_last*gy - q2_last*gx) * half_dt;
     
     // 7. 归一化四元数
     norm = sqrt(q0*q0 + q1*q1 + q2*q2 + q3*q3);
@@ -73,19 +73,21 @@ void Mahony_Update(MahonyFilter* filter, double gyro[3], double acc[3]) {
     
     filter->output.euler[0] = atan2f(2.0f * (q0 * q1 + q2 * q3), q0 * q0 - q1 * q1 - q2 * q2 + q3 * q3) * RAD_TO_DEG;
     filter->output.euler[1] = asinf(2.0f * (q0 * q2 - q1 * q3)) * RAD_TO_DEG;
-    double yaw = atan2f(2.0f * (q0 * q3 + q1 * q2), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * RAD_TO_DEG;
+    double yaw = atan2f(2.0f * (q0 * q3 + q1 * q2), -2*q2*q2 - 2*q3*q3 + 1) * RAD_TO_DEG;
     
-    // yaw unwrap
-    double delta = yaw - filter->last_yaw;
-    if(delta > 180.f) delta -= 360;
-    if(delta < -180.f) delta += 360;
+    // // yaw unwrap
+    // double delta = yaw - filter->last_yaw;
+    // if(delta > 180.f) delta -= 360;
+    // if(delta < -180.f) delta += 360;
 
-    double yaw_output = filter->output.euler[2] + delta;
-    // 防止输出大于360
-    if(yaw_output > 360.f) yaw_output -= 360;
-    if(yaw_output < -360.f) yaw_output += 360;
+    // double yaw_output = filter->output.euler[2] + delta;
+    // // 防止输出大于360
+    // if(yaw_output > 360.f) yaw_output -= 360;
+    // if(yaw_output < -360.f) yaw_output += 360;
 
-    filter->output.euler[2] = yaw_output;
+    // filter->output.euler[2] = yaw_output;
     
-    filter->last_yaw = yaw;
+    // filter->last_yaw = yaw;
+
+    filter->output.euler[2] = yaw;
 }
