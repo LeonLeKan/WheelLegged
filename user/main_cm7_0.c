@@ -12,12 +12,7 @@
 #include "save_manager_ui.h"
 #include "pid.h"
 #include "location.h"
-
-#define WIFI_SSID_TEST "Hhhyt"
-#define WIFI_PASSWORD_TEST "18273645"
-#define UDP_TARGET_IP "192.168.137.1"
-#define UDP_TARGET_PORT "8086"
-#define WIFI_LOCAL_PORT "6666"
+#include "wifi.h"
 
 #define BUTTON_LF (P20_0)
 #define BUTTON_RT (P20_1)
@@ -28,10 +23,6 @@
 void gpio_init_all(void);
 void imu_state_show(void);
 void start_imu_calibration(void);
-
-void wifi_init(void);
-void wifi_send_data(void);
-void wifi_send_image(void);
 
 void remote_control(void);
 
@@ -53,8 +44,6 @@ bool showing_points = false;
 bool car_run_state = false;
 
 uint8_t cali_flag = 1;
-
-uint8 image_copy[MT9V03X_H][MT9V03X_W];
 
 int main(void)
 {
@@ -178,52 +167,6 @@ void gpio_init_all(void)
     gpio_init(P21_6, GPI, 1, GPI_PULL_UP);
 }
 
-void wifi_init(void)
-{
-    while (wifi_spi_init(WIFI_SSID_TEST, WIFI_PASSWORD_TEST))
-    {
-        printf("\r\n connect wifi failed. \r\n");
-        system_delay_ms(100);
-    }
-
-    if (0 == WIFI_SPI_AUTO_CONNECT)
-    {
-        while (wifi_spi_socket_connect(
-            "UDP",
-            UDP_TARGET_IP,
-            UDP_TARGET_PORT,
-            WIFI_LOCAL_PORT))
-        {
-            printf("\r\n Connect UDP Servers error, try again.");
-            system_delay_ms(100);
-        }
-    }
-
-    seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_WIFI_SPI);
-    seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, image_copy[0], MT9V03X_W, MT9V03X_H);
-}
-
-void wifi_send_data(void)
-{
-    seekfree_assistant_oscilloscope_struct oscilloscope_data;
-    oscilloscope_data.data[0] = yaw_loop.Target;
-    oscilloscope_data.data[1] = yaw_loop.Actual;
-    oscilloscope_data.channel_num = 4;
-    seekfree_assistant_oscilloscope_send(&oscilloscope_data);
-}
-
-void wifi_send_image(void)
-{
-    if (mt9v03x_finish_flag)
-    {
-        mt9v03x_finish_flag = 0;
-
-        memcpy(image_copy[0], mt9v03x_image[0], MT9V03X_IMAGE_SIZE);
-
-        seekfree_assistant_camera_send();
-    }
-}
-
 void imu_state_show(void)
 {
     switch (imu.state)
@@ -277,7 +220,8 @@ void handle_channel_245(void)
     else if (last_ch4 != uart_receiver.channel[4])
     {
         // Channel 4: 删除末尾的点
-        waypoint_list_remove(&waypoints, waypoints.tail);
+        //waypoint_list_remove(&waypoints, waypoints.tail);
+        current_state = STATE_THUNDER;
     }
 
     else if (last_ch5 != uart_receiver.channel[5])

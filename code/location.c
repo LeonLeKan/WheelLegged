@@ -58,7 +58,6 @@ void location_update(void)
 
     double x_now = imu.output.position_x;
     double y_now = imu.output.position_y;
-    float yaw_now = imu.output.euler[2];
 
     double x_tgt = current_target->waypoint.x;
     double y_tgt = current_target->waypoint.y;
