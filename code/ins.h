@@ -9,9 +9,9 @@ void ins_init(void);
 /// @brief 更新位置估计
 /// @param yaw 弧度
 /// @param v m/s
-void ins_update(float yaw, float v);
+void ins_update(double yaw, double v);
 
-void ins_get_data(float *x_pos, float *y_pos);
+void ins_get_data(double *x_pos, double *y_pos);
 
 void ins_plane_to_waypoint(double x, double y, waypoint_t* waypoint);
 void ins_get_current_position(double* x, double* y);

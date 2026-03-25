@@ -17,26 +17,26 @@ typedef enum {
 typedef struct {
     // 原始传感器数据（传感器坐标系）
     struct {
-        float acc[3];   // 加速度计 (g)
-        float gyro[3];  // 陀螺仪 (deg/s)
+        double acc[3];   // 加速度计 (g)
+        double gyro[3];  // 陀螺仪 (deg/s)
     } raw;
     
     // 校准后数据（机体FLU坐标系）
     struct {
-        float acc[3];   // 转换后的加速度 (g)
-        float gyro[3];  // 减去零偏后的角速度 (deg/s)
+        double acc[3];   // 转换后的加速度 (g)
+        double gyro[3];  // 减去零偏后的角速度 (deg/s)
     } body;
 
     struct {
-        float v_left, v_right;  // 左右轮线速度 (m/s)
-        float speed;            // 前进速度 (m/s)
-        float yaw_rate;         // 编码器计算的yaw角速度 (deg/s)
+        double v_left, v_right;  // 左右轮线速度 (m/s)
+        double speed;            // 前进速度 (m/s)
+        double yaw_rate;         // 编码器计算的yaw角速度 (deg/s)
     } encoder;
 
     // 校准参数
     struct {
-        float gyro_bias[3];      // 陀螺仪零偏
-        float acc_sum[3];        // 加速度校准期间的累积和，用于计算初始姿态
+        double gyro_bias[3];      // 陀螺仪零偏
+        double acc_sum[3];        // 加速度校准期间的累积和，用于计算初始姿态
         uint32_t sample_count;   // 已采集样本数
         uint32_t target_samples; // 目标样本数
         bool is_calibrated;      // 校准完成标志
@@ -44,11 +44,11 @@ typedef struct {
 
     // 输出
     struct {
-        float euler[3];     // 欧拉角 [roll, pitch, yaw] (deg)
-        float gyro[3];      // 角速度 (deg/s)
-        float position_x;   // x位置坐标 (m)
-        float position_y;   // y位置坐标 (m)
-        float speed;        // 速度 (m/s)
+        double euler[3];     // 欧拉角 [roll, pitch, yaw] (deg)
+        double gyro[3];      // 角速度 (deg/s)
+        double position_x;   // x位置坐标 (m)
+        double position_y;   // y位置坐标 (m)
+        double speed;        // 速度 (m/s)
     } output;
 
     imu_state_t state;  // 当前状态

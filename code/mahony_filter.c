@@ -13,10 +13,10 @@ void Mahony_Init(MahonyFilter* filter, MahonyFilterParam* param) {
 }
 
 // 核心更新函数
-void Mahony_Update(MahonyFilter* filter, float gyro[3], float acc[3]) {
-    float gx = gyro[0] * DEG_TO_RAD, gy = gyro[1] * DEG_TO_RAD, gz = gyro[2] * DEG_TO_RAD;
-    float ax = acc[0], ay = acc[1], az = acc[2];
-    float norm, vx, vy, vz, ex, ey, ez;
+void Mahony_Update(MahonyFilter* filter, double gyro[3], double acc[3]) {
+    double gx = gyro[0] * DEG_TO_RAD, gy = gyro[1] * DEG_TO_RAD, gz = gyro[2] * DEG_TO_RAD;
+    double ax = acc[0], ay = acc[1], az = acc[2];
+    double norm, vx, vy, vz, ex, ey, ez;
     
     // 1. 归一化加速度计数据
     norm = sqrt(ax*ax + ay*ay + az*az);
@@ -52,8 +52,8 @@ void Mahony_Update(MahonyFilter* filter, float gyro[3], float acc[3]) {
     gz += filter->param.Kp * ez;
     
     // 6. 使用校正后的角速度积分更新四元数
-    float q0 = filter->q[0], q1 = filter->q[1], q2 = filter->q[2], q3 = filter->q[3];
-    float half_dt = 0.5f * filter->param.dt;
+    double q0 = filter->q[0], q1 = filter->q[1], q2 = filter->q[2], q3 = filter->q[3];
+    double half_dt = 0.5f * filter->param.dt;
     
     q0 += (-q1*gx - q2*gy - q3*gz) * half_dt;
     q1 += ( q0*gx + q2*gz - q3*gy) * half_dt;
@@ -73,14 +73,14 @@ void Mahony_Update(MahonyFilter* filter, float gyro[3], float acc[3]) {
     
     filter->output.euler[0] = atan2f(2.0f * (q0 * q1 + q2 * q3), q0 * q0 - q1 * q1 - q2 * q2 + q3 * q3) * RAD_TO_DEG;
     filter->output.euler[1] = asinf(2.0f * (q0 * q2 - q1 * q3)) * RAD_TO_DEG;
-    float yaw = atan2f(2.0f * (q0 * q3 + q1 * q2), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * RAD_TO_DEG;
+    double yaw = atan2f(2.0f * (q0 * q3 + q1 * q2), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * RAD_TO_DEG;
     
     // yaw unwrap
-    float delta = yaw - filter->last_yaw;
+    double delta = yaw - filter->last_yaw;
     if(delta > 180.f) delta -= 360;
     if(delta < -180.f) delta += 360;
 
-    float yaw_output = filter->output.euler[2] + delta;
+    double yaw_output = filter->output.euler[2] + delta;
     // 防止输出大于360
     if(yaw_output > 360.f) yaw_output -= 360;
     if(yaw_output < -360.f) yaw_output += 360;

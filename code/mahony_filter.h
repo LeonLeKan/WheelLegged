@@ -9,25 +9,25 @@
 #define DEG_TO_RAD PI / 180.0
 
 typedef struct {
-    float Kp, Ki, dt;
+    double Kp, Ki, dt;
 } MahonyFilterParam;
 
 typedef struct {
-    float q[4];           // 四元数 [q0, q1, q2, q3]
-    float integralFB[3];  // 误差积分项
+    double q[4];           // 四元数 [q0, q1, q2, q3]
+    double integralFB[3];  // 误差积分项
     MahonyFilterParam param;
 
-    float last_yaw; // 保存上一次yaw角，用于unwrap
+    double last_yaw; // 保存上一次yaw角，用于unwrap
 
     // 欧拉角输出
     struct {
-        float euler[3];   // 欧拉角 [roll, pitch, yaw] (deg)
+        double euler[3];   // 欧拉角 [roll, pitch, yaw] (deg)
     } output;
 } MahonyFilter;
 
 
 void Mahony_Init(MahonyFilter* filter, MahonyFilterParam* param);
-void Mahony_Update(MahonyFilter* filter, float gyro[3], float acc[3]);
+void Mahony_Update(MahonyFilter* filter, double gyro[3], double acc[3]);
 
 
 #endif

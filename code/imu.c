@@ -106,8 +106,8 @@ static void read_sensor_data(void)
 // 从编码器获取速度和yaw角速度
 static void read_encoder_data(void)
 {
-    imu.encoder.v_left = (float)motor_value.receive_left_speed_data * PI * WHEEL_D / 60.0f;
-    imu.encoder.v_right = -(float)motor_value.receive_right_speed_data * PI * WHEEL_D / 60.0f;
+    imu.encoder.v_left = (double)motor_value.receive_left_speed_data * PI * WHEEL_D / 60.0f;
+    imu.encoder.v_right = -(double)motor_value.receive_right_speed_data * PI * WHEEL_D / 60.0f;
 
     imu.encoder.speed = (imu.encoder.v_left + imu.encoder.v_right) / 2.0f;
 
@@ -117,23 +117,23 @@ static void read_encoder_data(void)
 static void set_mahony_initial_estimation(void)
 {
     // 使用校准期间的平均加速度作为初始姿态估计
-    float ax = imu.calib.acc_sum[0] / imu.calib.sample_count;
-    float ay = imu.calib.acc_sum[1] / imu.calib.sample_count;
-    float az = imu.calib.acc_sum[2] / imu.calib.sample_count;
+    double ax = imu.calib.acc_sum[0] / imu.calib.sample_count;
+    double ay = imu.calib.acc_sum[1] / imu.calib.sample_count;
+    double az = imu.calib.acc_sum[2] / imu.calib.sample_count;
     // 转换至FLU坐标系
     ax = ax;
     ay = -ay;
     az = -az;
     // 计算初始四元数
-    float roll = atan2f(ay, az);
-    float pitch = atan2f(-ax, sqrtf(ay * ay + az * az));
-    float yaw = 0.0f; // 初始航向角假设为0
-    float cy = cosf(yaw * 0.5f);
-    float sy = sinf(yaw * 0.5f);
-    float cp = cosf(pitch * 0.5f);
-    float sp = sinf(pitch * 0.5f);
-    float cr = cosf(roll * 0.5f);
-    float sr = sinf(roll * 0.5f);
+    double roll = atan2f(ay, az);
+    double pitch = atan2f(-ax, sqrtf(ay * ay + az * az));
+    double yaw = 0.0f; // 初始航向角假设为0
+    double cy = cosf(yaw * 0.5f);
+    double sy = sinf(yaw * 0.5f);
+    double cp = cosf(pitch * 0.5f);
+    double sp = sinf(pitch * 0.5f);
+    double cr = cosf(roll * 0.5f);
+    double sr = sinf(roll * 0.5f);
     imu.mahony_filter.q[0] = cr * cp * cy + sr * sp * sy; // q0
     imu.mahony_filter.q[1] = sr * cp * cy - cr * sp * sy; // q1
     imu.mahony_filter.q[2] = cr * sp * cy + sr * cp * sy; // q2
@@ -143,7 +143,7 @@ static void set_mahony_initial_estimation(void)
 // 按照传感器安装方向转换到机体坐标系
 static void apply_bias_and_cordinate_transform(void)
 {
-    float corrected_gyro[3];
+    double corrected_gyro[3];
     // 减去陀螺仪零偏
     corrected_gyro[0] = imu.raw.gyro[0] - imu.calib.gyro_bias[0];
     corrected_gyro[1] = imu.raw.gyro[1] - imu.calib.gyro_bias[1];
@@ -211,7 +211,7 @@ static void process_filter_update(void)
     ins_update(imu.mahony_filter.output.euler[2] * DEG_TO_RAD, imu.encoder.speed);
 
     // ukf更新
-    // float ukf_measurement[3];
+    // double ukf_measurement[3];
     // ukf_measurement[0] = imu.encoder.speed;                     // 速度
     // // mahony解算的yaw角输入ukf
     // ukf_measurement[1] = imu.body.gyro[2] * DEG_TO_RAD;         // IMU角速度 (rad/s)
@@ -219,7 +219,7 @@ static void process_filter_update(void)
     // ukf_measurement[2] = imu.body.gyro[2] * DEG_TO_RAD;     // 编码器角速度 (rad/s)
     // ukf_filter_update(&imu.ukf_filter, ukf_measurement);
 
-    float x, y;
+    double x, y;
     ins_get_data(&x, &y);
 
     imu.output.euler[2] = imu.mahony_filter.output.euler[2];
