@@ -32,7 +32,7 @@ void Mahony_Update(MahonyFilter* filter, double gyro[3], double acc[3]) {
     // 3. 计算加速度计测量值与估计值的误差（叉积）
     ex = (ay*vz - az*vy);
     ey = (az*vx - ax*vz);
-    ez = (ax*vy - ay*vx);
+    ez = 0; // 不使用加速度计修正yaw
     
     // 4. 误差积分（消除陀螺仪零偏）
     if (filter->param.Ki > 0.0f) {
