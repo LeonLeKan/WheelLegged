@@ -151,10 +151,10 @@ static void apply_bias_and_cordinate_transform(void)
             imu.rot_comp.exit_cnt = 0;
         }
         // 进行旋转补偿
-        if(corrected_gyro[2] > 0)
+        if(corrected_gyro[2] < 0.0)
             corrected_gyro[2] += imu.rot_comp.param.yaw_compensate_ccw;
         else 
-            corrected_gyro[2] -= imu.rot_comp.param.yaw_compensate_cw;
+            corrected_gyro[2] += imu.rot_comp.param.yaw_compensate_cw;
     }
     else {
         if(fabs(corrected_gyro[2]) > imu.rot_comp.param.rotation_thre)
