@@ -11,7 +11,7 @@
             <name>General</name>
             <archiveVersion>3</archiveVersion>
             <data>
-                <version>37</version>
+                <version>36</version>
                 <wantNonLocal>1</wantNonLocal>
                 <debug>1</debug>
                 <option>
@@ -98,7 +98,7 @@
                 </option>
                 <option>
                     <name>GBECoreSlave</name>
-                    <version>34</version>
+                    <version>33</version>
                     <state>41</state>
                 </option>
                 <option>
@@ -115,7 +115,7 @@
                 </option>
                 <option>
                     <name>CoreVariant</name>
-                    <version>34</version>
+                    <version>33</version>
                     <state>41</state>
                 </option>
                 <option>
@@ -138,7 +138,7 @@
                 </option>
                 <option>
                     <name>GFPUCoreSlave2</name>
-                    <version>34</version>
+                    <version>33</version>
                     <state>41</state>
                 </option>
                 <option>
@@ -213,12 +213,8 @@
                 </option>
                 <option>
                     <name>OG_32_64DeviceCoreSlave</name>
-                    <version>34</version>
+                    <version>33</version>
                     <state>41</state>
-                </option>
-                <option>
-                    <name>GOutputSo</name>
-                    <state>0</state>
                 </option>
             </data>
         </settings>
@@ -226,7 +222,7 @@
             <name>ICCARM</name>
             <archiveVersion>2</archiveVersion>
             <data>
-                <version>39</version>
+                <version>38</version>
                 <wantNonLocal>1</wantNonLocal>
                 <debug>1</debug>
                 <option>
@@ -501,14 +497,6 @@
                     <name>CCBranchTargetIdentification</name>
                     <state>0</state>
                 </option>
-                <option>
-                    <name>CCPosRadRwpi</name>
-                    <state>0</state>
-                </option>
-                <option>
-                    <name>CCPosSharedSlave</name>
-                    <state>0</state>
-                </option>
             </data>
         </settings>
         <settings>
@@ -713,10 +701,11 @@
         </settings>
         <settings>
             <name>CUSTOM</name>
-            <archiveVersion>4</archiveVersion>
+            <archiveVersion>3</archiveVersion>
             <data>
                 <extensions></extensions>
                 <cmdline></cmdline>
+                <hasPrio>1</hasPrio>
                 <buildSequence>inputOutputBased</buildSequence>
             </data>
         </settings>
@@ -724,7 +713,7 @@
             <name>ILINK</name>
             <archiveVersion>0</archiveVersion>
             <data>
-                <version>28</version>
+                <version>27</version>
                 <wantNonLocal>1</wantNonLocal>
                 <debug>1</debug>
                 <option>
@@ -1094,10 +1083,6 @@
                 <option>
                     <name>IlinkFpuProcessor</name>
                     <state>1</state>
-                </option>
-                <option>
-                    <name>IlinkSharedSlave</name>
-                    <state>0</state>
                 </option>
             </data>
         </settings>
@@ -1965,6 +1950,18 @@
             <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_imu660ra.h</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_imu660rb.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_imu660rb.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_imu660rc.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_imu660rc.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_imu963ra.c</name>
         </file>
         <file>
@@ -1995,6 +1992,12 @@
             <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_key.h</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_menc15a.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_menc15a.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_mt9v03x.c</name>
         </file>
         <file>
@@ -2005,6 +2008,12 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_oled.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_pmw3901.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_pmw3901.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_tft180.c</name>
@@ -2023,6 +2032,12 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_type.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_uart_receiver.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_uart_receiver.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_wifi_spi.c</name>
