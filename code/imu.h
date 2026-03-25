@@ -9,7 +9,8 @@
 typedef enum {
     IMU_STATE_UNINIT = 0,
     IMU_STATE_CALIBRATING,
-    IMU_STATE_RUNNING,
+    IMU_STATE_NORMAL,
+    IMU_STATE_ROTATING,
     IMU_STATE_ERROR
 } imu_state_t;
 
@@ -45,8 +46,12 @@ typedef struct {
         uint32_t sample_count;   // 已采集样本数
         uint32_t target_samples; // 目标样本数
         bool is_calibrated;      // 校准完成标志
-        RotationCompensationParam rot_comp; // 旋转状态yaw角速度补偿参数
     } calib;
+
+    struct {
+        int enter_cnt, exit_cnt;
+        RotationCompensationParam param;
+    } rot_comp;
 
     // 输出
     struct {

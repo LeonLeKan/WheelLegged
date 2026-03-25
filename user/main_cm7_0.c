@@ -36,7 +36,7 @@ MahonyFilterParam mahony_filter_param = {
 
 RotationCompensationParam rotation_compensation_param = {
     .rotation_thre = 180,
-    .yaw_compensate = 0.32};
+    .yaw_compensate = -2.8};
 
 bool showing_points = false;
 // 用于实现校准后的分层启动
@@ -176,7 +176,7 @@ void imu_state_show(void)
     case IMU_STATE_CALIBRATING:
         screen_printf(0, 0, "IMU State: CALIBRATING");
         break;
-    case IMU_STATE_RUNNING:
+    case IMU_STATE_NORMAL:
         screen_printf(0, 0, "IMU State: RUNNING    ");
         break;
     case IMU_STATE_ERROR:

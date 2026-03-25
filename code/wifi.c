@@ -41,11 +41,12 @@ void wifi_send_data(void)
     oscilloscope_data.data[1] = yaw_loop.Target;
     oscilloscope_data.data[2] = imu.output.euler[2];
     oscilloscope_data.data[3] = imu.body.gyro[2];
+    oscilloscope_data.data[4] = imu.state;
     
     // oscilloscope_data.data[0] = imu.calib.gyro_bias[0];
     // oscilloscope_data.data[1] = imu.calib.gyro_bias[1];
     // oscilloscope_data.data[2] = imu.calib.gyro_bias[2];
-    oscilloscope_data.channel_num = 3;
+    oscilloscope_data.channel_num = 5;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 

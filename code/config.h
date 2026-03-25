@@ -4,8 +4,7 @@
 #include "zf_common_headfile.h"
 
 #define IMU_UPDATE_PIT PIT_CH0
-#define IMU_UPDATE_INTERVAL_MS 1  // IMU更新间隔，单位毫秒
-#define UKF_UPDATE_INTERVAL_MS 1 // UKF更新间隔，单位毫秒，需要为IMU更新间隔的整数倍
+#define IMU_UPDATE_INTERVAL_MS 2  // IMU更新间隔，单位毫秒
 
 #define SCREEN_UPDATE_PIT PIT_CH15
 #define SCREEN_UPDATE_INTERVAL_MS 100 // 显点屏幕更新间隔，单位毫秒

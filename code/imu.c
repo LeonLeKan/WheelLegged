@@ -19,7 +19,7 @@ void imu_init(MahonyFilterParam mahony_param, RotationCompensationParam rot_comp
     memset(&imu, 0, sizeof(imu_t));
     imu.state = IMU_STATE_UNINIT;
 
-    imu.calib.rot_comp = rot_comp_param;
+    imu.rot_comp.param = rot_comp_param;
 
     Mahony_Init(&imu.mahony_filter, mahony_param);
 
@@ -64,7 +64,8 @@ void imu_update(void)
             process_calibration();
             break;
         }
-        case IMU_STATE_RUNNING:
+        case IMU_STATE_NORMAL:
+        case IMU_STATE_ROTATING:
             apply_bias_and_cordinate_transform();
             process_filter_update();
             break;
@@ -137,8 +138,33 @@ static void apply_bias_and_cordinate_transform(void)
     corrected_gyro[1] = imu.raw.gyro[1] - imu.calib.gyro_bias[1];
     corrected_gyro[2] = imu.raw.gyro[2] - imu.calib.gyro_bias[2];
 
-    if(fabs(corrected_gyro[2]) > imu.calib.rot_comp.rotation_thre)
-        corrected_gyro[2] += imu.calib.rot_comp.yaw_compensate;
+    if(imu.state == IMU_STATE_ROTATING)
+    {
+        if(fabs(corrected_gyro[2]) < imu.rot_comp.param.rotation_thre)
+            imu.rot_comp.exit_cnt++;
+        else 
+            imu.rot_comp.exit_cnt = 0;
+        if(imu.rot_comp.exit_cnt >= 50)     // 连续检测到角速度小于阈值，退出旋转状态
+        {
+            imu.state = IMU_STATE_NORMAL;
+            imu.rot_comp.enter_cnt = 0;
+            imu.rot_comp.exit_cnt = 0;
+        }
+        // 进行旋转补偿
+        corrected_gyro[2] += imu.rot_comp.param.yaw_compensate;
+    }
+    else {
+        if(fabs(corrected_gyro[2]) > imu.rot_comp.param.rotation_thre)
+            imu.rot_comp.enter_cnt++;
+        else 
+            imu.rot_comp.enter_cnt = 0;
+        if(imu.rot_comp.enter_cnt >= 10)    // 连续检测到角速度大于阈值，进入旋转状态
+        {
+            imu.state = IMU_STATE_ROTATING;
+            imu.rot_comp.enter_cnt = 0;
+            imu.rot_comp.exit_cnt = 0;
+        }
+    }
 
     // 转换至FLU坐标系
     imu.body.acc[0] = imu.raw.acc[0];
@@ -171,7 +197,7 @@ static void process_calibration(void)
         imu.calib.gyro_bias[2] /= imu.calib.target_samples;
         set_mahony_initial_estimation();
         imu.calib.is_calibrated = true;
-        imu.state = IMU_STATE_RUNNING;
+        imu.state = IMU_STATE_NORMAL;
     }
 }
 
