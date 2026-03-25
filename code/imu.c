@@ -147,7 +147,8 @@ static void apply_bias_and_cordinate_transform(void)
     // 减去陀螺仪零偏
     corrected_gyro[0] = imu.raw.gyro[0] - imu.calib.gyro_bias[0];
     corrected_gyro[1] = imu.raw.gyro[1] - imu.calib.gyro_bias[1];
-    corrected_gyro[2] = imu.raw.gyro[2] - imu.calib.gyro_bias[2];
+    // corrected_gyro[2] = imu.raw.gyro[2] - imu.calib.gyro_bias[2];
+    corrected_gyro[2] = imu.raw.gyro[2] - (-0.0);
 
     // 转换至FLU坐标系
     imu.body.acc[0] = imu.raw.acc[0];
