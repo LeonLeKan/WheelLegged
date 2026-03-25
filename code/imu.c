@@ -144,7 +144,7 @@ static void apply_bias_and_cordinate_transform(void)
             imu.rot_comp.exit_cnt++;
         else 
             imu.rot_comp.exit_cnt = 0;
-        if(imu.rot_comp.exit_cnt >= 50)     // 连续检测到角速度小于阈值，退出旋转状态
+        if(imu.rot_comp.exit_cnt >= 1)     // 连续检测到角速度小于阈值，退出旋转状态
         {
             imu.state = IMU_STATE_NORMAL;
             imu.rot_comp.enter_cnt = 0;
@@ -158,7 +158,7 @@ static void apply_bias_and_cordinate_transform(void)
             imu.rot_comp.enter_cnt++;
         else 
             imu.rot_comp.enter_cnt = 0;
-        if(imu.rot_comp.enter_cnt >= 10)    // 连续检测到角速度大于阈值，进入旋转状态
+        if(imu.rot_comp.enter_cnt >= 1)    // 连续检测到角速度大于阈值，进入旋转状态
         {
             imu.state = IMU_STATE_ROTATING;
             imu.rot_comp.enter_cnt = 0;
