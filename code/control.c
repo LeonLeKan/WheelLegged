@@ -518,6 +518,10 @@ void control_state_thunder(void)
     //     }
     // }
 
+    turn_loop2.Target = 360.0f;
+    turn_loop2.Actual = -imu.body.gyro[2];
+    PID_Update_Lo(&turn_loop2);
+
     angle_loop2.Target = pzero->data_float;
     angle_loop2.Actual = imu.output.euler[1];
     PID_Update_Lo(&angle_loop2);
@@ -546,9 +550,9 @@ void control_state_thunder(void)
     yaw_accumulate += yaw_thunder_diff;
     yaw_thunder_last = yaw_thunder_now;
 
-    small_driver_set_duty((int16)(aspeed_loop.Out + (920 - yaw_accumulate)), (int16)(-(aspeed_loop.Out - (920 - yaw_accumulate))));
+    small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
 
-    if (yaw_accumulate >= 720.0f)
+    if (yaw_accumulate <= -2880.0f)
     {
         yaw_thunder_now = 0.0f;
         yaw_thunder_last = 0.0f;
