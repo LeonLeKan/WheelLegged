@@ -518,7 +518,7 @@ void control_state_thunder(void)
     //     }
     // }
 
-    turn_loop2.Target = 90.0f;
+    turn_loop2.Target = 360.0f;
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 

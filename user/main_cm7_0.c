@@ -30,8 +30,8 @@ uint8_t motion_mode1 = 0;
 uint8_t motion_mode2 = 0;
 
 MahonyFilterParam mahony_filter_param = {
-    .Kp = 2.f,
-    .Ki = 0.00f,
+    .Kp = 0.7f,
+    .Ki = 0.005f,
     .dt = IMU_UPDATE_INTERVAL_MS / 1000.0f};
 
 RotationCompensationParam rotation_compensation_param = {
