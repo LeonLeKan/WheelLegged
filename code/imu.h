@@ -15,8 +15,9 @@ typedef enum {
 } imu_state_t;
 
 typedef struct {
-    double rotation_thre;   // 判断旋转状态的yaw角速度阈值 (deg/s)
-    double yaw_compensate;  // 给yaw的补偿 (deg)
+    double rotation_thre;       // 判断旋转状态的yaw角速度阈值 (deg/s)
+    double yaw_compensate_cw;   // 顺时针旋转时给yaw的补偿 (deg)
+    double yaw_compensate_ccw;  // 逆时针旋转时给yaw的补偿 (deg)
 } RotationCompensationParam;    // 旋转状态yaw角速度补偿参数
 
 
