@@ -2,13 +2,13 @@
 #include "mahony_filter.h"
 
 // 初始化
-void Mahony_Init(MahonyFilter* filter, MahonyFilterParam* param) {
+void Mahony_Init(MahonyFilter* filter, MahonyFilterParam param) {
     filter->q[0] = 1.0f; filter->q[1] = 0.0f; 
     filter->q[2] = 0.0f; filter->q[3] = 0.0f;
     filter->integralFB[0] = filter->integralFB[1] = filter->integralFB[2] = 0.0f;
-    filter->param.Kp = param->Kp;
-    filter->param.Ki = param->Ki;
-    filter->param.dt = param->dt;
+    filter->param.Kp = param.Kp;
+    filter->param.Ki = param.Ki;
+    filter->param.dt = param.dt;
     filter->last_yaw = 0;
 }
 

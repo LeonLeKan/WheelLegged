@@ -26,7 +26,7 @@ typedef struct {
 } MahonyFilter;
 
 
-void Mahony_Init(MahonyFilter* filter, MahonyFilterParam* param);
+void Mahony_Init(MahonyFilter* filter, MahonyFilterParam param);
 void Mahony_Update(MahonyFilter* filter, double gyro[3], double acc[3]);
 
 

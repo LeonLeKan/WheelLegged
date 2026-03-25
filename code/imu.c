@@ -13,34 +13,22 @@ static void process_filter_update(void);
 
 
 // =====================接口函数=======================
-void imu_init(MahonyFilterParam* param, ukf_filter_param_t* ukf_param)
+void imu_init(MahonyFilterParam mahony_param, RotationCompensationParam rot_comp_param)
 {
     imu660ra_init();
     memset(&imu, 0, sizeof(imu_t));
     imu.state = IMU_STATE_UNINIT;
 
-    Mahony_Init(&imu.mahony_filter, param);
-    bool ret = ukf_filter_init(&imu.ukf_filter, ukf_param);
-    if(ret)
-    {
-        imu.state = IMU_STATE_ERROR;
-        return;
-    }
+    imu.calib.rot_comp = rot_comp_param;
+
+    Mahony_Init(&imu.mahony_filter, mahony_param);
+
     pit_enable(IMU_UPDATE_PIT);
 }
 
-void imu_reset_mahony_filter(MahonyFilterParam* param)
+void imu_reset_mahony_filter(MahonyFilterParam param)
 {
     Mahony_Init(&imu.mahony_filter, param);
-}
-
-void imu_reset_ukf_filter(ukf_filter_param_t* param)
-{
-    bool ret = ukf_filter_init(&imu.ukf_filter, param);
-    if(ret)
-    {
-        imu.state = IMU_STATE_ERROR;
-    }
 }
 
 void imu_start_calibration(uint32_t target_samples)
@@ -147,8 +135,10 @@ static void apply_bias_and_cordinate_transform(void)
     // 减去陀螺仪零偏
     corrected_gyro[0] = imu.raw.gyro[0] - imu.calib.gyro_bias[0];
     corrected_gyro[1] = imu.raw.gyro[1] - imu.calib.gyro_bias[1];
-    // corrected_gyro[2] = imu.raw.gyro[2] - imu.calib.gyro_bias[2];
-    corrected_gyro[2] = imu.raw.gyro[2] - (-0.0);
+    corrected_gyro[2] = imu.raw.gyro[2] - imu.calib.gyro_bias[2];
+
+    if(fabs(corrected_gyro[2]) > imu.calib.rot_comp.rotation_thre)
+        corrected_gyro[2] += imu.calib.rot_comp.yaw_compensate;
 
     // 转换至FLU坐标系
     imu.body.acc[0] = imu.raw.acc[0];
@@ -200,25 +190,8 @@ static void process_filter_update(void)
     imu.output.gyro[0] = imu.body.gyro[0];
     imu.output.gyro[1] = imu.body.gyro[1];
 
-    // if (ukf_update_counter * IMU_UPDATE_INTERVAL_MS >= UKF_UPDATE_INTERVAL_MS)
-    // {
-    //     ukf_update_counter = 0;
-    // }
-    // else
-    // {
-    //     return; // 不到更新周期，跳过UKF更新
-    // }
     // 简化版惯性导航更新
     ins_update(imu.mahony_filter.output.euler[2] * DEG_TO_RAD, imu.encoder.speed);
-
-    // ukf更新
-    // double ukf_measurement[3];
-    // ukf_measurement[0] = imu.encoder.speed;                     // 速度
-    // // mahony解算的yaw角输入ukf
-    // ukf_measurement[1] = imu.body.gyro[2] * DEG_TO_RAD;         // IMU角速度 (rad/s)
-    // // 测试：只用imu
-    // ukf_measurement[2] = imu.body.gyro[2] * DEG_TO_RAD;     // 编码器角速度 (rad/s)
-    // ukf_filter_update(&imu.ukf_filter, ukf_measurement);
 
     double x, y;
     ins_get_data(&x, &y);

@@ -34,10 +34,9 @@ MahonyFilterParam mahony_filter_param = {
     .Ki = 0.00f,
     .dt = IMU_UPDATE_INTERVAL_MS / 1000.0f};
 
-ukf_filter_param_t ukf_filter_param = {
-    .dt = UKF_UPDATE_INTERVAL_MS / 1000.0,
-    .q = {0.0001, 0.0001, 0.000015, 0.001, 0.01},
-    .r = {0.0001, 0.000, 0.0000}};
+RotationCompensationParam rotation_compensation_param = {
+    .rotation_thre = 180,
+    .yaw_compensate = 0.32};
 
 bool showing_points = false;
 // 用于实现校准后的分层启动
@@ -84,7 +83,7 @@ int main(void)
     // imu初始化
     pit_ms_init(IMU_UPDATE_PIT, IMU_UPDATE_INTERVAL_MS);
     pit_disable(IMU_UPDATE_PIT);
-    imu_init(&mahony_filter_param, &ukf_filter_param);
+    imu_init(mahony_filter_param, rotation_compensation_param);
 
     while (true)
     {

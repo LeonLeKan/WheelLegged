@@ -3,7 +3,6 @@
 
 #include "zf_common_headfile.h"
 #include "mahony_filter.h"
-#include "ukf_filter.h"
 #include "config.h"
 
 // imu状态枚举
@@ -13,6 +12,12 @@ typedef enum {
     IMU_STATE_RUNNING,
     IMU_STATE_ERROR
 } imu_state_t;
+
+typedef struct {
+    double rotation_thre;   // 判断旋转状态的yaw角速度阈值 (deg/s)
+    double yaw_compensate;  // 给yaw的补偿 (deg)
+} RotationCompensationParam;    // 旋转状态yaw角速度补偿参数
+
 
 typedef struct {
     // 原始传感器数据（传感器坐标系）
@@ -40,6 +45,7 @@ typedef struct {
         uint32_t sample_count;   // 已采集样本数
         uint32_t target_samples; // 目标样本数
         bool is_calibrated;      // 校准完成标志
+        RotationCompensationParam rot_comp; // 旋转状态yaw角速度补偿参数
     } calib;
 
     // 输出
@@ -55,16 +61,14 @@ typedef struct {
     
     // 算法实例
     MahonyFilter mahony_filter;
-    ukf_filter_t ukf_filter;
 } imu_t;
 
 
 extern imu_t imu;
 
 
-void imu_init(MahonyFilterParam* param, ukf_filter_param_t* ukf_param);
-void imu_reset_mahony_filter(MahonyFilterParam* param);
-void imu_reset_ukf_filter(ukf_filter_param_t* param);
+void imu_init(MahonyFilterParam mahony_param, RotationCompensationParam rot_comp_param);
+void imu_reset_mahony_filter(MahonyFilterParam param);
 void imu_start_calibration(uint32_t target_samples);
 bool imu_is_calibrated(void);
 void imu_update(void);  // 在定时中断中调用
