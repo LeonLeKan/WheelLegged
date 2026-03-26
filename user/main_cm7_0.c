@@ -34,10 +34,7 @@ MahonyFilterParam mahony_filter_param = {
     .Ki = 0.005f,
     .dt = IMU_UPDATE_INTERVAL_MS / 1000.0f};
 
-RotationCompensationParam rotation_compensation_param = {
-    .rotation_thre = 180,
-    .yaw_compensate_cw = 2.8,
-    .yaw_compensate_ccw = -2.8};
+RotationCompensationParam rotation_compensation_param;
 
 bool showing_points = false;
 // 用于实现校准后的分层启动
@@ -74,7 +71,12 @@ int main(void)
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi
-    wifi_init();
+    // wifi_init();
+
+    // imu转圈偏移初始化
+    rotation_compensation_param.rotation_thre = 180;
+    rotation_compensation_param.yaw_compensate_cw  = cwtucop->data_float;
+    rotation_compensation_param.yaw_compensate_ccw = ccwtucop->data_float;
 
     // 屏幕初始化
     pit_ms_init(SCREEN_UPDATE_PIT, SCREEN_UPDATE_INTERVAL_MS);
@@ -103,7 +105,7 @@ int main(void)
             imu_state_show();
 
             // 如果需要，添加wifi
-            wifi_send_data();
+            // wifi_send_data();
             // wifi_send_image();
         }
 
@@ -144,7 +146,7 @@ int main(void)
                 }
 
                 // 如果需要，添加wifi
-                wifi_send_data();
+                // wifi_send_data();
                 // wifi_send_image();
             }
         }

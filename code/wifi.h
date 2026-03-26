@@ -4,6 +4,7 @@
 #include "zf_common_headfile.h"
 #include "imu.h"
 #include "pid.h"
+#include "location.h"
 
 #define WIFI_SSID_TEST "Hhhyt"
 #define WIFI_PASSWORD_TEST "18273645"

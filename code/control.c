@@ -425,141 +425,97 @@ void control_state_thunder(void)
                   90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
     }
 
-    // if (yaw_memory <= 0)
-    // {
-    //     turn_loop2.Target = 180.0f;
-    //     turn_loop2.Actual = -imu.body.gyro[2];
-    //     PID_Update_Lo(&turn_loop2);
-
-    //     angle_loop2.Target = pzero->data_float;
-    //     angle_loop2.Actual = imu.output.euler[1];
-    //     PID_Update_Lo(&angle_loop2);
-
-    //     aspeed_loop.Target = angle_loop2.Out;
-    //     aspeed_loop.Actual = imu.output.gyro[1];
-    //     PID_Update_Lo(&aspeed_loop);
-
-    //     small_driver_set_duty((int16)(aspeed_loop.Out - 500), (int16)(-(aspeed_loop.Out + 500)));
-
-    //     yaw_thunder_now = imu.output.euler[2];
-    //     if (yaw_thunder_flag == 0)
-    //     {
-    //         yaw_thunder_last = yaw_memory;
-    //         yaw_thunder_flag = 1;
-    //     }
-
-    //     yaw_thunder_diff = yaw_thunder_now - yaw_thunder_last;
-    //     if (yaw_thunder_diff > 180.0f)
-    //     {
-    //         yaw_thunder_diff -= 360.0f;
-    //     }
-    //     else if (yaw_thunder_diff < -180.0f)
-    //     {
-    //         yaw_thunder_diff += 360.0f;
-    //     }
-
-    //     yaw_accumulate += yaw_thunder_diff;
-    //     yaw_thunder_last = yaw_thunder_now;
-
-    //     if (yaw_accumulate <= -720.0f)
-    //     {
-    //         yaw_thunder_now = 0.0f;
-    //         yaw_thunder_last = 0.0f;
-    //         yaw_thunder_diff = 0.0f;
-    //         yaw_thunder_flag = 0;
-    //         yaw_accumulate = 0.0f;
-    //         current_state = STATE_ACCELERATE;
-    //     }
-    // }
-    // else if (yaw_memory > 0)
-    // {
-    //     turn_loop2.Target = -180.0f;
-    //     turn_loop2.Actual = -imu.body.gyro[2];
-    //     PID_Update_Lo(&turn_loop2);
-
-    //     angle_loop2.Target = pzero->data_float;
-    //     angle_loop2.Actual = imu.output.euler[1];
-    //     PID_Update_Lo(&angle_loop2);
-
-    //     aspeed_loop.Target = angle_loop2.Out;
-    //     aspeed_loop.Actual = imu.output.gyro[1];
-    //     PID_Update_Lo(&aspeed_loop);
-
-    //     small_driver_set_duty((int16)(aspeed_loop.Out + 500), (int16)(-(aspeed_loop.Out - 500)));
-
-    //     yaw_thunder_now = imu.output.euler[2];
-    //     if (yaw_thunder_flag == 0)
-    //     {
-    //         yaw_thunder_last = yaw_memory;
-    //         yaw_thunder_flag = 1;
-    //     }
-
-    //     yaw_thunder_diff = yaw_thunder_now - yaw_thunder_last;
-    //     if (yaw_thunder_diff > 180.0f)
-    //     {
-    //         yaw_thunder_diff -= 360.0f;
-    //     }
-    //     else if (yaw_thunder_diff < -180.0f)
-    //     {
-    //         yaw_thunder_diff += 360.0f;
-    //     }
-
-    //     yaw_accumulate += yaw_thunder_diff;
-    //     yaw_thunder_last = yaw_thunder_now;
-
-    //     if (yaw_accumulate >= 720.0f)
-    //     {
-    //         yaw_thunder_now = 0.0f;
-    //         yaw_thunder_last = 0.0f;
-    //         yaw_thunder_diff = 0.0f;
-    //         yaw_thunder_flag = 0;
-    //         yaw_accumulate = 0.0f;
-    //         current_state = STATE_ACCELERATE;
-    //     }
-    // }
-
-    turn_loop2.Target = -360.0f;
-    turn_loop2.Actual = -imu.body.gyro[2];
-    PID_Update_Lo(&turn_loop2);
-
-    angle_loop2.Target = pzero->data_float;
-    angle_loop2.Actual = imu.output.euler[1];
-    PID_Update_Lo(&angle_loop2);
-
-    aspeed_loop.Target = angle_loop2.Out;
-    aspeed_loop.Actual = imu.output.gyro[1];
-    PID_Update_Lo(&aspeed_loop);
-
-    yaw_thunder_now = imu.output.euler[2];
-    if (yaw_thunder_flag == 0)
+    if (yaw_memory <= 0)
     {
-        yaw_thunder_last = yaw_memory;
-        yaw_thunder_flag = 1;
+        turn_loop2.Target = 360.0f;
+        turn_loop2.Actual = -imu.body.gyro[2];
+        PID_Update_Lo(&turn_loop2);
+
+        angle_loop2.Target = pzero->data_float;
+        angle_loop2.Actual = imu.output.euler[1];
+        PID_Update_Lo(&angle_loop2);
+
+        aspeed_loop.Target = angle_loop2.Out;
+        aspeed_loop.Actual = imu.output.gyro[1];
+        PID_Update_Lo(&aspeed_loop);
+
+        small_driver_set_duty((int16)(aspeed_loop.Out - 500), (int16)(-(aspeed_loop.Out + 500)));
+
+        yaw_thunder_now = imu.output.euler[2];
+        if (yaw_thunder_flag == 0)
+        {
+            yaw_thunder_last = yaw_memory;
+            yaw_thunder_flag = 1;
+        }
+
+        yaw_thunder_diff = yaw_thunder_now - yaw_thunder_last;
+        if (yaw_thunder_diff > 180.0f)
+        {
+            yaw_thunder_diff -= 360.0f;
+        }
+        else if (yaw_thunder_diff < -180.0f)
+        {
+            yaw_thunder_diff += 360.0f;
+        }
+
+        yaw_accumulate += yaw_thunder_diff;
+        yaw_thunder_last = yaw_thunder_now;
+
+        if (yaw_accumulate <= -720.0f)
+        {
+            yaw_thunder_now = 0.0f;
+            yaw_thunder_last = 0.0f;
+            yaw_thunder_diff = 0.0f;
+            yaw_thunder_flag = 0;
+            yaw_accumulate = 0.0f;
+            current_state = STATE_ACCELERATE;
+        }
     }
-
-    yaw_thunder_diff = yaw_thunder_now - yaw_thunder_last;
-    if (yaw_thunder_diff > 180.0f)
+    else if (yaw_memory > 0)
     {
-        yaw_thunder_diff -= 360.0f;
-    }
-    else if (yaw_thunder_diff < -180.0f)
-    {
-        yaw_thunder_diff += 360.0f;
-    }
+        turn_loop2.Target = -360.0f;
+        turn_loop2.Actual = -imu.body.gyro[2];
+        PID_Update_Lo(&turn_loop2);
 
-    yaw_accumulate += yaw_thunder_diff;
-    yaw_thunder_last = yaw_thunder_now;
+        angle_loop2.Target = pzero->data_float;
+        angle_loop2.Actual = imu.output.euler[1];
+        PID_Update_Lo(&angle_loop2);
 
-    small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+        aspeed_loop.Target = angle_loop2.Out;
+        aspeed_loop.Actual = imu.output.gyro[1];
+        PID_Update_Lo(&aspeed_loop);
 
-    if (yaw_accumulate >= 720.0f)
-    {
-        yaw_thunder_now = 0.0f;
-        yaw_thunder_last = 0.0f;
-        yaw_thunder_diff = 0.0f;
-        yaw_thunder_flag = 0;
-        yaw_accumulate = 0.0f;
-        current_state = STATE_TEST;
+        small_driver_set_duty((int16)(aspeed_loop.Out + 500), (int16)(-(aspeed_loop.Out - 500)));
+
+        yaw_thunder_now = imu.output.euler[2];
+        if (yaw_thunder_flag == 0)
+        {
+            yaw_thunder_last = yaw_memory;
+            yaw_thunder_flag = 1;
+        }
+
+        yaw_thunder_diff = yaw_thunder_now - yaw_thunder_last;
+        if (yaw_thunder_diff > 180.0f)
+        {
+            yaw_thunder_diff -= 360.0f;
+        }
+        else if (yaw_thunder_diff < -180.0f)
+        {
+            yaw_thunder_diff += 360.0f;
+        }
+
+        yaw_accumulate += yaw_thunder_diff;
+        yaw_thunder_last = yaw_thunder_now;
+
+        if (yaw_accumulate >= 720.0f)
+        {
+            yaw_thunder_now = 0.0f;
+            yaw_thunder_last = 0.0f;
+            yaw_thunder_diff = 0.0f;
+            yaw_thunder_flag = 0;
+            yaw_accumulate = 0.0f;
+            current_state = STATE_ACCELERATE;
+        }
     }
 }
 
