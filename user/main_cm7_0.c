@@ -14,12 +14,6 @@
 #include "location.h"
 #include "wifi.h"
 
-#define BUTTON_LF (P20_0)
-#define BUTTON_RT (P20_1)
-#define BUTTON_DN (P20_2)
-#define BUTTON_UP (P20_3)
-#define BUTTON_OK (P21_5)
-
 void gpio_init_all(void);
 void imu_state_show(void);
 void start_imu_calibration(void);
@@ -28,6 +22,8 @@ void remote_control(void);
 
 uint8_t motion_mode1 = 0;
 uint8_t motion_mode2 = 0;
+uint8_t motion_mode3 = 0;
+uint8_t motion_mode4 = 0;
 
 MahonyFilterParam mahony_filter_param = {
     .Kp = 0.7f,
@@ -71,7 +67,7 @@ int main(void)
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi
-    // wifi_init();
+    wifi_init();
 
     // imu转圈偏移初始化
     rotation_compensation_param.rotation_thre = 180;
@@ -86,15 +82,19 @@ int main(void)
     // imu初始化
     pit_ms_init(IMU_UPDATE_PIT, IMU_UPDATE_INTERVAL_MS);
     pit_disable(IMU_UPDATE_PIT);
-    imu_init(mahony_filter_param, rotation_compensation_param);
+    //imu_init(mahony_filter_param, rotation_compensation_param);
+    imu660rc_init(IMU660RC_QUARTERNION_480HZ);
 
     while (true)
     {
         // 主循环检测拨码的状态
-        motion_mode1 = gpio_get_level(P21_6);
-        motion_mode2 = gpio_get_level(P21_5);
+        motion_mode1 = gpio_get_level(DIP_1);
+        motion_mode2 = gpio_get_level(DIP_2);
+        motion_mode3 = gpio_get_level(DIP_3);
+        motion_mode4 = gpio_get_level(DIP_4);
 
-        if (motion_mode1 == 1 && motion_mode2 == 1)
+        if (motion_mode1 == 1 && motion_mode2 == 1 &&
+            motion_mode3 == 1 && motion_mode4 == 1)
         {
             current_state = STATE_IDLE;
             if (cali_flag == 1)
@@ -109,7 +109,8 @@ int main(void)
             // wifi_send_image();
         }
 
-        else if (motion_mode1 == 0 && motion_mode2 == 1)
+        else if (motion_mode1 == 1 && motion_mode2 == 1 &&
+                 motion_mode3 == 1 && motion_mode4 == 0)
         {
             current_state = STATE_IDLE;
             ips200_clear();
@@ -127,12 +128,13 @@ int main(void)
                 }
 
                 // 如果需要，添加wifi
-                // wifi_send_data();
+                wifi_send_data();
                 // wifi_send_image();
             }
         }
 
-        else if ((motion_mode1 == 1 && motion_mode2 == 0) || (motion_mode1 == 0 && motion_mode2 == 0))
+        else if (motion_mode1 == 0 && motion_mode2 == 1 &&
+                 motion_mode3 == 1 && motion_mode4 == 1)
         {
             ips200_clear();
             current_state = STATE_STAND_UP;
@@ -166,7 +168,10 @@ void gpio_init_all(void)
     gpio_init(BUTTON_DN, GPI, 1, GPI_PULL_UP);
     gpio_init(BUTTON_UP, GPI, 1, GPI_PULL_UP);
     gpio_init(BUTTON_OK, GPI, 1, GPI_PULL_UP);
-    gpio_init(P21_6, GPI, 1, GPI_PULL_UP);
+    gpio_init(DIP_1, GPI, 1, GPI_PULL_UP);
+    gpio_init(DIP_2, GPI, 1, GPI_PULL_UP);
+    gpio_init(DIP_3, GPI, 1, GPI_PULL_UP);
+    gpio_init(DIP_4, GPI, 1, GPI_PULL_UP);
 }
 
 void imu_state_show(void)
@@ -229,8 +234,7 @@ void handle_channel_245(void)
     else if (last_ch5 != uart_receiver.channel[5])
     {
         // Channel 5: 保存到Flash，存入当前激活的存档（开机默认为0号存档）
-        waypoint_list_save_to_flash(&waypoints,
-                                    INS_FLASH_START_PAGE + save_manager_instance.active_save_idx);
+        waypoint_list_save_to_flash(&waypoints, INS_FLASH_START_PAGE + save_manager_instance.active_save_idx);
     }
     last_ch2 = uart_receiver.channel[2];
     last_ch4 = uart_receiver.channel[4];

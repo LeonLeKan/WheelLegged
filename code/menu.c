@@ -424,29 +424,23 @@ void create_3rd_menu(void)
 
 void key_handle_menu(void)
 {
-    static uint8_t last_switch_state = 1; // 上电前拉回高电平
-    uint8_t current_switch_state = gpio_get_level(BUTTON_OK);
-
-    uint8_t switch_changed = (last_switch_state != current_switch_state);
-
-    if (switch_changed)
-    {
-        if (!edit_mode)
-        {
-            if (currentMenu->type == MENU_TYPE_FUNCTION && currentMenu->Function != NULL && currentMenu != change)
-            {
-                currentMenu->Function();
-                currentMenu->exec_flag = 1;
-                ips200_clear();
-            }
-        }
-        last_switch_state = current_switch_state;
-        return;
-    }
-
     if (!edit_mode)
     {
-        if (gpio_get_level(BUTTON_DN) == 0)
+        if (gpio_get_level(BUTTON_OK) == 0)
+        {
+            system_delay_ms(10);
+            ips200_clear();
+            if (gpio_get_level(BUTTON_OK) == 0)
+            {
+                if (currentMenu->type == MENU_TYPE_FUNCTION && currentMenu->Function != NULL)
+                {
+                    currentMenu->Function();
+                    currentMenu->exec_flag = 1;
+                    ips200_clear();
+                }
+            }
+        }
+        else if (gpio_get_level(BUTTON_DN) == 0)
         {
             system_delay_ms(10);
             ips200_clear();
@@ -1081,19 +1075,15 @@ void control_to_ins_menu(void)
 
 void key_handle_ins(void)
 {
-    static uint8_t last_switch_state = 1; // 上电前拉回高电平
-    uint8_t current_switch_state = gpio_get_level(BUTTON_OK);
-
-    uint8_t switch_changed = (last_switch_state != current_switch_state);
-
-    if (switch_changed)
+    if (gpio_get_level(BUTTON_OK) == 0)
     {
-        save_manager_key_ok_pressed();
-        last_switch_state = current_switch_state;
-        return;
+        system_delay_ms(80);
+        if (gpio_get_level(BUTTON_OK) == 0)
+        {
+            save_manager_key_ok_pressed();
+        }
     }
-
-    if (gpio_get_level(BUTTON_DN) == 0)
+    else if (gpio_get_level(BUTTON_DN) == 0)
     {
         system_delay_ms(80);
         if (gpio_get_level(BUTTON_DN) == 0)

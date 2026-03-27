@@ -166,9 +166,8 @@ void uart1_isr (void)
 {
     if(uart_isr_mask(UART_1))            // 串口1接收中断
     {
-        
-        wireless_module_uart_handler();  // 无线模块统一回调函数
-      
+        // sbus
+        uart_receiver_handler();
     }
     else                                // 串口1发送中断
     {
@@ -182,8 +181,7 @@ void uart2_isr (void)
 {
     if(uart_isr_mask(UART_2))            // 串口2接收中断
     {
-        
-        // gnss_uart_callback();            // GPS模块回调函数      
+        // motor
         uart_control_callback();
     }
     else                                // 串口2发送中断
@@ -214,8 +212,8 @@ void uart4_isr (void)
 {
     if(uart_isr_mask(UART_4))            // 串口4接收中断
     {
-
-        uart_receiver_handler();                                                                // 串口接收机回调函数
+        // gps
+        // gnss_uart_callback();                                                               // 串口接收机回调函数
        
     }
     else                                // 串口4发送中断
@@ -323,9 +321,10 @@ void gpio_5_exti_isr()                  // 外部 GPIO_5 中断服务函数
 
 void gpio_6_exti_isr()                  // 外部 GPIO_6 中断服务函数     
 {
-
-
-
+    if(exti_flag_get(P06_7))
+    {
+        imu660rc_callback();
+    }
 }
 
 void gpio_7_exti_isr()                  // 外部 GPIO_7 中断服务函数     

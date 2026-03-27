@@ -31,13 +31,9 @@ void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
 
-    oscilloscope_data.data[0] = yaw_loop.Target;
-    oscilloscope_data.data[1] = yaw_loop.Actual;
-    oscilloscope_data.data[2] = imu.output.position_x;
-    oscilloscope_data.data[3] = imu.output.position_y;
-    oscilloscope_data.data[4] = current_target->waypoint.x;
-    oscilloscope_data.data[5] = current_target->waypoint.y;
-    oscilloscope_data.data[6] = imu.state;
+    oscilloscope_data.data[0] = imu660rc_roll;
+    oscilloscope_data.data[1] = imu660rc_pitch;
+    oscilloscope_data.data[2] = imu660rc_yaw;
 
     oscilloscope_data.channel_num = 7;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);

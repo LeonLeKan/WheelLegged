@@ -3,11 +3,16 @@
 
 #include "zf_common_headfile.h"
 
-#define BUTTON_LF (P20_0)
-#define BUTTON_RT (P20_1)
-#define BUTTON_DN (P20_2)
-#define BUTTON_UP (P20_3)
-#define BUTTON_OK (P21_5)
+#define BUTTON_LF (P19_4)
+#define BUTTON_RT (P20_3)
+#define BUTTON_DN (P20_0)
+#define BUTTON_UP (P20_2)
+#define BUTTON_OK (P20_1)
+
+#define DIP_1 (P08_3)
+#define DIP_2 (P09_0)
+#define DIP_3 (P09_1)
+#define DIP_4 (P10_2)
 
 #define MAX_DISPLAY 10
 #define MAX_LAYER 3
