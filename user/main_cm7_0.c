@@ -67,7 +67,7 @@ int main(void)
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi
-    //wifi_init();
+    wifi_init();
 
     // imu转圈偏移初始化
     rotation_compensation_param.rotation_thre = 180;
@@ -82,8 +82,7 @@ int main(void)
     // imu初始化
     pit_ms_init(IMU_UPDATE_PIT, IMU_UPDATE_INTERVAL_MS);
     pit_disable(IMU_UPDATE_PIT);
-    //imu_init(mahony_filter_param, rotation_compensation_param);
-    imu660rc_init(IMU660RC_QUARTERNION_480HZ);
+    imu_init(mahony_filter_param, rotation_compensation_param);
 
     while (true)
     {

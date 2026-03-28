@@ -15,7 +15,7 @@ static void process_filter_update(void);
 // =====================接口函数=======================
 void imu_init(MahonyFilterParam mahony_param, RotationCompensationParam rot_comp_param)
 {
-    imu660ra_init();
+    imu660rc_init(IMU660RC_QUARTERNION_DISABLE);
     memset(&imu, 0, sizeof(imu_t));
     imu.state = IMU_STATE_UNINIT;
 
@@ -80,16 +80,16 @@ void imu_update(void)
 // 读取原始传感器数据
 static void read_sensor_data(void)
 {
-    imu660ra_get_acc();
-    imu660ra_get_gyro();
+    imu660rc_get_acc();
+    imu660rc_get_gyro();
 
-    imu.raw.acc[0] = imu660ra_acc_transition(imu660ra_acc_x);
-    imu.raw.acc[1] = imu660ra_acc_transition(imu660ra_acc_y);
-    imu.raw.acc[2] = imu660ra_acc_transition(imu660ra_acc_z);
+    imu.raw.acc[0] = imu660rc_acc_transition(imu660rc_acc_x);
+    imu.raw.acc[1] = imu660rc_acc_transition(imu660rc_acc_y);
+    imu.raw.acc[2] = imu660rc_acc_transition(imu660rc_acc_z);
 
-    imu.raw.gyro[0] = imu660ra_gyro_transition(imu660ra_gyro_x);
-    imu.raw.gyro[1] = imu660ra_gyro_transition(imu660ra_gyro_y);
-    imu.raw.gyro[2] = imu660ra_gyro_transition(imu660ra_gyro_z);
+    imu.raw.gyro[0] = imu660rc_gyro_transition(imu660rc_gyro_x);
+    imu.raw.gyro[1] = imu660rc_gyro_transition(imu660rc_gyro_y);
+    imu.raw.gyro[2] = imu660rc_gyro_transition(imu660rc_gyro_z);
 }
 
 // 从编码器获取速度和yaw角速度
@@ -110,8 +110,8 @@ static void set_mahony_initial_estimation(void)
     double ay = imu.calib.acc_sum[1] / imu.calib.sample_count;
     double az = imu.calib.acc_sum[2] / imu.calib.sample_count;
     // 转换至FLU坐标系
-    ax = ax;
-    ay = -ay;
+    ax = ay;
+    ay = ax;
     az = -az;
     // 计算初始四元数
     double roll = atan2f(ay, az);
@@ -170,12 +170,12 @@ static void apply_bias_and_cordinate_transform(void)
     }
 
     // 转换至FLU坐标系
-    imu.body.acc[0] = imu.raw.acc[0];
-    imu.body.acc[1] = -imu.raw.acc[1];
+    imu.body.acc[0] = imu.raw.acc[1];
+    imu.body.acc[1] = imu.raw.acc[0];
     imu.body.acc[2] = -imu.raw.acc[2];
 
-    imu.body.gyro[0] = corrected_gyro[0];
-    imu.body.gyro[1] = -corrected_gyro[1];
+    imu.body.gyro[0] = corrected_gyro[1];
+    imu.body.gyro[1] = corrected_gyro[0];
     imu.body.gyro[2] = -corrected_gyro[2];
 }
 

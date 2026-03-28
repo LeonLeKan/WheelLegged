@@ -31,11 +31,11 @@ void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
 
-    oscilloscope_data.data[0] = imu660rc_roll;
-    oscilloscope_data.data[1] = imu660rc_pitch;
-    oscilloscope_data.data[2] = imu660rc_yaw;
+    oscilloscope_data.data[0] = imu.output.euler[0];
+    oscilloscope_data.data[1] = imu.output.euler[1];
+    oscilloscope_data.data[2] = imu.output.euler[2];
 
-    oscilloscope_data.channel_num = 7;
+    oscilloscope_data.channel_num = 3;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 
