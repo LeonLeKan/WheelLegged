@@ -67,7 +67,7 @@ int main(void)
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi
-    wifi_init();
+    //wifi_init();
 
     // imu转圈偏移初始化
     rotation_compensation_param.rotation_thre = 180;
@@ -109,8 +109,8 @@ int main(void)
             // wifi_send_image();
         }
 
-        else if (motion_mode1 == 1 && motion_mode2 == 1 &&
-                 motion_mode3 == 1 && motion_mode4 == 0)
+        else if (motion_mode1 == 0 && motion_mode2 == 0 &&
+                 motion_mode3 == 1 && motion_mode4 == 1)
         {
             current_state = STATE_IDLE;
             ips200_clear();
