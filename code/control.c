@@ -98,8 +98,8 @@ void control_state_accelerate(void)
         speed_loop.Target = speed->data_float / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
-        servo_set(70.0f, 110.0f,
-                  70.0f, 110.0f);
+        servo_set(80.0f, 100.0f,
+                  80.0f, 100.0f);
 
         // turn_loop1.Target = 0.0f; // outer
         // turn_loop1.Actual = (float)error;
@@ -580,7 +580,7 @@ void control_state_thunder(void)
         aspeed_loop.Actual = imu.output.gyro[1];
         PID_Update_Lo(&aspeed_loop);
 
-        small_driver_set_duty((int16)(aspeed_loop.Out + 500), (int16)(-(aspeed_loop.Out - 500)));
+        small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
 
         yaw_thunder_now = imu.output.euler[2];
         if (yaw_thunder_flag == 0)
