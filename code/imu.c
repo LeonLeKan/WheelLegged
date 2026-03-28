@@ -106,13 +106,10 @@ static void read_encoder_data(void)
 static void set_mahony_initial_estimation(void)
 {
     // 使用校准期间的平均加速度作为初始姿态估计
-    double ax = imu.calib.acc_sum[0] / imu.calib.sample_count;
-    double ay = imu.calib.acc_sum[1] / imu.calib.sample_count;
-    double az = imu.calib.acc_sum[2] / imu.calib.sample_count;
-    // 转换至FLU坐标系
-    ax = ay;
-    ay = ax;
-    az = -az;
+    // 转换到FLU坐标系
+    double ax = imu.calib.acc_sum[1] / imu.calib.sample_count;
+    double ay = imu.calib.acc_sum[0] / imu.calib.sample_count;
+    double az = -imu.calib.acc_sum[2] / imu.calib.sample_count;
     // 计算初始四元数
     double roll = atan2f(ay, az);
     double pitch = atan2f(-ax, sqrtf(ay * ay + az * az));
