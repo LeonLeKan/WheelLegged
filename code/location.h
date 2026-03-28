@@ -12,8 +12,8 @@
 #define XYMIN_BIAS 0.1f
 
 extern waypoint_node_t *current_target;
-extern float yaw_memory;
 
-void location_update(void);
+void location_update_0(void);
+void location_update_1(void);
 
 #endif

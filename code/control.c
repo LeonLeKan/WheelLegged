@@ -29,7 +29,7 @@ void control_state_stand_up(void)
 {
     static uint32_t count = 0;
     count++;
-    if (count >= 200)
+    if (count >= 400)
     {
         an1pid_update(an1kp->data_float, an1ki->data_float, an1kd->data_float);
 
@@ -39,7 +39,7 @@ void control_state_stand_up(void)
 
         small_driver_set_duty((int16)angle_loop1.Out, (int16)-angle_loop1.Out);
 
-        if (count >= 250)
+        if (count >= 450)
         {
             count = 0;
             current_state = STATE_STAND_STILL;
@@ -145,6 +145,47 @@ void control_state_deaccelerate(void)
         servo_set(120.0f, 60.0f,
                   120.0f, 60.0f);
     }
+    angle_loop2.Target = pzero->data_float;
+    angle_loop2.Actual = imu.output.euler[1];
+    PID_Update_Lo(&angle_loop2);
+
+    aspeed_loop.Target = angle_loop2.Out;
+    aspeed_loop.Actual = imu.output.gyro[1];
+    PID_Update_Lo(&aspeed_loop);
+
+    small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+}
+
+void control_state_de_thunder(void)
+{
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+    yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
+    // tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
+    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    // threshold = (uint8_t)thre->data_int;
+    error_calc_far_line = (uint8_t)farl->data_int;
+    error_calc_near_line = (uint8_t)nearl->data_int;
+
+    static uint32_t count = 0;
+    count++;
+    if (count >= 4)
+    {
+        count = 0;
+
+        speed_loop.Target = speed->data_float / 100.0f;
+        speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+
+        servo_set(130.0f, 50.0f,
+                  130.0f, 50.0f);
+
+        PID_Update_Lo(&yaw_loop);
+    }
+
+    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual; // inner
+    turn_loop2.Actual = -imu.body.gyro[2];
+    PID_Update_Lo(&turn_loop2);
+    
     angle_loop2.Target = pzero->data_float;
     angle_loop2.Actual = imu.output.euler[1];
     PID_Update_Lo(&angle_loop2);

@@ -66,9 +66,17 @@ void pit0_ch2_isr() // 定时器通道 2 周期中断服务函数
     pit_isr_flag_clear(PIT_CH2);
     // 中断2: 惯导位置更新
     if (current_state == STATE_ACCELERATE ||
-        current_state == STATE_FORWARD)
+        current_state == STATE_FORWARD    ||
+        current_state == STATE_DE_THUNDER)
     {
-        location_update();
+        if (testnum->data_int == 0)
+        {
+            location_update_0();
+        }
+        else if (testnum->data_int == 1)
+        {
+            location_update_1();
+        }
     }
 }
 
@@ -321,10 +329,9 @@ void gpio_5_exti_isr()                  // 外部 GPIO_5 中断服务函数
 
 void gpio_6_exti_isr()                  // 外部 GPIO_6 中断服务函数     
 {
-    if(exti_flag_get(P06_7))
-    {
-        imu660rc_callback();
-    }
+    
+
+    
 }
 
 void gpio_7_exti_isr()                  // 外部 GPIO_7 中断服务函数     

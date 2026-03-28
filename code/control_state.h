@@ -9,6 +9,7 @@ typedef enum {
     STATE_STAND_STILL,
     STATE_ACCELERATE,
     STATE_DEACCELERATE,
+    STATE_DE_THUNDER,
     STATE_FORWARD,
     STATE_DECLINE_FRONT_SINGLE_SIDE,
     STATE_STAND_FRONT_SINGLE_SIDE,
@@ -22,6 +23,7 @@ typedef enum {
 
 extern volatile control_state_t current_state;
 extern volatile uint8_t test_state;
+extern volatile float yaw_memory;
 
 void control_state_switch(void);
 void control_state_update(void);

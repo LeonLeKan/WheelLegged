@@ -5,6 +5,7 @@
 
 volatile control_state_t current_state = STATE_IDLE;
 volatile uint8_t test_state = 0;
+volatile float yaw_memory = 0.0f;
 
 static void accelerate_to_forward(void)
 {
@@ -19,6 +20,15 @@ static void deaccelerate_to_stop(void)
     if (current_state == STATE_DEACCELERATE && (speed_loop.Actual < 0.1f))
     {
         current_state = STATE_STOP;
+    }
+}
+
+static void deaccelerate_to_thunder(void)
+{
+    if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 0.2f))
+    {
+        yaw_memory = yaw_loop.Actual;
+        current_state = STATE_THUNDER;
     }
 }
 
@@ -71,6 +81,7 @@ void control_state_switch(void)
 {
     accelerate_to_forward();
     deaccelerate_to_stop();
+    deaccelerate_to_thunder();
     to_single_side_decline();
     to_single_side_stand();
     quit_single_side();
@@ -94,6 +105,9 @@ void control_state_update(void)
         break;
     case STATE_DEACCELERATE:
         control_state_deaccelerate();
+        break;
+    case STATE_DE_THUNDER:
+        control_state_de_thunder();
         break;
     case STATE_FORWARD:
         control_state_forward();

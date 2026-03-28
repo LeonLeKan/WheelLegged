@@ -66,8 +66,14 @@ int main(void)
     // 存点初始化
     save_manager_init(ins_to_control_menu);
 
+    // 判断科目几
+    save_manager_load(testnum->data_int);
+
     // 如有需要，添加wifi
-    wifi_init();
+    if (gpio_get_level(DIP_4) == 0)
+    {
+        wifi_init();
+    }
 
     // imu转圈偏移初始化
     rotation_compensation_param.rotation_thre = 180;
@@ -92,8 +98,7 @@ int main(void)
         motion_mode3 = gpio_get_level(DIP_3);
         motion_mode4 = gpio_get_level(DIP_4);
 
-        if (motion_mode1 == 1 && motion_mode2 == 1 &&
-            motion_mode3 == 1 && motion_mode4 == 1)
+        if (motion_mode1 == 1 && motion_mode2 == 1 && motion_mode3 == 1)
         {
             current_state = STATE_IDLE;
             if (cali_flag == 1)
@@ -104,12 +109,14 @@ int main(void)
             imu_state_show();
 
             // 如果需要，添加wifi
-            // wifi_send_data();
-            // wifi_send_image();
+            if (motion_mode4 == 0)
+            {
+                wifi_send_data();
+                // wifi_send_image();
+            }
         }
 
-        else if (motion_mode1 == 0 && motion_mode2 == 0 &&
-                 motion_mode3 == 1 && motion_mode4 == 1)
+        else if (motion_mode1 == 0 && motion_mode2 == 0 && motion_mode3 == 1)
         {
             current_state = STATE_IDLE;
             ips200_clear();
@@ -127,19 +134,21 @@ int main(void)
                 }
 
                 // 如果需要，添加wifi
-                wifi_send_data();
-                // wifi_send_image();
+                if (motion_mode4 == 0)
+                {
+                    wifi_send_data();
+                    // wifi_send_image();
+                }
             }
         }
 
-        else if (motion_mode1 == 0 && motion_mode2 == 1 &&
-                 motion_mode3 == 1 && motion_mode4 == 1)
+        else if (motion_mode1 == 0 && motion_mode2 == 1 && motion_mode3 == 1)
         {
             ips200_clear();
             current_state = STATE_STAND_UP;
             while (true)
             {
-                // 跑
+                // 科目一
                 remote_control();
                 if (image_block == 1)
                 {
@@ -147,8 +156,11 @@ int main(void)
                 }
 
                 // 如果需要，添加wifi
-                // wifi_send_data();
-                // wifi_send_image();
+                if (motion_mode4 == 0)
+                {
+                    wifi_send_data();
+                    // wifi_send_image();
+                }
             }
         }
     }

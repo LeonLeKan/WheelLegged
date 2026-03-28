@@ -5,7 +5,6 @@
 #include "control_state.h"
 
 waypoint_node_t *current_target = NULL;
-float yaw_memory = 0.0f;
 
 static double direction_calculate(double x_target, double y_target, double x_now, double y_now)
 {
@@ -42,7 +41,7 @@ static void advance_to_next_waypoint(void)
     }
 }
 
-void location_update(void)
+void location_update_0(void)
 {
     waypoint_list_t *list = save_manager_get_active_save();
     
@@ -71,8 +70,45 @@ void location_update(void)
     double dy = y_tgt - y_now;
     if (fabs(dx) < XYMIN_BIAS && fabs(dy) < XYMIN_BIAS)
     {
-        yaw_memory = yaw_loop.Actual;
-        current_state = STATE_THUNDER;
+        advance_to_next_waypoint();
+    }
+
+    if (!current_target) 
+    {
+        current_state = STATE_DEACCELERATE;
+    }
+}
+
+void location_update_1(void)
+{
+    waypoint_list_t *list = save_manager_get_active_save();
+    
+    if (!current_target)
+    {
+        current_target = list->head->next;
+    }
+        
+    if (!current_target)
+    {
+        return;
+    }
+
+    double x_now = imu.output.position_x;
+    double y_now = imu.output.position_y;
+
+    double x_tgt = current_target->waypoint.x;
+    double y_tgt = current_target->waypoint.y;
+
+    double target_deg = direction_calculate(x_tgt, y_tgt, x_now, y_now);
+
+    yaw_loop.Target = target_deg;
+    yaw_loop.Actual = imu.output.euler[2];
+
+    double dx = x_tgt - x_now;
+    double dy = y_tgt - y_now;
+    if (fabs(dx) < XYMIN_BIAS && fabs(dy) < XYMIN_BIAS)
+    {
+        current_state = STATE_DE_THUNDER;
         advance_to_next_waypoint();
     }
 
