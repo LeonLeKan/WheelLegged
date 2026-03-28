@@ -88,6 +88,4 @@ void Mahony_Update(MahonyFilter* filter, double gyro[3], double acc[3]) {
     filter->output.euler[2] = yaw_output;
     
     filter->last_yaw = yaw;
-
-    filter->output.euler[2] = yaw_output;
 }
