@@ -75,19 +75,19 @@ void Mahony_Update(MahonyFilter* filter, double gyro[3], double acc[3]) {
     filter->output.euler[1] = asinf(2.0f * (q0 * q2 - q1 * q3)) * RAD_TO_DEG;
     double yaw = atan2f(2.0f * (q0 * q3 + q1 * q2), -2*q2*q2 - 2*q3*q3 + 1) * RAD_TO_DEG;
     
-    // // yaw unwrap
-    // double delta = yaw - filter->last_yaw;
-    // if(delta > 180.f) delta -= 360;
-    // if(delta < -180.f) delta += 360;
+    // yaw unwrap
+    double delta = yaw - filter->last_yaw;
+    if(delta > 180.f) delta -= 360;
+    if(delta < -180.f) delta += 360;
 
-    // double yaw_output = filter->output.euler[2] + delta;
-    // // 防止输出大于360
-    // if(yaw_output > 360.f) yaw_output -= 360;
-    // if(yaw_output < -360.f) yaw_output += 360;
+    double yaw_output = filter->output.euler[2] + delta;
+    // 防止输出大于360
+    if(yaw_output > 360.f) yaw_output -= 360;
+    if(yaw_output < -360.f) yaw_output += 360;
 
-    // filter->output.euler[2] = yaw_output;
+    filter->output.euler[2] = yaw_output;
     
-    // filter->last_yaw = yaw;
+    filter->last_yaw = yaw;
 
-    filter->output.euler[2] = yaw;
+    filter->output.euler[2] = yaw_output;
 }
