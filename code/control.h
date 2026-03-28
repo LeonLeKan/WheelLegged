@@ -17,6 +17,7 @@ void control_state_stand_still(void);
 void control_state_accelerate(void);
 void control_state_deaccelerate(void);
 void control_state_de_thunder(void);
+void control_state_tra_thunder(void);
 void control_state_forward(void);
 void control_state_decline_front_single_side(void);
 void control_state_stand_front_single_side(void);

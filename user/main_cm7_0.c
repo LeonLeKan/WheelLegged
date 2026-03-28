@@ -122,7 +122,6 @@ int main(void)
             ips200_clear();
             while (true)
             {
-                // 调菜单
                 if (menu_current_state == MENU_STATE_CONTROL)
                 {
                     show_menu();
@@ -148,7 +147,6 @@ int main(void)
             current_state = STATE_STAND_UP;
             while (true)
             {
-                // 科目一
                 remote_control();
                 if (image_block == 1)
                 {

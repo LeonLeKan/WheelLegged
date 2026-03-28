@@ -67,7 +67,8 @@ void pit0_ch2_isr() // 定时器通道 2 周期中断服务函数
     // 中断2: 惯导位置更新
     if (current_state == STATE_ACCELERATE ||
         current_state == STATE_FORWARD    ||
-        current_state == STATE_DE_THUNDER)
+        current_state == STATE_DE_THUNDER ||
+        current_state == STATE_TRA_THUNDER)
     {
         if (testnum->data_int == 0)
         {

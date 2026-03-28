@@ -68,7 +68,7 @@ void location_update_0(void)
 
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
-    if (fabs(dx) < XYMIN_BIAS && fabs(dy) < XYMIN_BIAS)
+    if (fabs(dx) < XYMIN_BIA_0 && fabs(dy) < XYMIN_BIA_0)
     {
         advance_to_next_waypoint();
     }
@@ -106,9 +106,16 @@ void location_update_1(void)
 
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
-    if (fabs(dx) < XYMIN_BIAS && fabs(dy) < XYMIN_BIAS)
+    if (fabs(dx) < XYMIN_THUNDER && fabs(dy) < XYMIN_THUNDER && fabs(dx) >= XYMIN_BIA_1 && fabs(dy) >= XYMIN_BIA_1 &&
+        current_state != STATE_TRA_THUNDER && current_target->next)
     {
         current_state = STATE_DE_THUNDER;
+    }
+
+    if (fabs(dx) < XYMIN_BIA_1 && fabs(dy) < XYMIN_BIA_1)
+    {
+        yaw_memory = yaw_loop.Actual;
+        current_state = STATE_THUNDER;
         advance_to_next_waypoint();
     }
 

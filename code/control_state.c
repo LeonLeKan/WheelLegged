@@ -25,10 +25,10 @@ static void deaccelerate_to_stop(void)
 
 static void deaccelerate_to_thunder(void)
 {
-    if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 0.2f))
+    if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 1.0f))
     {
-        yaw_memory = yaw_loop.Actual;
-        current_state = STATE_THUNDER;
+        current_state = STATE_TRA_THUNDER;
+        speed_loop.Target = 1.0f;
     }
 }
 
@@ -108,6 +108,9 @@ void control_state_update(void)
         break;
     case STATE_DE_THUNDER:
         control_state_de_thunder();
+        break;
+    case STATE_TRA_THUNDER:
+        control_state_tra_thunder();
         break;
     case STATE_FORWARD:
         control_state_forward();
