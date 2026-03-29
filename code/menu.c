@@ -7,10 +7,10 @@
 
 volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
-MENU *RootMenu, *Balance, *Image, *Element, *currentMenu;
+MENU *RootMenu, *Balance, *Image, *Element, *testnum, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *pzero, *pinit, *show,
     *thre, *farl, *nearl, *saveim,
-    *change, *snspeed, *rollba, *turnamf, *turnamt, *testnum, *cwtucop, *ccwtucop, *saveel;
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
@@ -90,18 +90,22 @@ void create_1st_menu(void)
     Balance = createMenu("Balance", 1, 1, MENU_TYPE_NORMAL, NULL);
     Image = createMenu("Image", 1, 2, MENU_TYPE_NORMAL, NULL);
     Element = createMenu("Element", 1, 3, MENU_TYPE_NORMAL, NULL);
+    testnum = createMenu("testnum", 1, 4, MENU_TYPE_INT, NULL);
 
     RootMenu->child = Balance;
     Balance->parent = RootMenu;
     Image->parent = RootMenu;
     Element->parent = RootMenu;
+    testnum->parent = RootMenu;
 
     Balance->next = Image;
     Image->last = Balance;
     Image->next = Element;
     Element->last = Image;
-    Element->next = Balance;
-    Balance->last = Element;
+    Element->next = testnum;
+    testnum->last = Element;
+    testnum->next = Balance;
+    Balance->last = testnum;
 
     currentMenu = RootMenu->child;
 }
@@ -131,10 +135,9 @@ void create_2nd_menu(void)
     rollba = createMenu("rollba", 2, 3, MENU_TYPE_FLOAT, NULL);
     turnamf = createMenu("turnamf", 2, 4, MENU_TYPE_INT, NULL);
     turnamt = createMenu("turnamt", 2, 5, MENU_TYPE_INT, NULL);
-    testnum = createMenu("testnum", 2, 6, MENU_TYPE_INT, NULL);
-    cwtucop = createMenu("cwtucop", 2, 7, MENU_TYPE_FLOAT, NULL);
-    ccwtucop = createMenu("ccwtucop", 2, 8, MENU_TYPE_FLOAT, NULL);
-    saveel = createMenu("save", 2, 9, MENU_TYPE_FUNCTION, menu_save);
+    cwtucop = createMenu("cwtucop", 2, 6, MENU_TYPE_FLOAT, NULL);
+    ccwtucop = createMenu("ccwtucop", 2, 7, MENU_TYPE_FLOAT, NULL);
+    saveel = createMenu("save", 2, 8, MENU_TYPE_FUNCTION, menu_save);
 
     speed->next = anloop1;
     anloop1->last = speed;
@@ -178,10 +181,8 @@ void create_2nd_menu(void)
     turnamf->last = rollba;
     turnamf->next = turnamt;
     turnamt->last = turnamf;
-    turnamt->next = testnum;
-    testnum->last = turnamt;
-    testnum->next = cwtucop;
-    cwtucop->last = testnum;
+    turnamt->next = cwtucop;
+    cwtucop->last = turnamt;
     cwtucop->next = ccwtucop;
     ccwtucop->last = cwtucop;
     ccwtucop->next = saveel;
@@ -215,7 +216,6 @@ void create_2nd_menu(void)
     rollba->parent = Element;
     turnamf->parent = Element;
     turnamt->parent = Element;
-    testnum->parent = Element;
     cwtucop->parent = Element;
     ccwtucop->parent = Element;
     saveel->parent = Element;
@@ -858,6 +858,10 @@ void menu_save(void)
         } while (tmp != ele);
     }
 
+    MENU *test = testnum;
+    flash_union_buffer[index++].int32_type = test->data_int;
+    node_count++;
+
     flash_union_buffer[0].float_type = menu_magic;
     flash_union_buffer[1].uint32_type = node_count;
 
@@ -996,6 +1000,14 @@ void menu_load1(void)
             tmp = tmp->next;
         } while (tmp != ele);
     }
+
+    MENU *test = testnum;
+    test->data_int = (int)flash_union_buffer[idx++].int32_type;
+    if (fabs((float)test->data_int) >= 100000)
+    {
+        test->data_int = 0;
+    }
+    real_count++;
 }
 
 void menu_zero(void)

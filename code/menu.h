@@ -50,10 +50,10 @@ typedef enum
     MENU_STATE_INS,
 } menu_state_t;
 
-extern MENU *RootMenu, *Balance, *Image, *Element, *currentMenu;
+extern MENU *RootMenu, *Balance, *Image, *Element, *testnum, *currentMenu;
 extern MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *pzero, *pinit, *show,
     *thre, *farl, *nearl, *saveim,
-    *change, *snspeed, *rollba, *turnamf, *turnamt, *testnum, *cwtucop, *ccwtucop, *saveel;
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *saveel;
 extern MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
