@@ -18,7 +18,7 @@
 #define COLOR_MENU_HIGHLIGHT RGB565_CYAN
 
 // 移动步长（米）
-#define MOVE_STEP    0.5
+#define MOVE_STEP    0.05
 
 // 全局点显示实例(单例)
 points_display_instance_t points_display_instance;
