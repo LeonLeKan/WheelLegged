@@ -8,7 +8,8 @@
 // imu状态枚举
 typedef enum {
     IMU_STATE_UNINIT = 0,
-    IMU_STATE_CALIBRATING,
+    IMU_STATE_INITIAL_ESTIMATION,
+    IMU_STATE_AUTO_GYRO_CALIBRATING,
     IMU_STATE_NORMAL,
     IMU_STATE_ROTATING,
     IMU_STATE_ERROR
@@ -43,11 +44,17 @@ typedef struct {
     // 校准参数
     struct {
         double gyro_bias[3];      // 陀螺仪零偏
-        double acc_sum[3];        // 加速度校准期间的累积和，用于计算初始姿态
         uint32_t sample_count;   // 已采集样本数
         uint32_t target_samples; // 目标样本数
         bool is_calibrated;      // 校准完成标志
     } calib;
+
+    struct {
+        double acc_sum[3];        // 加速度校准期间的累积和，用于计算初始姿态
+        uint32_t sample_count;   // 已采集样本数
+        uint32_t target_samples; // 目标样本数
+        bool is_estimated;       // 初始估计完成标志
+    } initial_estimation; // 初始姿态估计相关数据
 
     struct {
         int enter_cnt, exit_cnt;
@@ -75,8 +82,9 @@ extern imu_t imu;
 
 void imu_init(MahonyFilterParam mahony_param, RotationCompensationParam rot_comp_param);
 void imu_reset_mahony_filter(MahonyFilterParam param);
-void imu_start_calibration(uint32_t target_samples);
-bool imu_is_calibrated(void);
+void imu_start_initial_estimation(uint32_t target_samples);
+void imu_set_gyro_bias(double bias_x, double bias_y, double bias_z);
+void imu_start_auto_gyro_calibration(uint32_t target_samples);
 void imu_update(void);  // 在定时中断中调用
 
 

@@ -16,7 +16,8 @@
 
 void gpio_init_all(void);
 void imu_state_show(void);
-void start_imu_calibration(void);
+void start_imu_initial_estimation(void);
+void start_imu_auto_gyro_calibration(void);
 
 void remote_control(void);
 
@@ -36,7 +37,7 @@ bool showing_points = false;
 // 用于实现校准后的分层启动
 bool car_run_state = false;
 
-uint8_t cali_flag = 1;
+uint8_t initial_estimation_flag = 1;
 
 int main(void)
 {
@@ -101,10 +102,10 @@ int main(void)
         if (motion_mode1 == 1 && motion_mode2 == 1 && motion_mode3 == 1)
         {
             current_state = STATE_IDLE;
-            if (cali_flag == 1)
+            if (initial_estimation_flag == 1)
             {
-                start_imu_calibration();
-                cali_flag = 0;
+                start_imu_initial_estimation();
+                initial_estimation_flag = 0;
             }
             imu_state_show();
 
@@ -164,10 +165,16 @@ int main(void)
     }
 }
 
-void start_imu_calibration(void)
+void start_imu_initial_estimation(void)
 {
     system_delay_ms(300);        // 确保系统稳定
-    imu_start_calibration(3000); // 采集3000个样本进行校准
+    imu_start_initial_estimation(500); // 采集500个样本进行初始姿态估计
+}
+
+void start_imu_auto_gyro_calibration(void)
+{
+    system_delay_ms(300);        // 确保系统稳定
+    imu_start_auto_gyro_calibration(3000); // 采集3000个样本进行校准
 }
 
 void gpio_init_all(void)
@@ -190,7 +197,10 @@ void imu_state_show(void)
     case IMU_STATE_UNINIT:
         screen_printf(0, 0, "IMU State: UNINIT     ");
         break;
-    case IMU_STATE_CALIBRATING:
+    case IMU_STATE_INITIAL_ESTIMATION:
+        screen_printf(0, 0, "IMU State: ESTIMATING ");
+        break;
+    case IMU_STATE_AUTO_GYRO_CALIBRATING:
         screen_printf(0, 0, "IMU State: CALIBRATING");
         break;
     case IMU_STATE_NORMAL:

@@ -8,7 +8,8 @@ imu_t imu;
 static void read_sensor_data(void);
 static void read_encoder_data(void);
 static void apply_bias_and_cordinate_transform(void);
-static void process_calibration(void);
+static void process_initial_estimation(void);
+static void process_auto_calibration(void);
 static void process_filter_update(void);
 
 
@@ -31,7 +32,22 @@ void imu_reset_mahony_filter(MahonyFilterParam param)
     Mahony_Init(&imu.mahony_filter, param);
 }
 
-void imu_start_calibration(uint32_t target_samples)
+void imu_start_initial_estimation(uint32_t target_samples)
+{
+    imu.initial_estimation.target_samples = target_samples;
+    imu.initial_estimation.sample_count = 0;
+    imu.state = IMU_STATE_INITIAL_ESTIMATION;
+}
+
+void imu_set_gyro_bias(double bias_x, double bias_y, double bias_z)
+{
+    imu.calib.gyro_bias[0] = bias_x;
+    imu.calib.gyro_bias[1] = bias_y;
+    imu.calib.gyro_bias[2] = bias_z;
+    imu.calib.is_calibrated = true;
+}
+
+void imu_start_auto_gyro_calibration(uint32_t target_samples)
 {
     // 清空校准数据
     imu.calib.target_samples = target_samples;
@@ -41,15 +57,8 @@ void imu_start_calibration(uint32_t target_samples)
     imu.calib.gyro_bias[1] = 0.0f;
     imu.calib.gyro_bias[2] = 0.0f;
     // 进入校准状态
-    imu.state = IMU_STATE_CALIBRATING;
+    imu.state = IMU_STATE_AUTO_GYRO_CALIBRATING;
 }
-
-
-bool imu_is_calibrated(void)
-{
-    return imu.calib.is_calibrated;
-}
-
 
 // imu更新函数（中断中调用）
 void imu_update(void)
@@ -57,18 +66,31 @@ void imu_update(void)
     read_sensor_data();
     read_encoder_data();
 
+    // 如果已经校准并且完成初始估计，则进入正常运行状态
+    if(imu.calib.is_calibrated && imu.initial_estimation.is_estimated)
+    {
+        imu.state = IMU_STATE_NORMAL;
+    }
+
     switch (imu.state)
     {
-        case IMU_STATE_CALIBRATING:
+        case IMU_STATE_INITIAL_ESTIMATION:
         {
-            process_calibration();
+            process_initial_estimation();
+            break;
+        }
+        case IMU_STATE_AUTO_GYRO_CALIBRATING:
+        {
+            process_auto_calibration();
             break;
         }
         case IMU_STATE_NORMAL:
         case IMU_STATE_ROTATING:
+        {
             apply_bias_and_cordinate_transform();
             process_filter_update();
             break;
+        }
         default:
             return; // 非法状态，直接返回
     }
@@ -107,9 +129,9 @@ static void set_mahony_initial_estimation(void)
 {
     // 使用校准期间的平均加速度作为初始姿态估计
     // 转换到FLU坐标系
-    double ax = imu.calib.acc_sum[1] / imu.calib.sample_count;
-    double ay = imu.calib.acc_sum[0] / imu.calib.sample_count;
-    double az = -imu.calib.acc_sum[2] / imu.calib.sample_count;
+    double ax = imu.initial_estimation.acc_sum[1] / imu.initial_estimation.sample_count;
+    double ay = imu.initial_estimation.acc_sum[0] / imu.initial_estimation.sample_count;
+    double az = -imu.initial_estimation.acc_sum[2] / imu.initial_estimation.sample_count;
     // 计算初始四元数
     double roll = atan2f(ay, az);
     double pitch = atan2f(-ax, sqrtf(ay * ay + az * az));
@@ -176,17 +198,29 @@ static void apply_bias_and_cordinate_transform(void)
     imu.body.gyro[2] = -corrected_gyro[2];
 }
 
+// 根据加速度计估计初始姿态
+static void process_initial_estimation(void)
+{
+    // 累加加速度数据
+    imu.initial_estimation.acc_sum[0] += imu.raw.acc[0];
+    imu.initial_estimation.acc_sum[1] += imu.raw.acc[1];
+    imu.initial_estimation.acc_sum[2] += imu.raw.acc[2];
+    imu.initial_estimation.sample_count++;
+    // 检查是否完成初始估计
+    if (imu.initial_estimation.sample_count >= imu.initial_estimation.target_samples)
+    {
+        set_mahony_initial_estimation();
+        imu.initial_estimation.is_estimated = true;
+    }
+}
 
-static void process_calibration(void)
+// 进行自动陀螺仪校准
+static void process_auto_calibration(void)
 {
     // 累加陀螺仪数据
     imu.calib.gyro_bias[0] += imu.raw.gyro[0];
     imu.calib.gyro_bias[1] += imu.raw.gyro[1];
     imu.calib.gyro_bias[2] += imu.raw.gyro[2];
-    // 累加加速度数据（用于初始姿态估计）
-    imu.calib.acc_sum[0] += imu.raw.acc[0];
-    imu.calib.acc_sum[1] += imu.raw.acc[1];
-    imu.calib.acc_sum[2] += imu.raw.acc[2];
     imu.calib.sample_count++;
     // 检查是否完成校准
     if (imu.calib.sample_count >= imu.calib.target_samples)
@@ -195,12 +229,9 @@ static void process_calibration(void)
         imu.calib.gyro_bias[0] /= imu.calib.target_samples;
         imu.calib.gyro_bias[1] /= imu.calib.target_samples;
         imu.calib.gyro_bias[2] /= imu.calib.target_samples;
-        set_mahony_initial_estimation();
         imu.calib.is_calibrated = true;
-        imu.state = IMU_STATE_NORMAL;
     }
 }
-
 
 static void process_filter_update(void)
 {
