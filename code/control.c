@@ -332,7 +332,7 @@ void control_state_decline_front_single_side(void)
                   110.0f, 70.0f);
 
         yaw_loop.Target = 0.0f; // outer
-        yaw_loop.Actual = (float)error;
+        yaw_loop.Actual = imu.output.euler[2];
         PID_Update_Lo(&yaw_loop);
     }
 
@@ -389,7 +389,7 @@ void control_state_stand_front_single_side(void)
                   80.0f - filtered_speed_out, 80.0f + filtered_speed_out);
 
         yaw_loop.Target = 0.0f; // outer
-        yaw_loop.Actual = (float)error;
+        yaw_loop.Actual = imu.output.euler[2];
         PID_Update_Lo(&yaw_loop);
     }
 
@@ -449,7 +449,7 @@ void control_state_single_side(void)
         filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
 
         yaw_loop.Target = 0.0f; // outer
-        yaw_loop.Actual = (float)error;
+        yaw_loop.Actual = imu.output.euler[2];
         PID_Update_Lo(&yaw_loop);
     }
 

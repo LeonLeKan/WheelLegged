@@ -124,3 +124,42 @@ void location_update_1(void)
         current_state = STATE_DEACCELERATE;
     }
 }
+
+void location_update_2(void)
+{
+    waypoint_list_t *list = save_manager_get_active_save();
+    
+    if (!current_target)
+    {
+        current_target = list->head->next;
+    }
+        
+    if (!current_target)
+    {
+        return;
+    }
+
+    double x_now = imu.output.position_x;
+    double y_now = imu.output.position_y;
+
+    double x_tgt = current_target->waypoint.x;
+    double y_tgt = current_target->waypoint.y;
+
+    double target_deg = direction_calculate(x_tgt, y_tgt, x_now, y_now);
+
+    yaw_loop.Target = target_deg;
+    yaw_loop.Actual = imu.output.euler[2];
+
+    double dx = x_tgt - x_now;
+    double dy = y_tgt - y_now;
+
+    if (fabs(dx) < XYMIN_BIA_1 && fabs(dy) < XYMIN_BIA_1)
+    {
+        advance_to_next_waypoint();
+    }
+
+    if (!current_target) 
+    {
+        current_state = STATE_DECLINE_FRONT_SINGLE_SIDE;
+    }
+}

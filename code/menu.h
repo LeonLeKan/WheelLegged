@@ -51,7 +51,7 @@ typedef enum
 } menu_state_t;
 
 extern MENU *RootMenu, *Balance, *Image, *Element, *testnum, *currentMenu;
-extern MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *pzero, *pinit, *show,
+extern MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *imubias, *pzero, *pinit, *show,
     *thre, *farl, *nearl, *saveim,
     *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *saveel;
 extern MENU *an1kp, *an1ki, *an1kd,
@@ -62,8 +62,9 @@ extern MENU *an1kp, *an1ki, *an1kd,
     *askp, *aski, *askd,
     *snkp, *snki, *snkd,
     *yakp, *yaki, *yakd,
-    *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn, *zeroya,
-    *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn, *saveya;
+    *rollbias, *pitchbias, *yawbias,
+    *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn, *zeroya, *zerobi,
+    *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn, *saveya, *savebi;
 
 extern volatile menu_state_t menu_current_state;
 

@@ -8,7 +8,7 @@
 volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
 MENU *RootMenu, *Balance, *Image, *Element, *testnum, *currentMenu;
-MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *pzero, *pinit, *show,
+MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *imubias, *pzero, *pinit, *show,
     *thre, *farl, *nearl, *saveim,
     *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
@@ -19,8 +19,9 @@ MENU *an1kp, *an1ki, *an1kd,
     *askp, *aski, *askd,
     *snkp, *snki, *snkd,
     *yakp, *yaki, *yakd,
-    *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn, *zeroya,
-    *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn, *saveya;
+    *rollbias, *pitchbias, *yawbias,
+    *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn, *zeroya, *zerobi,
+    *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn, *saveya, *savebi;
 
 #define MENU_POOL_SIZE 128
 
@@ -121,9 +122,10 @@ void create_2nd_menu(void)
     asloop = createMenu("asloop", 2, 7, MENU_TYPE_NORMAL, NULL);
     snloop = createMenu("snloop", 2, 8, MENU_TYPE_NORMAL, NULL);
     yaloop = createMenu("yaloop", 2, 9, MENU_TYPE_NORMAL, NULL);
-    pzero = createMenu("pzero", 2, 10, MENU_TYPE_FLOAT, NULL);
-    pinit = createMenu("pinit", 2, 11, MENU_TYPE_FLOAT, NULL);
-    show = createMenu("show", 2, 12, MENU_TYPE_FUNCTION, image_show);
+    imubias = createMenu("imubias", 2, 10, MENU_TYPE_NORMAL, NULL);
+    pzero = createMenu("pzero", 2, 11, MENU_TYPE_FLOAT, NULL);
+    pinit = createMenu("pinit", 2, 12, MENU_TYPE_FLOAT, NULL);
+    show = createMenu("show", 2, 13, MENU_TYPE_FUNCTION, image_show);
 
     thre = createMenu("thre", 2, 1, MENU_TYPE_INT, NULL);
     farl = createMenu("farl", 2, 2, MENU_TYPE_INT, NULL);
@@ -155,8 +157,10 @@ void create_2nd_menu(void)
     snloop->last = asloop;
     snloop->next = yaloop;
     yaloop->last = snloop;
-    yaloop->next = pzero;
-    pzero->last = yaloop;
+    yaloop->next = imubias;
+    imubias->last = yaloop;
+    imubias->next = pzero;
+    pzero->last = imubias;
     pzero->next = pinit;
     pinit->last = pzero;
     pinit->next = show;
@@ -200,6 +204,7 @@ void create_2nd_menu(void)
     asloop->parent = Balance;
     snloop->parent = Balance;
     yaloop->parent = Balance;
+    imubias->parent = Balance;
     pzero->parent = Balance;
     pinit->parent = Balance;
     show->parent = Balance;
@@ -259,6 +264,10 @@ void create_3rd_menu(void)
     yaki = createMenu("yaki", 3, 2, MENU_TYPE_FLOAT, NULL);
     yakd = createMenu("yakd", 3, 3, MENU_TYPE_FLOAT, NULL);
 
+    rollbias = createMenu("rollbias", 3, 1, MENU_TYPE_FLOAT, NULL);
+    pitchbias = createMenu("pitchbias", 3, 2, MENU_TYPE_FLOAT, NULL);
+    yawbias = createMenu("yawbias", 3, 3, MENU_TYPE_FLOAT, NULL);
+
     savean1 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
     savean2 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
     savesp = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
@@ -267,6 +276,7 @@ void create_3rd_menu(void)
     saveas = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
     savesn = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
     saveya = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
+    savebi = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
 
     zeroan1 = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
     zeroan2 = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
@@ -276,6 +286,7 @@ void create_3rd_menu(void)
     zeroas = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
     zerosn = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
     zeroya = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
+    zerobi = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
 
     anloop1->child = an1kp;
     an1kp->next = an1ki;
@@ -373,6 +384,18 @@ void create_3rd_menu(void)
     zeroya->next = yakp;
     yakp->last = zeroya;
 
+    imubias->child = rollbias;
+    rollbias->next = pitchbias;
+    pitchbias->last = rollbias;
+    pitchbias->next = yawbias;
+    yawbias->last = pitchbias;
+    yawbias->next = savebi;
+    savebi->last = yawbias;
+    savebi->next = zerobi;
+    zerobi->last = savebi;
+    zerobi->next = rollbias;
+    rollbias->last = zerobi;
+
     an1kp->parent = anloop1;
     an1ki->parent = anloop1;
     an1kd->parent = anloop1;
@@ -420,6 +443,12 @@ void create_3rd_menu(void)
     yakd->parent = yaloop;
     zeroya->parent = yaloop;
     saveya->parent = yaloop;
+
+    rollbias->parent = imubias;
+    pitchbias->parent = imubias;
+    yawbias->parent = imubias;
+    zerobi->parent = imubias;
+    savebi->parent = imubias;
 }
 
 void key_handle_menu(void)

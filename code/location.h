@@ -17,5 +17,6 @@ extern waypoint_node_t *current_target;
 
 void location_update_0(void);
 void location_update_1(void);
+void location_update_2(void);
 
 #endif
