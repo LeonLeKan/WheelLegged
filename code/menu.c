@@ -113,7 +113,7 @@ void create_1st_menu(void)
 
 void create_2nd_menu(void)
 {
-    speed = createMenu("speed", 2, 1, MENU_TYPE_FLOAT, NULL);
+    speed = createMenu("speed", 2, 1, MENU_TYPE_INT, NULL);
     anloop1 = createMenu("anloop1", 2, 2, MENU_TYPE_NORMAL, NULL);
     anloop2 = createMenu("anloop2", 2, 3, MENU_TYPE_NORMAL, NULL);
     sploop = createMenu("sploop", 2, 4, MENU_TYPE_NORMAL, NULL);
@@ -133,7 +133,7 @@ void create_2nd_menu(void)
     saveim = createMenu("save", 2, 4, MENU_TYPE_FUNCTION, menu_save);
 
     change = createMenu("change", 2, 1, MENU_TYPE_FUNCTION, control_to_ins_menu);
-    snspeed = createMenu("snspeed", 2, 2, MENU_TYPE_FLOAT, NULL);
+    snspeed = createMenu("snspeed", 2, 2, MENU_TYPE_INT, NULL);
     rollba = createMenu("rollba", 2, 3, MENU_TYPE_FLOAT, NULL);
     turnamf = createMenu("turnamf", 2, 4, MENU_TYPE_INT, NULL);
     turnamt = createMenu("turnamt", 2, 5, MENU_TYPE_INT, NULL);
@@ -522,7 +522,7 @@ void key_handle_menu(void)
                     }
                     else
                     {
-                        sprintf(edit_buf, "%+09.3f", currentMenu->data_float);
+                        sprintf(edit_buf, "%+09.4f", currentMenu->data_float);
                     }
                 }
                 else if (currentMenu->child != NULL && currentMenu->layer < MAX_LAYER)
@@ -646,7 +646,7 @@ void show_menu(void)
             }
             else
             {
-                sprintf(buf, "%+09.3f", currentMenu->data_float);
+                sprintf(buf, "%+09.4f", currentMenu->data_float);
             }
             pstr = buf;
         }
@@ -755,15 +755,15 @@ void show_menu(void)
 
     if (kp_node && ki_node && kd_node)
     {
-        sprintf(buf_float_kp, "%+09.3f", kp_node->data_float);
-        sprintf(buf_float_ki, "%+09.3f", ki_node->data_float);
-        sprintf(buf_float_kd, "%+09.3f", kd_node->data_float);
+        sprintf(buf_float_kp, "%+09.4f", kp_node->data_float);
+        sprintf(buf_float_ki, "%+09.4f", ki_node->data_float);
+        sprintf(buf_float_kd, "%+09.4f", kd_node->data_float);
     }
     else
     {
-        sprintf(buf_float_kp, "%+09.3f", 0.0);
-        sprintf(buf_float_ki, "%+09.3f", 0.0);
-        sprintf(buf_float_kd, "%+09.3f", 0.0);
+        sprintf(buf_float_kp, "%+09.4f", 0.0);
+        sprintf(buf_float_ki, "%+09.4f", 0.0);
+        sprintf(buf_float_kd, "%+09.4f", 0.0);
     }
 
     ips200_show_string(168, 192, buf_float_kp);

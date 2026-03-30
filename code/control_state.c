@@ -46,7 +46,7 @@ static void to_single_side_decline(void)
 static void to_single_side_stand(void)
 {
     if (current_state == STATE_DECLINE_FRONT_SINGLE_SIDE
-      && speed_loop.Actual < snspeed->data_float / 100.0f)
+      && speed_loop.Actual < speed_loop.Target / 100.0f)
     {
         current_state = STATE_STAND_FRONT_SINGLE_SIDE;
     }

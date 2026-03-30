@@ -95,7 +95,7 @@ void control_state_accelerate(void)
     {
         count = 0;
 
-        speed_loop.Target = speed->data_float / 100.0f;
+        speed_loop.Target = (float)speed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         servo_set(80.0f, 100.0f,
@@ -139,7 +139,7 @@ void control_state_deaccelerate(void)
     {
         count = 0;
 
-        speed_loop.Target = speed->data_float / 100.0f;
+        speed_loop.Target = (float)speed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         servo_set(130.0f, 50.0f,
@@ -173,7 +173,7 @@ void control_state_de_thunder(void)
     {
         count = 0;
 
-        speed_loop.Target = speed->data_float / 100.0f;
+        speed_loop.Target = (float)speed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         servo_set(110.0f, 70.0f,
@@ -270,7 +270,7 @@ void control_state_forward(void)
     {
         count = 0;
 
-        speed_loop.Target = speed->data_float / 100.0f;
+        speed_loop.Target = (float)speed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
@@ -325,7 +325,7 @@ void control_state_decline_front_single_side(void)
     {
         count = 0;
 
-        speed_loop.Target = snspeed->data_float / 100.0f;
+        speed_loop.Target = (float)snspeed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         servo_set(110.0f, 70.0f,
@@ -372,7 +372,7 @@ void control_state_stand_front_single_side(void)
     {
         count = 0;
 
-        speed_loop.Target = snspeed->data_float / 100.0f;
+        speed_loop.Target = (float)snspeed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
@@ -440,7 +440,7 @@ void control_state_single_side(void)
     {
         count = 0;
 
-        speed_loop.Target = snspeed->data_float / 100.0f;
+        speed_loop.Target = (float)snspeed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
@@ -686,7 +686,7 @@ void control_state_jolt(void)
     {
         count = 0;
 
-        speed_loop.Target = speed->data_float / 100.0f;
+        speed_loop.Target = (float)speed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
