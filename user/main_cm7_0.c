@@ -91,6 +91,8 @@ int main(void)
     pit_disable(IMU_UPDATE_PIT);
     imu_init(mahony_filter_param, rotation_compensation_param);
 
+    imu_set_gyro_bias(rollbias->data_float, pitchbias->data_float, yawbias->data_float);
+
     while (true)
     {
         // 主循环检测拨码的状态
