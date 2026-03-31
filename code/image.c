@@ -23,8 +23,8 @@ typedef struct {
 
 
 int error = 0;
-int error_calc_near_line = 77;
-int error_calc_far_line = 75;
+int error_calc_near_line = 42;
+int error_calc_far_line = 40;
 
 all_range white_range[CAMERA_H];//所有白条子
 road my_road[CAMERA_H];//赛道
@@ -66,18 +66,9 @@ float single_dis = 0;
 
 
 //关于阈值
-uint8_t threshold_1 = 200;//中间部分阈值，左上阈值
-uint8_t threshold_2 = 200;//边缘部分阈值，右上阈值
-uint8_t threshold_3 = 200;//左下阈值
-uint8_t threshold_4 = 200;//右下阈值
+uint8_t threshold = 230;
 uint8_t mid_divide = 94;
 uint8_t up_divide = NEAR_LINE / 2;
-uint8_t threshold_mode = 2;//控制阈值模式
-int8_t threshold_minus1 = 10;//大津法阈值要减的数
-int8_t threshold_minus2 = 10;//大津法阈值要减的数
-uint8_t gray_dis = 2;//去阴影
-uint8_t traverse_mode = 2;//横断桥开关，0表示跳过，1表示右边跳，2表示左边跳
-float extract_k = 0.4;
 
 //补线需要的数据
 uint8_t left_guai_H = 0;//左下边界拐点
@@ -2520,55 +2511,18 @@ void THRE()
     uint8_t* gray_map = 0;
     uint8_t bound_thre = 0;
     map = fullBuffer;
-    
-    if (threshold_mode == 2)
+    for (int i = 0; i < 120; i++)
     {
-        threshold_1 = GetOTSU_part(fullBuffer, 1, up_divide, 1, mid_divide);//左上
-        threshold_2 = GetOTSU_part(fullBuffer, 1, up_divide, mid_divide, 188);//右上
-        threshold_3 = GetOTSU_part(fullBuffer, up_divide, NEAR_LINE, 0, mid_divide);//左下
-        threshold_4 = GetOTSU_part(fullBuffer, up_divide, NEAR_LINE, mid_divide, 188);
-        for (int i = 0; i < up_divide; i++)
+        my_map = &IMG[i][0];
+        for (int j = 0; j < 188; j++)
         {
-            my_map = &IMG[i][0];
-            for (int j = 0; j < mid_divide; j++)
-            {
-                if ((*map) > threshold_1)
-                    (*my_map) = 1;
-                else (*my_map) = 0;
-                map++;
-                my_map++;
-            }
-            for (int j = mid_divide; j < 188; j++)
-            {
-                if ((*map) > threshold_2)
-                    (*my_map) = 1;
-                else (*my_map) = 0;
-                map++;
-                my_map++;
-            }
-        }
-        for (int i = up_divide; i < 120; i++)
-        {
-            my_map = &IMG[i][0];
-            for (int j = 0; j < mid_divide; j++)
-            {
-                if ((*map) > threshold_3)
-                    (*my_map) = 1;
-                else (*my_map) = 0;
-                map++;
-                my_map++;
-            }
-            for (int j = mid_divide; j < 188; j++)
-            {
-                if ((*map) > threshold_4)
-                    (*my_map) = 1;
-                else (*my_map) = 0;
-                map++;
-                my_map++;
-            }
+            if ((*map) > threshold)
+                (*my_map) = 1;
+            else (*my_map) = 0;
+            map++;
+            my_map++;
         }
     }
-
 }
 
 /////////////
@@ -3377,7 +3331,7 @@ void element_check()//人机交互
 void print_f()
 {
     printf("————————————————————————————————————\n");
-    printf("threshold1 = %d,thresholds2 = %d,threshold3 = %d,threshold4 = %d\n", threshold_1, threshold_2, threshold_3, threshold_4);
+    //printf("threshold1 = %d,thresholds2 = %d,threshold3 = %d,threshold4 = %d\n", threshold_1, threshold_2, threshold_3, threshold_4);
     printf("元素状态 = %d,弯道状态 = %d,元素状态 = %d\n", step, bend_state, yuansu_state);
     printf("单边桥判断帧数 = %d, 弯道判断帧数 = %d\n", single_side_fps, bend_fps);
     printf("right_guai_H = %d , left_guai_H = %d\n", right_guai_H, left_guai_H);

@@ -74,16 +74,8 @@ extern uint8_t IMG[CAMERA_H][CAMERA_W];//二值化后图像数组
 extern uint8_t* fullBuffer;//指向灰度图的首地址
 extern uint8_t mid_line[CAMERA_H];
 extern uint8_t left_line[CAMERA_H], right_line[CAMERA_H];
-extern uint8_t threshold_1;
-extern uint8_t threshold_2;
-extern uint8_t top_road;
-extern uint8_t bend_state;
 
-
-extern uint8_t threshold_mode;
-extern int8_t threshold_minus1;
-extern int8_t threshold_minus2;
-extern uint8_t traverse_mode;
+extern uint8_t threshold;
 
 
 //属于赛道的每个白条子属性
@@ -128,9 +120,6 @@ uint8_t is_connect(road_range* new_white, road* pre_line, uint8_t continue_id);
 //====================================================判断状态函数====================================================
 
 void state_judge(void);
-void zebra_judge(uint8_t start, uint8_t end);
-void roundabout_judge(uint8_t start, uint8_t end);
-void crossing_judge(uint8_t start, uint8_t end);
 void straight_judge(uint8_t start, uint8_t end);
 void single_side_bridge_judge2(uint8_t start);
 void single_side_bridge_judge(uint8_t start, uint8_t end);
@@ -139,15 +128,12 @@ void bend_judge(void);
 //===================================================各元素状态机=================================================
 
 void general_judgement(void);
-void cross_state_machine(void);
 void single_side_bridge_state_machine(void);
 void straight(void);
 void bend(uint8_t start);
 
 //====================================================选道====================================================
 
-void left_roundabout_road_choose(uint8_t* road_continue);                             //左环岛选道
-void right_roundabout_road_choose(uint8_t* road_continue);                            //右环岛选道
 void renew_road(void);                                                                //按中间选道
 void single_side_road_choose(void);                                                   //单边桥选两边
 void single_side_bridge_two_line(uint8_t* road_continue);
