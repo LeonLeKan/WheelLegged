@@ -46,7 +46,7 @@ static void to_single_side_decline(void)
 static void to_single_side_stand(void)
 {
     if (current_state == STATE_DECLINE_FRONT_SINGLE_SIDE
-      && speed_loop.Actual < speed_loop.Target / 100.0f)
+      && speed_loop.Actual < speed_loop.Target)
     {
         current_state = STATE_STAND_FRONT_SINGLE_SIDE;
     }
@@ -82,9 +82,9 @@ void control_state_switch(void)
     accelerate_to_forward();
     deaccelerate_to_stop();
     deaccelerate_to_thunder();
-    to_single_side_decline();
+    // to_single_side_decline();
     to_single_side_stand();
-    quit_single_side();
+    // quit_single_side();
 }
 
 void control_state_update(void)

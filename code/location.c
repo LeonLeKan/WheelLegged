@@ -5,6 +5,7 @@
 #include "control_state.h"
 
 waypoint_node_t *current_target = NULL;
+uint8_t road_idx[10];
 
 static double direction_calculate(double x_target, double y_target, double x_now, double y_now)
 {
@@ -153,7 +154,7 @@ void location_update_2(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
-    if (fabs(dx) < XYMIN_BIA_1 && fabs(dy) < XYMIN_BIA_1)
+    if (fabs(dx) < XYMIN_BIA_2 && fabs(dy) < XYMIN_BIA_2)
     {
         advance_to_next_waypoint();
     }

@@ -7,7 +7,7 @@
 
 volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
-MENU *RootMenu, *Balance, *Image, *Element, *testnum, *currentMenu;
+MENU *RootMenu, *Balance, *Image, *Element, *testnum, *road2, *saveall, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *imubias, *pzero, *pinit, *show,
     *thre, *farl, *nearl, *saveim,
     *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *saveel;
@@ -92,12 +92,16 @@ void create_1st_menu(void)
     Image = createMenu("Image", 1, 2, MENU_TYPE_NORMAL, NULL);
     Element = createMenu("Element", 1, 3, MENU_TYPE_NORMAL, NULL);
     testnum = createMenu("testnum", 1, 4, MENU_TYPE_INT, NULL);
+    road2 = createMenu("road2", 1, 5, MENU_TYPE_INT, NULL);
+    saveall = createMenu("save", 1, 6, MENU_TYPE_FUNCTION, menu_save);
 
     RootMenu->child = Balance;
     Balance->parent = RootMenu;
     Image->parent = RootMenu;
     Element->parent = RootMenu;
     testnum->parent = RootMenu;
+    road2->parent = RootMenu;
+    saveall->parent = RootMenu;
 
     Balance->next = Image;
     Image->last = Balance;
@@ -105,8 +109,12 @@ void create_1st_menu(void)
     Element->last = Image;
     Element->next = testnum;
     testnum->last = Element;
-    testnum->next = Balance;
-    Balance->last = testnum;
+    testnum->next = road2;
+    road2->last = testnum;
+    road2->next = saveall;
+    saveall->last = road2;
+    saveall->next = Balance;
+    Balance->last = saveall;
 
     currentMenu = RootMenu->child;
 }
@@ -891,6 +899,10 @@ void menu_save(void)
     flash_union_buffer[index++].int32_type = test->data_int;
     node_count++;
 
+    MENU *road = road2;
+    flash_union_buffer[index++].int32_type = road->data_int;
+    node_count++;
+
     flash_union_buffer[0].float_type = menu_magic;
     flash_union_buffer[1].uint32_type = node_count;
 
@@ -907,7 +919,6 @@ void menu_load1(void)
         return;
 
     uint32_t idx = 2;
-    uint32_t real_count = 0;
 
     MENU *loop = Balance->child;
     if (loop == NULL)
@@ -922,7 +933,6 @@ void menu_load1(void)
             {
                 loop->data_int = 0;
             }
-            real_count++;
         }
         else if (loop->type == MENU_TYPE_FLOAT)
         {
@@ -937,7 +947,6 @@ void menu_load1(void)
             {
                 loop->data_float = 0.0f;
             }
-            real_count++;
         }
 
         MENU *param = loop->child;
@@ -953,7 +962,6 @@ void menu_load1(void)
                     {
                         tmp->data_int = 0;
                     }
-                    real_count++;
                 }
                 else if (tmp->type == MENU_TYPE_FLOAT)
                 {
@@ -968,7 +976,6 @@ void menu_load1(void)
                     {
                         tmp->data_float = 0;
                     }
-                    real_count++;
                 }
                 tmp = tmp->next;
             } while (tmp != param);
@@ -990,7 +997,6 @@ void menu_load1(void)
                 {
                     tmp->data_int = 0;
                 }
-                real_count++;
             }
             tmp = tmp->next;
         } while (tmp != img);
@@ -1009,7 +1015,6 @@ void menu_load1(void)
                 {
                     tmp->data_int = 0;
                 }
-                real_count++;
             }
             else if (tmp->type == MENU_TYPE_FLOAT)
             {
@@ -1024,7 +1029,6 @@ void menu_load1(void)
                 {
                     tmp->data_float = 0;
                 }
-                real_count++;
             }
             tmp = tmp->next;
         } while (tmp != ele);
@@ -1036,7 +1040,13 @@ void menu_load1(void)
     {
         test->data_int = 0;
     }
-    real_count++;
+
+    MENU *road = road2;
+    road->data_int = (int)flash_union_buffer[idx++].int32_type;
+    if (fabs((float)road->data_int) >= 100000)
+    {
+        road2->data_int = 0;
+    }
 }
 
 void menu_zero(void)
@@ -1068,7 +1078,7 @@ void menu_zero(void)
 }
 uint8_t my_img[CAMERA_H][CAMERA_W];
 
-static void image_show(void)
+void image_show(void)
 {
     ips200_clear();
 
