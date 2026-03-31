@@ -655,7 +655,7 @@ void control_state_jump_up(void)
         image_block = 1;
         servo_set(90.0f, 90.0f,
                   90.0f, 90.0f);
-        traverse_state = 0;
+        // traverse_state = 0;
         angle_loop2.ErrorInt = 0.0f;
         current_state = STATE_FORWARD;
     }
