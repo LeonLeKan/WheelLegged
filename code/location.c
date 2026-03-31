@@ -5,6 +5,7 @@
 #include "control_state.h"
 
 waypoint_node_t *current_target = NULL;
+uint8_t road_idx[10];
 
 static double direction_calculate(double x_target, double y_target, double x_now, double y_now)
 {

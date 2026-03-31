@@ -217,7 +217,7 @@ void imu_state_show(void)
     }
 }
 
-void handle_channel_245(void)
+void handle_channel(void)
 {
     static uint16 last_ch2 = 0, last_ch4 = 0, last_ch5 = 0;
 
@@ -239,7 +239,7 @@ void handle_channel_245(void)
 
     if (last_ch2 != uart_receiver.channel[2])
     {
-        // Channel 2: 在末尾添加当前位置点
+        // 在末尾添加当前位置点
         waypoint_t point;
         ins_get_current_position(&point.x, &point.y);
         ins_add_current(&waypoints, waypoints.tail, point);
@@ -247,14 +247,14 @@ void handle_channel_245(void)
 
     else if (last_ch4 != uart_receiver.channel[4])
     {
-        // Channel 4: 删除末尾的点
+        // 删除末尾的点
         //waypoint_list_remove(&waypoints, waypoints.tail);
         current_state = STATE_THUNDER;
     }
 
     else if (last_ch5 != uart_receiver.channel[5])
     {
-        // Channel 5: 保存到Flash，存入当前激活的存档（开机默认为0号存档）
+        // 保存到Flash，存入当前激活的存档
         waypoint_list_save_to_flash(&waypoints, INS_FLASH_START_PAGE + save_manager_instance.active_save_idx);
     }
     last_ch2 = uart_receiver.channel[2];
@@ -267,13 +267,12 @@ void remote_control(void)
     if (1 == uart_receiver.finsh_flag)
     {
         speed_loop.Target = (uart_receiver.channel[1] - 800) / 200.0f;
-        yaw_loop.Target += (uart_receiver.channel[0] - 800) / 800.0f;
+        yaw_test_bias = uart_receiver.channel[0] - 800;
         if (uart_receiver.channel[3] == 1792 && test_state == 0)
         {
             test_state = 1;
         }
-        // 2, 4, 5频道当作按钮使用
-        handle_channel_245();
+        handle_channel();
         uart_receiver.finsh_flag = 0;
     }
 }

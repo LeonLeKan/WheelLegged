@@ -9,6 +9,7 @@
 // relevant variables
 volatile uint8_t image_block = 1;
 volatile float roll_base = 0.0f;
+volatile float yaw_test_bias = 0.0f;
 
 void control_init(void)
 {
@@ -385,8 +386,8 @@ void control_state_stand_front_single_side(void)
         filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
 
         // 使用滤波后的速度输出
-        servo_set(100.0f - filtered_speed_out, 100.0f + filtered_speed_out,
-                  80.0f - filtered_speed_out, 80.0f + filtered_speed_out);
+        servo_set(110.0f - filtered_speed_out, 110.0f + filtered_speed_out,
+                  70.0f - filtered_speed_out, 70.0f + filtered_speed_out);
 
         yaw_loop.Target = 0.0f; // outer
         yaw_loop.Actual = imu.output.euler[2];
@@ -461,9 +462,16 @@ void control_state_single_side(void)
         PID_Update_Lo(&single_loop);
     }
 
+    // 对single_loop.Out进行低通滤波
+    static float filtered_single_out = 0.0f;
+    static const float single_alpha = 0.1f; // 单边桥环滤波系数，可调整
+
+    // 更新滤波器
+    filtered_single_out = single_alpha * single_loop.Out + (1.0f - single_alpha) * filtered_single_out;
+
     // 使用滤波后的速度输出
-    servo_set(100.0f - filtered_speed_out - single_loop.Out, 100.0f + filtered_speed_out + single_loop.Out,
-              80.0f - filtered_speed_out + single_loop.Out, 80.0f + filtered_speed_out - single_loop.Out);
+    servo_set(110.0f - filtered_speed_out - filtered_single_out, 110.0f + filtered_speed_out + filtered_single_out,
+              70.0f - filtered_speed_out + filtered_single_out, 70.0f + filtered_speed_out - filtered_single_out);
 
     turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual; // inner
     turn_loop2.Actual = -imu.body.gyro[2];
@@ -700,13 +708,23 @@ void control_state_jolt(void)
     }
 
     // 单边桥控制
-    single_loop.Target = 0.0f;
+    single_loop.Target = roll_base;
     single_loop.Actual = imu.output.euler[0];
-    PID_Update_Lo(&single_loop);
+    if (fabs(single_loop.Target - single_loop.Actual) > 2.0f)
+    {
+        PID_Update_Lo(&single_loop);
+    }
+
+    // 对single_loop.Out进行低通滤波
+    static float filtered_single_out = 0.0f;
+    static const float single_alpha = 0.1f; // 单边桥环滤波系数，可调整
+
+    // 更新滤波器
+    filtered_single_out = single_alpha * single_loop.Out + (1.0f - single_alpha) * filtered_single_out;
 
     // 使用滤波后的速度输出
-    servo_set(90.0f - filtered_speed_out - single_loop.Out, 90.0f + filtered_speed_out + single_loop.Out,
-              90.0f - filtered_speed_out + single_loop.Out, 90.0f + filtered_speed_out - single_loop.Out);
+    servo_set(90.0f - filtered_speed_out - filtered_single_out, 90.0f + filtered_speed_out + filtered_single_out,
+              90.0f - filtered_speed_out + filtered_single_out, 90.0f + filtered_speed_out - filtered_single_out);
 
     turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual; // inner
     turn_loop2.Actual = -imu.body.gyro[2];
@@ -755,16 +773,7 @@ void control_state_test(void)
 
         servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
                   90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
-
-        // turn_loop1.Target = 0.0f; // outer
-        // turn_loop1.Actual = (float)error;
-        yaw_loop.Actual = imu.output.euler[2];
-        PID_Update_Lo(&yaw_loop);
     }
-
-    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual; // inner
-    turn_loop2.Actual = -imu.body.gyro[2];
-    PID_Update_Lo(&turn_loop2);
 
     angle_loop2.Target = pzero->data_float;
     angle_loop2.Actual = imu.output.euler[1];
@@ -774,7 +783,7 @@ void control_state_test(void)
     aspeed_loop.Actual = imu.output.gyro[1];
     PID_Update_Lo(&aspeed_loop);
 
-    small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+    small_driver_set_duty((int16)(aspeed_loop.Out + yaw_test_bias), (int16)(-(aspeed_loop.Out - yaw_test_bias)));
 }
 
 void control_state_stop(void)
