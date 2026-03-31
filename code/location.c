@@ -154,7 +154,7 @@ void location_update_2(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
-    if (fabs(dx) < XYMIN_BIA_1 && fabs(dy) < XYMIN_BIA_1)
+    if (fabs(dx) < XYMIN_BIA_2 && fabs(dy) < XYMIN_BIA_2)
     {
         advance_to_next_waypoint();
     }

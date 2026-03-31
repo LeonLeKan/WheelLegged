@@ -457,10 +457,7 @@ void control_state_single_side(void)
     // 单边桥控制
     single_loop.Target = roll_base;
     single_loop.Actual = imu.output.euler[0];
-    if (fabs(single_loop.Target - single_loop.Actual) > 2.0f)
-    {
-        PID_Update_Lo(&single_loop);
-    }
+    PID_Update_Lo(&single_loop);
 
     // 对single_loop.Out进行低通滤波
     static float filtered_single_out = 0.0f;
@@ -710,10 +707,7 @@ void control_state_jolt(void)
     // 单边桥控制
     single_loop.Target = roll_base;
     single_loop.Actual = imu.output.euler[0];
-    if (fabs(single_loop.Target - single_loop.Actual) > 2.0f)
-    {
-        PID_Update_Lo(&single_loop);
-    }
+    PID_Update_Lo(&single_loop);
 
     // 对single_loop.Out进行低通滤波
     static float filtered_single_out = 0.0f;
@@ -743,6 +737,14 @@ void control_state_jolt(void)
 
 void control_state_test(void)
 {
+    static uint16_t last_channel_0 = 0;
+
+    if (last_channel_0 != 800 && uart_receiver.channel[0] == 800)
+    {
+        yaw_loop.Target = imu.output.euler[2];
+    }
+    last_channel_0 = uart_receiver.channel[0];
+
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
 
@@ -773,7 +775,14 @@ void control_state_test(void)
 
         servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
                   90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
+
+        yaw_loop.Actual = imu.output.euler[2];
+        PID_Update_Lo(&yaw_loop);
     }
+
+    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual; // inner
+    turn_loop2.Actual = -imu.body.gyro[2];
+    PID_Update_Lo(&turn_loop2);
 
     angle_loop2.Target = pzero->data_float;
     angle_loop2.Actual = imu.output.euler[1];
@@ -783,7 +792,14 @@ void control_state_test(void)
     aspeed_loop.Actual = imu.output.gyro[1];
     PID_Update_Lo(&aspeed_loop);
 
-    small_driver_set_duty((int16)(aspeed_loop.Out + yaw_test_bias), (int16)(-(aspeed_loop.Out - yaw_test_bias)));
+    if (uart_receiver.channel[0] == 800)
+    {
+        small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+    }
+    else
+    {
+        small_driver_set_duty((int16)(aspeed_loop.Out + yaw_test_bias), (int16)(-(aspeed_loop.Out - yaw_test_bias)));
+    }
 }
 
 void control_state_stop(void)

@@ -31,9 +31,9 @@ void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
 
-    oscilloscope_data.data[0] = imu.calib.gyro_bias[0];
-    oscilloscope_data.data[1] = imu.calib.gyro_bias[1];
-    oscilloscope_data.data[2] = imu.calib.gyro_bias[2];
+    oscilloscope_data.data[0] = yaw_loop.Target;
+    oscilloscope_data.data[1] = yaw_loop.Actual;
+    oscilloscope_data.data[2] = test_state;
 
     oscilloscope_data.channel_num = 3;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
