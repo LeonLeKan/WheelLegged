@@ -46,7 +46,7 @@ static void to_single_side_decline(void)
 static void to_single_side_stand(void)
 {
     if (current_state == STATE_DECLINE_FRONT_SINGLE_SIDE
-      && speed_loop.Actual < speed_loop.Target)
+      && speed_loop.Actual < (float)snspeed->data_int / 100.0f)
     {
         current_state = STATE_STAND_FRONT_SINGLE_SIDE;
     }
@@ -69,7 +69,7 @@ static void quit_single_side(void)
         switch_from_single_side_to_forward_count++;
         if (switch_from_single_side_to_forward_count >= 60)
         {
-            current_state = STATE_ACCELERATE;
+            current_state = STATE_DEACCELERATE;
             roll_base = 0.0f;
             switch_from_single_side_to_forward = 0;
             switch_from_single_side_to_forward_count = 0;
@@ -82,9 +82,9 @@ void control_state_switch(void)
     accelerate_to_forward();
     deaccelerate_to_stop();
     deaccelerate_to_thunder();
-    // to_single_side_decline();
+    //to_single_side_decline();
     to_single_side_stand();
-    // quit_single_side();
+    quit_single_side();
 }
 
 void control_state_update(void)

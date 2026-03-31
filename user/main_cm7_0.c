@@ -20,6 +20,7 @@ void start_imu_initial_estimation(void);
 void start_imu_auto_gyro_calibration(void);
 
 void remote_control(void);
+void calculate_route(void);
 
 uint8_t motion_mode1 = 0;
 uint8_t motion_mode2 = 0;
@@ -67,9 +68,6 @@ int main(void)
     // 存点初始化
     save_manager_init(ins_to_control_menu);
 
-    // 判断科目几
-    save_manager_load(testnum->data_int);
-
     // 如有需要，添加wifi
     if (gpio_get_level(DIP_4) == 0)
     {
@@ -93,6 +91,16 @@ int main(void)
 
     imu_set_gyro_bias(rollbias->data_float, pitchbias->data_float, yawbias->data_float);
 
+    if (testnum->data_int == 2)
+    {
+        calculate_route();
+        save_manager_load(testnum->data_int + road_idx[road_num]);
+    }
+    else
+    {
+        save_manager_load(testnum->data_int);
+    }
+
     while (true)
     {
         // 主循环检测拨码的状态
@@ -110,6 +118,7 @@ int main(void)
                 initial_estimation_flag = 0;
             }
             imu_state_show();
+            image_main();
 
             // 如果需要，添加wifi
             if (motion_mode4 == 0)
@@ -153,7 +162,7 @@ int main(void)
                 remote_control();
                 if (image_block == 1)
                 {
-                    // image_main();
+                    image_main();
                 }
 
                 // 如果需要，添加wifi
@@ -274,5 +283,39 @@ void remote_control(void)
         }
         handle_channel();
         uart_receiver.finsh_flag = 0;
+    }
+}
+
+void calculate_route(void)
+{
+    int temp = road2->data_int;
+    uint8_t digits[5] = {0};
+    int count = 0;
+
+    if(temp == 0) 
+    {
+        digits[0] = 0;
+        count = 1;
+    } 
+    else 
+    {
+        while(temp > 0 && count < 5) 
+        {
+            digits[count] = (uint8_t)(temp % 10);
+            count++;
+            temp /= 10;
+        }
+    }
+    
+    for(int i = 0; i < 5; i++) 
+    {
+        if(i < count) 
+        {
+            road_idx[i] = digits[count - 1 - i];
+        } 
+        else 
+        {
+            road_idx[i] = 0;
+        }
     }
 }

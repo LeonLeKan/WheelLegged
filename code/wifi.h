@@ -6,11 +6,12 @@
 #include "pid.h"
 #include "location.h"
 #include "control_state.h"
+#include "image.h"
 
 #define WIFI_SSID_TEST "Hhhyt"
 #define WIFI_PASSWORD_TEST "18273645"
-#define UDP_TARGET_IP "192.168.137.1"
-#define UDP_TARGET_PORT "8086"
+#define TCP_TARGET_IP "192.168.137.1"
+#define TCP_TARGET_PORT "8086"
 #define WIFI_LOCAL_PORT "6666"
 
 void wifi_init(void);

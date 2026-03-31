@@ -5,7 +5,8 @@
 #include "control_state.h"
 
 waypoint_node_t *current_target = NULL;
-uint8_t road_idx[10];
+uint8_t road_idx[5];
+uint8_t road_num = 0;
 
 static double direction_calculate(double x_target, double y_target, double x_now, double y_now)
 {
@@ -126,7 +127,45 @@ void location_update_1(void)
     }
 }
 
-void location_update_2(void)
+void location_update_2_0(void)
+{
+    waypoint_list_t *list = save_manager_get_active_save();
+    
+    if (!current_target)
+    {
+        current_target = list->head->next;
+    }
+        
+    if (!current_target)
+    {
+        return;
+    }
+
+    double x_now = imu.output.position_x;
+    double y_now = imu.output.position_y;
+
+    double x_tgt = current_target->waypoint.x;
+    double y_tgt = current_target->waypoint.y;
+
+    double target_deg = direction_calculate(x_tgt, y_tgt, x_now, y_now);
+
+    yaw_loop.Target = target_deg;
+    yaw_loop.Actual = imu.output.euler[2];
+
+    double dx = x_tgt - x_now;
+    double dy = y_tgt - y_now;
+    if (fabs(dx) < XYMIN_BIA_0 && fabs(dy) < XYMIN_BIA_0)
+    {
+        advance_to_next_waypoint();
+    }
+
+    if (!current_target) 
+    {
+        current_state = STATE_DEACCELERATE;
+    }
+}
+
+void location_update_2_1(void)
 {
     waypoint_list_t *list = save_manager_get_active_save();
     
@@ -161,6 +200,7 @@ void location_update_2(void)
 
     if (!current_target) 
     {
+        image_block = 1;
         current_state = STATE_DECLINE_FRONT_SINGLE_SIDE;
     }
 }

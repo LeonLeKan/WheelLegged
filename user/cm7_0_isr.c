@@ -78,9 +78,13 @@ void pit0_ch2_isr() // 定时器通道 2 周期中断服务函数
         {
             location_update_1();
         }
-        else if (testnum->data_int == 2)
+        else if (testnum->data_int == 2 && road_idx[road_num] == 0)
         {
-            location_update_2();
+            location_update_2_0();
+        }
+        else if (testnum->data_int == 2 && road_idx[road_num] == 1)
+        {
+            location_update_2_1();
         }
     }
 }

@@ -13,12 +13,12 @@ void wifi_init(void)
     if (0 == WIFI_SPI_AUTO_CONNECT)
     {
         while (wifi_spi_socket_connect(
-            "UDP",
-            UDP_TARGET_IP,
-            UDP_TARGET_PORT,
+            "TCP",
+            TCP_TARGET_IP,
+            TCP_TARGET_PORT,
             WIFI_LOCAL_PORT))
         {
-            printf("\r\n Connect UDP Servers error, try again.");
+            printf("\r\n Connect TCP Servers error, try again.");
             system_delay_ms(100);
         }
     }
@@ -31,11 +31,12 @@ void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
 
-    oscilloscope_data.data[0] = yaw_loop.Target;
-    oscilloscope_data.data[1] = yaw_loop.Actual;
-    oscilloscope_data.data[2] = test_state;
+    oscilloscope_data.data[0] = speed_loop.Actual;
+    oscilloscope_data.data[1] = single_side_state;
+    oscilloscope_data.data[2] = speed_loop.Target;
+    oscilloscope_data.data[3] = current_state;
 
-    oscilloscope_data.channel_num = 3;
+    oscilloscope_data.channel_num = 4;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 

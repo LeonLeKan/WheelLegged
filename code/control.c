@@ -7,7 +7,7 @@
 #include "location.h"
 
 // relevant variables
-volatile uint8_t image_block = 1;
+volatile uint8_t image_block = 0;
 volatile float roll_base = 0.0f;
 volatile float yaw_test_bias = 0.0f;
 
@@ -312,7 +312,8 @@ void control_state_decline_front_single_side(void)
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
 
-    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+    speed_loop.Ki = 0.0f;
+    // sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     // yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
@@ -357,7 +358,8 @@ void control_state_stand_front_single_side(void)
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
 
-    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+    speed_loop.Ki = 0.0f;
+    // sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     // yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
@@ -421,7 +423,8 @@ void control_state_single_side(void)
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
 
-    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+    speed_loop.Ki = 0.0f;
+    // sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     // yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);

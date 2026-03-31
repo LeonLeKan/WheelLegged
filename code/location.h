@@ -15,9 +15,12 @@
 #define XYMIN_THUNDER 1.0f
 
 extern waypoint_node_t *current_target;
+extern uint8_t road_idx[5];
+extern uint8_t road_num;
 
 void location_update_0(void);
 void location_update_1(void);
-void location_update_2(void);
+void location_update_2_0(void);
+void location_update_2_1(void);
 
 #endif
