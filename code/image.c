@@ -13,8 +13,6 @@ typedef struct {
 }range;
 
 
-
-
 //每行的所有白条子
 typedef struct {
     uint8_t   num;//每行白条数量
@@ -22,10 +20,22 @@ typedef struct {
 }all_range;
 
 
+
+//////////////////////// 传给控制 ////////////////////
+// 1-单边桥 2-三级跳 3-下三级 4-颠簸路段
+element_t now_element;
+int stair_distance;     // 到下一级台阶的距离
+bool out_flag = 0;      // 是否出白色赛道（用于判断元素结束）
 int error = 0;
 int error_calc_near_line = 42;
 int error_calc_far_line = 40;
+uint8_t threshold = 230;    //阈值
+//////////////////////// ////////// //////////////////
 
+
+
+uint8_t road_start = NEAR_LINE;
+uint8_t road_end = FAR_LINE;
 all_range white_range[CAMERA_H];//所有白条子
 road my_road[CAMERA_H];//赛道
 road_range myroad_continue[NEW_CAMERA_H];
@@ -64,11 +74,6 @@ uint8_t single_start_fps = 0;
 uint8_t single_start_fps_up;
 float single_dis = 0;
 
-
-//关于阈值
-uint8_t threshold = 230;
-uint8_t mid_divide = 94;
-uint8_t up_divide = NEAR_LINE / 2;
 
 //补线需要的数据
 uint8_t left_guai_H = 0;//左下边界拐点
@@ -138,6 +143,7 @@ uint8_t element_cross_d = 0;
 //////////////////////////////////
 void general_judgement() {
     state_judge();
+    uint8_t bend_judge_start = (road_start < 60) ? 60 : road_start;
     switch (step)
     {
     case strai: bend(bend_judge_start); break;
@@ -1534,7 +1540,7 @@ void state_judge()
     }
     switch (step)
     {
-    case strai: 
+    case strai:
     {
         if (element_ok == 0)
         {
@@ -2134,112 +2140,6 @@ void two_dots_line(uint8_t dots1_H, uint8_t dots1_W, uint8_t dots2_H, uint8_t do
 
 
 
-uint8_t GetOTSU_part(uint8_t* imageInput, uint8_t height_far, uint8_t height_near, uint8_t widthleft, uint8_t widthright)
-{
-    int16_t i, j;
-    uint32_t Amount = 0;
-    uint32_t PixelBack = 0;
-    uint32_t PixelIntegralBack = 0;
-    uint32_t PixelIntegral = 0;
-    int32_t PixelIntegralFore = 0;
-    int32_t PixelFore = 0;
-    float OmegaBack, OmegaFore, MicroBack, MicroFore, SigmaB, Sigma; // 类间方差;
-    int16_t MinValue, MaxValue;
-    uint8_t Thrshold = 0;//阈值
-    uint16_t HistoGram[256] = { 0 };//灰度直方图
-    uint8_t* map = imageInput;
-    for (j = height_far; j <= height_near; j++)
-    {
-        map = imageInput + j * CAMERA_H;
-        for (i = widthleft; i < widthright; i++)
-        {
-            HistoGram[*(map + i)]++;//统计灰度级中每个像素在所选区域中的个数
-
-        }
-    }
-    for (MinValue = 0; MinValue < 256 && HistoGram[MinValue] == 0; MinValue++);        //获取最小灰度的值
-    for (MaxValue = 255; MaxValue > MinValue && HistoGram[MinValue] == 0; MaxValue--); //获取最大灰度的值
-
-    if (MaxValue == MinValue)
-    {
-        if (MaxValue > 255)
-        {
-            return 255;  // 如果 MaxValue 超出 uint8_t 范围，返回最大值 255
-        }
-        return (uint8_t)MaxValue;  // 显式转换为 uint8_t，避免隐式转换警告
-    }//图像中只有一个颜色
-    if (MinValue + 1 == MaxValue) return (uint8_t)MinValue; // 图像中只有两个颜色
-
-    for (j = MinValue; j <= MaxValue; j++)    Amount += HistoGram[j];        //  像素总数
-
-    PixelIntegral = 0;
-    for (j = MinValue; j <= MaxValue; j++)
-    {
-        PixelIntegral += HistoGram[j] * j;//灰度值总数
-    }
-    SigmaB = -1;
-    for (j = MinValue; j < MaxValue; j++)
-    {
-        PixelBack = PixelBack + HistoGram[j];    //前景像素点数
-        PixelFore = Amount - PixelBack;         //背景像素点数
-        OmegaBack = (float)PixelBack / Amount;//前景像素百分比
-        OmegaFore = (float)PixelFore / Amount;//背景像素百分比
-        PixelIntegralBack += HistoGram[j] * j;  //前景灰度值
-        PixelIntegralFore = PixelIntegral - PixelIntegralBack;//背景灰度值
-        MicroBack = (float)PixelIntegralBack / PixelBack;   //前景灰度百分比
-        MicroFore = (float)PixelIntegralFore / PixelFore;   //背景灰度百分比
-        Sigma = OmegaBack * OmegaFore * (MicroBack - MicroFore) * (MicroBack - MicroFore);//计算类间方差
-        if (Sigma > SigmaB)                    //遍历最大的类间方差g //找出最大类间方差以及对应的阈值
-        {
-            SigmaB = Sigma;
-            Thrshold = (uint8_t)j;
-        }
-        if (Sigma < SigmaB)
-            break;
-    }
-    return Thrshold;                        //返回最佳阈值
-}
-void sobel(uint8_t* imageInput, uint8_t* imageOut, uint8_t Theshold, uint8_t height_far, uint8_t height_near, uint8_t width_left, uint8_t width_right)
-{
-    int tempx = 0, tempy = 0, temp = 0, i = 1, j = 1;
-    uint8_t* imag = imageInput;
-    for (i = height_far; i <= height_near; i++)
-    {
-        imag = imageInput + i * CAMERA_W;
-        for (j = width_left; j <= width_right; j++)
-        {
-            //计算x方向
-            tempx = -*(imag - CAMERA_W + j - 1)//         {-1,0,1}
-                - 2 * (*(imag + j - 1))//                 {-2,0,2}
-                - *(imag + CAMERA_W + j - 1)  //            {-1,0,1}
-                + *(imag - CAMERA_W + j + 1)
-                + 2 * (*(imag + j + 1))
-                + *(imag + CAMERA_W + j + 1);
-            if (tempx < 0) tempx = -tempx;
-            //计算y方向
-            tempy = *imag + CAMERA_W + j - 1//           {-1,-2,-1}
-                + 2 * (*(imag + CAMERA_W + j))//          {0,0,0}
-                + *(imag + CAMERA_W + 1 + j)//            {1,2,1}
-                - *(imag - CAMERA_W - 1 + j)
-                - 2 * (*(imag - CAMERA_W + j))
-                - *(imag - CAMERA_W + 1 + j);
-            if (tempy < 0) tempy = -tempy;
-            temp = (tempx + tempy) / 2;
-            if (temp > 255) temp = 255;
-            //*(imag + i * CAMERA_W + j) = temp;
-            if (temp > Theshold)//二值化
-            {
-                *(imageOut + j + i * CAMERA_W) = white;
-
-            }
-            else
-            {
-                *(imageOut + j + i * CAMERA_W) = black;
-
-            }
-        }
-    }
-}
 ////////////////////////////////////////////
 //功能：讲道路重新进行选择
 //输入：
@@ -2925,10 +2825,13 @@ void search_white_range1()
     uint8_t tnum = 0;//当前行白条数
     all_connect_num = 0;//白条编号初始化
     uint8_t* map = NULL;
+    bool found_road_start = 0;
+    bool found_road_end = 0;
     for (i = istart; i >= iend; i--)
     {
         map = &IMG[i][LEFT_SIDE];//指针行走加快访问速度
         tnum = 0;
+        bool found_long_white = 0;
         for (j = LEFT_SIDE; j <= RIGHT_SIDE; j++, map++)
         {
             if ((*map))//遇白条左边界
@@ -2948,10 +2851,24 @@ void search_white_range1()
                     j++;
                 }
                 now_white->right = j - 1;
+                if (now_white->right - now_white->left > 30)
+                {
+                    found_long_white = 1;
+                }
                 now_white->connect_num = ++all_connect_num;//白条数加一，给这个白条编号
             }
         }
         white_range[i].num = tnum;
+        if (!found_road_start && found_long_white)
+        {
+            found_road_start = 1;
+            road_start = i;
+        }
+        else if (!found_road_end && found_road_start && !found_long_white)
+        {
+            found_road_end = 1;
+            road_end = i;
+        }
     }
 }
 
@@ -2976,7 +2893,7 @@ void find_all_connect()
     int d_num, i_d, d_left, d_right;
     all_range* u_white = NULL;
     all_range* d_white = NULL;
-    for (int i = NEAR_LINE; i > FAR_LINE; i--)//因为每两行每两行比较 所以循环到FAR_LINE+1
+    for (int i = road_start; i > FAR_LINE; i--)//因为每两行每两行比较 所以循环到FAR_LINE+1
     {
         u_num = white_range[i - 1].num;
         d_num = white_range[i].num;
@@ -3048,7 +2965,7 @@ void find_road()
 ///////////////////////////////////////////
 void find_road1()
 {
-    uint8_t istart = NEAR_LINE;
+    uint8_t istart = road_start;
     uint8_t iend = FAR_LINE;
     //top_road = NEAR_LINE;//赛道最高处所在行数，先初始化话为最低处
     int road_f = -1;//赛道所在连通域父节点编号，先初始化为-1，以判断是否找到赛道
@@ -3058,9 +2975,12 @@ void find_road1()
     //寻找赛道所在连通域
     // 寻找最中心的白条子
     for (int i = 1; i <= white_range[istart].num; i++)
-        if (white_range[istart].area[i].left <= CAMERA_W / 2
-            && white_range[istart].area[i].right >= CAMERA_W / 2 && (white_range[istart].area[i].right - white_range[istart].area[i].left) >= 90)
+        if (white_range[istart].area[i].right - white_range[istart].area[i].left >= 40)
+        {
+
             road_f = find_f(white_range[istart].area[i].connect_num);
+            break;
+        }
 
     if (road_f == -1)//若赛道没在中间，在NEAR_LINE行选一行最长的认为这就是赛道
     {
@@ -3174,7 +3094,7 @@ void ordinary_two_line(void)
     int width_max;
 
     //寻找起始行最宽的白条子
-    i_start = NEAR_LINE;
+    i_start = road_start;
     i_end = FAR_LINE - 1;
     width_max = 0;
     for (j = 1; j <= my_road[i_start].white_num; j++)
@@ -3186,7 +3106,7 @@ void ordinary_two_line(void)
         }
     }
     j_continue[i_start] = j_start;
-    
+
     if (step == single_side)
     {
         single_side_bridge_two_line(j_continue);
@@ -3342,6 +3262,38 @@ void print_f()
     printf("mid_line[前瞻] = %d\n", mid_line[35]);
 }
 
+
+void calc_stair_distance()
+{
+    if (NEAR_LINE - road_start >= 2)
+    {
+        stair_distance = NEAR_LINE - road_start;
+    }
+    else {
+        stair_distance = NEAR_LINE - road_end;
+    }
+}
+
+void out_check()
+{
+    int white_count = 0;
+    for (int i = NEAR_LINE; i >= NEAR_LINE - 20; i--)
+    {
+        for (int j = 64; j <= 124; j++)
+        {
+            if(IMG[i][j])
+                white_count++;
+        }
+    }
+    if (white_count < 600)
+    {
+        out_flag = 1;
+    }
+    else {
+        out_flag = 0;
+    }
+}
+
 ////////////////////////////////////////////
 //功能：图像处理主程序
 //输入：
@@ -3350,16 +3302,13 @@ void print_f()
 ///////////////////////////////////////////
 void image_main()
 {
+#if ONBOARD
+#else 
+    now_element = FRONT_STAIRS;
+#endif
     datas_init();
-    /*get_white_threshold_avg();
-    threshold_decrease();*/
-    /*if (gray_dis == 1)
-    {
-        threshold_add_gray();
-    }*/
     THRE();
     head_clear();
-    Reduce_Noise(&IMG[0][0], IMG);
     search_white_range1();
     find_all_connect();
     find_road_state();
@@ -3380,10 +3329,19 @@ void image_main()
 #endif 
     element_check();
     pre_step = step;
-    general_judgement();
-    get_mid_line();
+    switch (now_element)
+    {
+    case SINGLE_SIDE:
+        general_judgement();
+        get_mid_line();
+        break;
+    case FRONT_STAIRS:
+        calc_stair_distance();
+        out_check();
+        break;
+    }
+
     mid_update = 1;
-    bend_judge();
     define_mid_255();
     int sum = 0;
     for (int i = error_calc_near_line; i >= error_calc_far_line; i--)
@@ -3395,6 +3353,9 @@ void image_main()
     if (error > 25) error = 25;
 
     //print_f();
+#if ONBOARD
+#else
+    printf("%d %d\n", stair_distance, out_flag);
     for (int i = 0; i < CAMERA_W; i++)
     {
         IMG[error_calc_near_line][i] = purple;
@@ -3407,4 +3368,5 @@ void image_main()
             IMG[i][right_line[i]] = green;
             IMG[i][mid_line[i]] = red;
         }
+#endif
 }
