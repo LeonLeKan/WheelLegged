@@ -12,7 +12,7 @@
 #define XYMIN_BIA_0 0.1f
 #define XYMIN_BIA_1 0.1f
 #define XYMIN_BIA_2 0.1f
-#define XYMIN_THUNDER 1.0f
+#define XYMIN_THUNDER 1.5f
 
 extern waypoint_node_t *current_target;
 extern uint8_t road_idx[5];
@@ -22,5 +22,6 @@ void location_update_0(void);
 void location_update_1(void);
 void location_update_2_0(void);
 void location_update_2_1(void);
+void location_update_2_2(void);
 
 #endif

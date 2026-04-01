@@ -118,13 +118,12 @@ int main(void)
                 initial_estimation_flag = 0;
             }
             imu_state_show();
-            image_main();
 
             // 如果需要，添加wifi
             if (motion_mode4 == 0)
             {
                 wifi_send_data();
-                // wifi_send_image();
+                wifi_send_image();
             }
         }
 
