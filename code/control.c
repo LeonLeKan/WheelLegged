@@ -10,6 +10,7 @@
 volatile uint8_t image_block = 0;
 volatile float roll_base = 0.0f;
 volatile float yaw_test_bias = 0.0f;
+volatile uint8_t jump_count = 0;
 
 void control_init(void)
 {
@@ -233,7 +234,6 @@ void control_state_thunder(void)
 {
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
-    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
 
     static float yaw_thunder_now = 0.0f;
@@ -242,26 +242,8 @@ void control_state_thunder(void)
     static uint8_t yaw_thunder_flag = 0;
     static float yaw_accumulate = 0.0f;
 
-    static uint32_t count = 0;
-    count++;
-    if (count >= 4)
-    {
-        count = 0;
-
-        speed_loop.Target = 0.0f;
-        speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
-
-        PID_Update_Lo(&speed_loop);
-
-        // 对speed_loop.Out进行低通滤波
-        static float filtered_speed_out = 0.0f;
-        static const float speed_alpha = 0.1f; 
-
-        filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
-
-        servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
-                  90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
-    }
+    servo_set(90.0f, 90.0f,
+              90.0f, 90.0f);
 
     if (yaw_thunder_memory <= 0)
     {
@@ -306,6 +288,7 @@ void control_state_thunder(void)
             yaw_thunder_diff = 0.0f;
             yaw_thunder_flag = 0;
             yaw_accumulate = 0.0f;
+            speed_loop.Actual = 0.0f;
             current_state = STATE_ACCELERATE;
         }
     }
@@ -352,6 +335,7 @@ void control_state_thunder(void)
             yaw_thunder_diff = 0.0f;
             yaw_thunder_flag = 0;
             yaw_accumulate = 0.0f;
+            speed_loop.Actual = 0.0f;
             current_state = STATE_ACCELERATE;
         }
     }
@@ -635,10 +619,12 @@ void control_state_tra_stairs(void)
         servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
                   90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
 
-        PID_Update_Lo(&yaw_loop);
+        turn_loop1.Target = 0.0f; 
+        turn_loop1.Actual = (float)error;
+        PID_Update_Lo(&turn_loop1);
     }
 
-    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual; 
+    turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual; 
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 
@@ -657,6 +643,7 @@ void control_state_jump_up(void)
 {
     angle_loop2.Ki = 0.0f;
     speed_loop.Ki = 0.0f;
+    turn_loop2.Ki = 0.0f;
 
     static uint32_t count = 0;
     count++;
@@ -697,7 +684,8 @@ void control_state_jump_up(void)
                   90.0f, 90.0f);
         angle_loop2.ErrorInt = 0.0f;
         speed_loop.ErrorInt = 0.0f;
-        current_state = STATE_FORWARD;
+        turn_loop2.ErrorInt = 0.0f;
+        current_state = STATE_TRA_STAIRS;
     }
 }
 

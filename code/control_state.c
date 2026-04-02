@@ -95,6 +95,7 @@ static void quit_single_side(void)
                 image_block = 0;
                 road_num++;
                 save_manager_load(testnum->data_int + road_idx[road_num]);
+                speed_loop.ErrorInt = 0.0f;
                 current_state = STATE_DEACCELERATE;
             }
         }
@@ -110,8 +111,26 @@ static void decline_to_stairs(void)
     }
 }
 
-static void quit_stairs(void)
+static void judge_time_to_jump(void)
 {
+    if (current_state == STATE_DE_STAIRS || current_state == STATE_TRA_STAIRS)
+    {
+        if (stair_distance <= 14 && jump_count <= 2)
+        {
+            image_block = 0;
+            jump_count += 1;
+            current_state = STATE_JUMP_UP;
+        }
+        else if (jump_count >= 3)
+        {
+            jump_count = 0;
+            ins_reset();
+            image_block = 0;
+            road_num++;
+            save_manager_load(testnum->data_int + road_idx[road_num]);
+            current_state = STATE_DEACCELERATE;
+        }
+    }
 }
 
 void control_state_switch(void)
@@ -134,7 +153,7 @@ void control_state_switch(void)
     else if (testnum->data_int == 2 && road_idx[road_num] == 2)
     {
         decline_to_stairs();
-        quit_stairs();
+        judge_time_to_jump();
     }
 }
 

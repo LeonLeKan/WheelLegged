@@ -12,7 +12,7 @@
 #define XYMIN_BIA_0 0.1f
 #define XYMIN_BIA_1 0.1f
 #define XYMIN_BIA_2 0.1f
-#define XYMIN_THUNDER 1.5f
+#define XYMIN_THUNDER 1.0f
 
 extern waypoint_node_t *current_target;
 extern uint8_t road_idx[5];

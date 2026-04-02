@@ -127,7 +127,6 @@ void location_update_1(void)
             yaw_thunder_memory = yaw_loop.Actual;
             current_state = STATE_THUNDER;
         }
-
     }
 }
 

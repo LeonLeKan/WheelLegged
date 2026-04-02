@@ -9,6 +9,7 @@
 extern volatile uint8_t image_block;
 extern volatile float roll_base;
 extern volatile float yaw_test_bias;
+extern volatile uint8_t jump_count;
 
 void control_init(void);
 
