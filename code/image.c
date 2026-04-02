@@ -2851,7 +2851,7 @@ void search_white_range1()
                     j++;
                 }
                 now_white->right = j - 1;
-                if (now_white->right - now_white->left > 30)
+                if (now_white->right - now_white->left > 50)
                 {
                     found_long_white = 1;
                 }
@@ -3274,6 +3274,32 @@ void calc_stair_distance()
     }
 }
 
+// 三级台阶补线
+void mend_stairs()
+{
+    float input[2];
+    if (NEAR_LINE - road_start >= 2)
+    {
+        least_square_get_line(left_line, road_start - 5, 5, input, NEAR_LINE, road_start - 5);
+        least_square_get_line(right_line, road_start - 5, 5, input, NEAR_LINE, road_start - 5);
+    }
+    if (road_end - FAR_LINE >= 5)
+    {
+        if (road_start - road_end >= 15)
+        {
+            least_square_get_line(left_line, road_end + 10, 5, input, road_end + 10, FAR_LINE);
+            least_square_get_line(right_line, road_end + 10, 5, input, road_end + 10, FAR_LINE);
+        }
+        else {
+            for (int i = road_end; i >= FAR_LINE; i--)
+            {
+                left_line[i] = 84;
+                right_line[i] = 94;
+            }
+        }
+    }
+}
+
 void out_check()
 {
     int white_count = 0;
@@ -3337,7 +3363,9 @@ void image_main()
         break;
     case FRONT_STAIRS:
         calc_stair_distance();
+        mend_stairs();
         out_check();
+        get_mid_line();
         break;
     }
 
