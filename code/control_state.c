@@ -5,11 +5,13 @@
 #include "location.h"
 #include "ins.h"
 
+// ¡Ÿ ±±‰¡ø
 volatile control_state_t current_state = STATE_IDLE;
 volatile uint8_t single_lock = 0;
 volatile uint32_t single_lock_count = 0;
+volatile uint8_t single_delay = 0;
 volatile uint8_t test_state = 0;
-volatile float yaw_memory = 0.0f;
+volatile float yaw_thunder_memory = 0.0f;
 
 static void accelerate_to_forward(void)
 {
@@ -32,7 +34,6 @@ static void deaccelerate_to_thunder(void)
     if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 1.0f))
     {
         current_state = STATE_TRA_THUNDER;
-        speed_loop.Target = 1.0f;
     }
 }
 
@@ -45,14 +46,27 @@ static void decline_to_single_side_stand(void)
     }
 }
 
+static void stand_to_single_side(void)
+{
+    if (current_state == STATE_STAND_FRONT_SINGLE_SIDE)
+    {
+        single_delay++;
+        if (single_delay >= 60)
+        {
+            single_delay = 0;
+            roll_base = rollba->data_float;
+            current_state = STATE_SINGLE_SIDE;
+        }
+    }
+}
+
 static void quit_single_side(void)
 {
-    static uint32_t switch_from_single_side_to_forward = 0;
     static uint32_t switch_from_single_side_to_forward_count = 0;
 
     if (current_state == STATE_SINGLE_SIDE)
     {
-        if (single_lock == 0 && single_side_state != 0)
+        if (single_lock == 0)
         {
             single_lock = 1;
             single_lock_count = 0;
@@ -60,32 +74,28 @@ static void quit_single_side(void)
         if (single_lock == 1)
         {
             single_lock_count++;
-            if (single_lock_count >= 400)  // 2s
+            if (single_lock_count >= snlock->data_int)
             {
-                single_lock = 0;
+                single_lock = 2;
                 single_lock_count = 0;
             }
         }
-        else
+        if (single_lock == 2 && single_side_state == 0)
         {
-            if (single_side_state == 0 && switch_from_single_side_to_forward == 0)
+            single_lock = 3;
+        }
+        if (single_lock == 3)
+        {
+            switch_from_single_side_to_forward_count++;
+            if (switch_from_single_side_to_forward_count >= 60)
             {
-                switch_from_single_side_to_forward = 1;
-            }
-
-            if (switch_from_single_side_to_forward == 1)
-            {
-                switch_from_single_side_to_forward_count++;
-                if (switch_from_single_side_to_forward_count >= 60)
-                {
-                    ins_reset();
-                    image_block = 0;
-                    road_num++;
-                    save_manager_load(testnum->data_int + road_idx[road_num]);
-                    current_state = STATE_DEACCELERATE;
-                    switch_from_single_side_to_forward = 0;
-                    switch_from_single_side_to_forward_count = 0;
-                }
+                single_lock = 0;
+                switch_from_single_side_to_forward_count = 0;
+                ins_reset();
+                image_block = 0;
+                road_num++;
+                save_manager_load(testnum->data_int + road_idx[road_num]);
+                current_state = STATE_DEACCELERATE;
             }
         }
     }
@@ -93,6 +103,11 @@ static void quit_single_side(void)
 
 static void decline_to_stairs(void)
 {
+    if (current_state == STATE_DE_STAIRS
+      && speed_loop.Actual < (float)stspeed->data_int / 100.0f)
+    {
+        current_state = STATE_TRA_STAIRS;
+    }
 }
 
 static void quit_stairs(void)
@@ -104,13 +119,23 @@ void control_state_switch(void)
     accelerate_to_forward();
     deaccelerate_to_stop();
 
-    deaccelerate_to_thunder();
+    if (testnum->data_int == 1)
+    {
+        deaccelerate_to_thunder();
+    }
 
-    decline_to_single_side_stand();
-    quit_single_side();
+    else if (testnum->data_int == 2 && road_idx[road_num] == 1)
+    {
+        decline_to_single_side_stand();
+        stand_to_single_side();
+        quit_single_side();
+    }
 
-    decline_to_stairs();
-    quit_stairs();
+    else if (testnum->data_int == 2 && road_idx[road_num] == 2)
+    {
+        decline_to_stairs();
+        quit_stairs();
+    }
 }
 
 void control_state_update(void)
@@ -138,6 +163,9 @@ void control_state_update(void)
     case STATE_TRA_THUNDER:
         control_state_tra_thunder();
         break;
+    case STATE_THUNDER:
+        control_state_thunder();
+        break;
     case STATE_FORWARD:
         control_state_forward();
         break;
@@ -150,17 +178,20 @@ void control_state_update(void)
     case STATE_SINGLE_SIDE:
         control_state_single_side();
         break;
-    case STATE_THUNDER:
-        control_state_thunder();
+    case STATE_DE_STAIRS:
+        control_state_de_stairs();
         break;
-    case STATE_DECLINE_FRONT_STAIRS:
-        control_state_decline_front_stairs();
+    case STATE_TRA_STAIRS:
+        control_state_tra_stairs();
         break;
     case STATE_JUMP_UP:
         control_state_jump_up();
         break;
-    case STATE_DECLINE_FRONT_JOLT:
-        control_state_decline_front_jolt();
+    case STATE_DE_JOLT:
+        control_state_de_jolt();
+        break;
+    case STATE_TRA_JOLT:
+        control_state_tra_jolt();
         break;
     case STATE_JOLT:
         control_state_jolt();

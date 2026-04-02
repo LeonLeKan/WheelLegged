@@ -9,6 +9,8 @@ volatile PID_t turn_loop2;
 volatile PID_t aspeed_loop;
 volatile PID_t single_loop;
 volatile PID_t yaw_loop;
+volatile PID_t jos_loop;
+volatile PID_t joy_loop;
 
 void PID_Update_Lo(volatile PID_t *p)
 {
@@ -197,6 +199,38 @@ void ya_zero(void)
     yaw_loop.Kd = 0;
 }
 
+void jospid_update(float kp, float ki, float kd)
+{
+    jos_loop.Kp = kp;
+    jos_loop.Ki = ki;
+    jos_loop.Kd = kd;
+    jos_loop.OutMax = +100;
+    jos_loop.OutMin = -100;
+}
+
+void jos_zero(void)
+{
+    jos_loop.Kp = 0;
+    jos_loop.Ki = 0;
+    jos_loop.Kd = 0;
+}
+
+void joypid_update(float kp, float ki, float kd)
+{
+    joy_loop.Kp = kp;
+    joy_loop.Ki = ki;
+    joy_loop.Kd = kd;
+    joy_loop.OutMax = +2500;
+    joy_loop.OutMin = -2500;
+}
+
+void joy_zero(void)
+{
+    joy_loop.Kp = 0;
+    joy_loop.Ki = 0;
+    joy_loop.Kd = 0;
+}
+
 void para_zero(void)
 {
     an1_zero();
@@ -207,6 +241,8 @@ void para_zero(void)
     as_zero();
     sn_zero();
     ya_zero();
+    jos_zero();
+    joy_zero();
 }
 
 void out_zero(void)
@@ -219,4 +255,6 @@ void out_zero(void)
     aspeed_loop.Out = 0.0f;
     single_loop.Out = 0.0f;
     yaw_loop.Out = 0.0f;
+    jos_loop.Out = 0.0f;
+    joy_loop.Out = 0.0f;
 }

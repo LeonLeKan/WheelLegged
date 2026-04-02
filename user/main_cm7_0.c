@@ -89,8 +89,10 @@ int main(void)
     pit_disable(IMU_UPDATE_PIT);
     imu_init(mahony_filter_param, rotation_compensation_param);
 
+    // 菜单里读取陀螺仪固定偏置
     imu_set_gyro_bias(rollbias->data_float, pitchbias->data_float, yawbias->data_float);
 
+    // 判断科目几，以及科目三的路径
     if (testnum->data_int == 2)
     {
         calculate_route();
@@ -123,7 +125,7 @@ int main(void)
             if (motion_mode4 == 0)
             {
                 wifi_send_data();
-                wifi_send_image();
+                // wifi_send_image();
             }
         }
 
