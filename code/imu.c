@@ -97,6 +97,11 @@ void imu_update(void)
     
 }
 
+void imu_reset_yaw(void)
+{
+    Mahony_Reset_Yaw(&imu.mahony_filter);
+}
+
 
 // =====================内部函数=======================
 // 读取原始传感器数据

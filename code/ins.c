@@ -27,8 +27,10 @@ void ins_get_data(double *x_pos, double *y_pos)
 
 void ins_reset(void)
 {
+    stopped = true;
     x = 0;
     y = 0;
+    imu_reset_yaw();
     stopped = false;
 }
 

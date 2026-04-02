@@ -89,3 +89,21 @@ void Mahony_Update(MahonyFilter* filter, double gyro[3], double acc[3]) {
     
     filter->last_yaw = yaw;
 }
+
+void Mahony_Reset_Yaw(MahonyFilter* filter)
+{
+    // 将当前yaw设为0，保持roll和pitch不变
+    double q0 = filter->q[0], q1 = filter->q[1], q2 = filter->q[2], q3 = filter->q[3];
+    double roll = atan2f(2.0f * (q0 * q1 + q2 * q3), q0 * q0 - q1 * q1 - q2 * q2 + q3 * q3);
+    double pitch = asinf(2.0f * (q0 * q2 - q1 * q3));
+    // 重新计算四元数，yaw设为0
+    double cy = cosf(0.0f);
+    double sp = sinf(pitch * 0.5f);
+    double cp = cosf(pitch * 0.5f);
+    filter->q[0] = q0 * cp + q3 * sp;
+    filter->q[1] = q1 * cp + q2 * sp;
+    filter->q[2] = q2 * cp - q1 * sp;
+    filter->q[3] = q3 * cp - q0 * sp;
+    filter->last_yaw = 0;
+    filter->output.euler[2] = 0;
+}
