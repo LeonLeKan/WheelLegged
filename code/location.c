@@ -115,16 +115,19 @@ void location_update_1(void)
         current_state = STATE_DE_THUNDER;
     }
 
-    if (fabs(dx) < XYMIN_BIA_1 && fabs(dy) < XYMIN_BIA_1 && current_target->next)
+    if (fabs(dx) < XYMIN_BIA_1 && fabs(dy) < XYMIN_BIA_1)
     {
-        yaw_memory = yaw_loop.Actual;
-        current_state = STATE_THUNDER;
         advance_to_next_waypoint();
-    }
+        if (!current_target)
+        {
+            current_state = STATE_DEACCELERATE;
+        }
+        else
+        {
+            yaw_thunder_memory = yaw_loop.Actual;
+            current_state = STATE_THUNDER;
+        }
 
-    if (!current_target) 
-    {
-        current_state = STATE_DEACCELERATE;
     }
 }
 
@@ -155,7 +158,7 @@ void location_update_2_0(void)
 
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
-    if (fabs(dx) < XYMIN_BIA_0 && fabs(dy) < XYMIN_BIA_0)
+    if (fabs(dx) < XYMIN_BIA_2 && fabs(dy) < XYMIN_BIA_2)
     {
         advance_to_next_waypoint();
     }
@@ -244,7 +247,7 @@ void location_update_2_2(void)
     {
         ins_stop();
         image_block = 1;
-        current_state = STATE_DECLINE_FRONT_STAIRS;
+        current_state = STATE_DE_STAIRS;
     }
 }
 
