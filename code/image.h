@@ -64,18 +64,31 @@ extern uint32 out_check_flag;
 #define ramp             9
 ////////////////////////////
 
+typedef enum {
+    NORM,
+    SINGLE_SIDE,
+    FRONT_STAIRS,
+    BACK_STAIRS,
+    JOLT
+}element_t;
+
+//////////////////////// 传给控制 ////////////////////
+// 1-单边桥 2-三级跳 3-下三级 4-颠簸路段
+extern element_t now_element;
+extern int stair_distance;     // 到下一级台阶的距离
+extern bool out_flag;      // 是否出白色赛道（用于判断元素结束）
 extern int error;
 extern int error_calc_near_line;
 extern int error_calc_far_line;
+extern uint8_t threshold; //阈值
 extern uint8_t single_side_state;
+//////////////////////// ////////// //////////////////
 
 extern uint8_t IMG[CAMERA_H][CAMERA_W];//二值化后图像数组
 //extern uint8_t image_Buffer_0[CAMERA_H][CAMERA_W];
 extern uint8_t* fullBuffer;//指向灰度图的首地址
 extern uint8_t mid_line[CAMERA_H];
 extern uint8_t left_line[CAMERA_H], right_line[CAMERA_H];
-
-extern uint8_t threshold;
 
 
 //属于赛道的每个白条子属性
@@ -107,8 +120,6 @@ void image_main(void);
 uint8_t mid(uint8_t i);
 void find_all_connect_easy();
 void get_line_easy();
-uint8_t GetOTSU_part(uint8_t* imageInput, uint8_t height_far, uint8_t height_near, uint8_t widthleft, uint8_t widthright);
-void sobel(uint8_t* imageInput, uint8_t* imageOut, uint8_t Theshold, uint8_t height_far, uint8_t height_near, uint8_t width_left, uint8_t width_right);
 void print_f(void);//打印数值的函数
 void datas_init(void);
 void get_white_threshold_avg(void);
@@ -133,7 +144,6 @@ void straight(void);
 void bend(uint8_t start);
 
 //====================================================选道====================================================
-
 void renew_road(void);                                                                //按中间选道
 void single_side_road_choose(void);                                                   //单边桥选两边
 void single_side_bridge_two_line(uint8_t* road_continue);
