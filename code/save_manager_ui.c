@@ -117,7 +117,7 @@ void save_manager_key_ok_pressed(void)
     );
     if (!ret)
     {
-        // 加载失败，清空当前数据
+        // 加载失败，清空当前数据，仍然进入显示点界面
         waypoint_list_clear(save_manager_instance.active_save);
     }
 

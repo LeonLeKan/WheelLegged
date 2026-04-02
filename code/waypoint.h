@@ -3,7 +3,7 @@
 
 #include "zf_common_headfile.h"
 
-#define MAX_NODES 50
+#define MAX_NODES 100
 
 typedef enum {
     ELEMENT_NORMAL,

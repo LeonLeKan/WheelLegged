@@ -9,7 +9,7 @@ void save_manager_init(void (*exit_callback)(void))
     save_manager_instance.active_save = &waypoints;
     // 默认先加载0号存档
     bool ret = save_manager_load(0);
-    save_manager_instance.total_saves = 5;
+    save_manager_instance.total_saves = 7;
     save_manager_instance.showing_points = 0;
     save_manager_instance.exit_callback = exit_callback;
 }
