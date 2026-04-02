@@ -3294,7 +3294,7 @@ void mend_stairs()
             for (int i = road_end; i >= FAR_LINE; i--)
             {
                 left_line[i] = 84;
-                right_line[i] = 94;
+                right_line[i] = 104;
             }
         }
     }
