@@ -115,7 +115,7 @@ static void judge_time_to_jump(void)
 {
     if (current_state == STATE_DE_STAIRS || current_state == STATE_TRA_STAIRS)
     {
-        if (stair_distance <= 14 && jump_count <= 2)
+        if (stair_distance <= stdis->data_int && jump_count <= 2)
         {
             image_block = 0;
             jump_count += 1;

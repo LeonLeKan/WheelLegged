@@ -9,7 +9,7 @@ volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
 MENU *RootMenu, *Balance, *Image, *Element, *testnum, *road2, *saveall, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit, *show,
-    *thre, *farl, *nearl, *saveim,
+    *thre, *farl, *nearl, *stdis, *saveim,
     *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
@@ -142,7 +142,8 @@ void create_2nd_menu(void)
     thre = createMenu("thre", 2, 1, MENU_TYPE_INT, NULL);
     farl = createMenu("farl", 2, 2, MENU_TYPE_INT, NULL);
     nearl = createMenu("nearl", 2, 3, MENU_TYPE_INT, NULL);
-    saveim = createMenu("save", 2, 4, MENU_TYPE_FUNCTION, menu_save);
+    stdis = createMenu("stdis", 2, 4, MENU_TYPE_INT, NULL);
+    saveim = createMenu("save", 2, 5, MENU_TYPE_FUNCTION, menu_save);
 
     change = createMenu("change", 2, 1, MENU_TYPE_FUNCTION, control_to_ins_menu);
     snspeed = createMenu("snspeed", 2, 2, MENU_TYPE_INT, NULL);
@@ -191,8 +192,10 @@ void create_2nd_menu(void)
     farl->last = thre;
     farl->next = nearl;
     nearl->last = farl;
-    nearl->next = saveim;
-    saveim->last = nearl;
+    nearl->next = stdis;
+    stdis->last = nearl;
+    stdis->next = saveim;
+    saveim->last = stdis;
     saveim->next = thre;
     thre->last = saveim;
 
@@ -240,6 +243,7 @@ void create_2nd_menu(void)
     thre->parent = Image;
     farl->parent = Image;
     nearl->parent = Image;
+    stdis->parent = Image;
     saveim->parent = Image;
 
     Element->child = change;

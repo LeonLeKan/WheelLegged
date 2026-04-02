@@ -65,7 +65,7 @@ void control_state_stand_still(void)
         }
         else if (test_state == 0)
         {
-            current_state = STATE_JOLT;
+            current_state = STATE_ACCELERATE;
         }
     }
 
