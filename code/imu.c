@@ -100,6 +100,7 @@ void imu_update(void)
 void imu_reset_yaw(void)
 {
     Mahony_Reset_Yaw(&imu.mahony_filter);
+    imu.output.euler[2] = 0.0f;
 }
 
 

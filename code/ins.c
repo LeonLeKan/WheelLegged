@@ -3,7 +3,7 @@
 
 double x, y;
 
-bool stopped = false;
+bool ins_stopped = false;
 
 // ====================== 接口函数 ======================
 void ins_init(void)
@@ -13,7 +13,7 @@ void ins_init(void)
 
 void ins_update(double yaw, double v)
 {
-    if(stopped) return;
+    if(ins_stopped) return;
     // 简单的积分计算位置（仅供示例，实际应用中需要更复杂的算法）
     x += v * cosf(yaw) * (IMU_UPDATE_INTERVAL_MS / 1000.0f);
     y += v * sinf(yaw) * (IMU_UPDATE_INTERVAL_MS / 1000.0f);
@@ -27,21 +27,21 @@ void ins_get_data(double *x_pos, double *y_pos)
 
 void ins_reset(void)
 {
-    stopped = true;
+    ins_stopped = true;
     x = 0;
     y = 0;
     imu_reset_yaw();
-    stopped = false;
+    ins_stopped = false;
 }
 
 void ins_stop(void)
 {
-    stopped = true;
+    ins_stopped = true;
 }
 
 void ins_start(void)
 {
-    stopped = false;
+    ins_stopped = false;
 }
 
 

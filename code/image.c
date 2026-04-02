@@ -3377,8 +3377,8 @@ void image_main()
         sum += mid_line[i];
     }
     error = sum / (error_calc_near_line - error_calc_far_line + 1) - 94;
-    if (error < -25) error = -25;
-    if (error > 25) error = 25;
+    if (error < -25) error = 0;
+    if (error > 25) error = 0;
 
     //print_f();
 #if ONBOARD

@@ -5,7 +5,7 @@
 #include "location.h"
 #include "ins.h"
 
-// ÁÙÊ±±äÁ¿
+// ????
 volatile control_state_t current_state = STATE_IDLE;
 volatile uint8_t single_lock = 0;
 volatile uint32_t single_lock_count = 0;
@@ -96,7 +96,7 @@ static void quit_single_side(void)
                 road_num++;
                 save_manager_load(testnum->data_int + road_idx[road_num]);
                 speed_loop.ErrorInt = 0.0f;
-                current_state = STATE_DEACCELERATE;
+                current_state = STATE_ACCELERATE;
             }
         }
     }

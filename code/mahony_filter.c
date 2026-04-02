@@ -1,6 +1,8 @@
 // mahony_filter.c
 #include "mahony_filter.h"
 
+bool mahony_stopped = false;
+
 // 初始化
 void Mahony_Init(MahonyFilter* filter, MahonyFilterParam param) {
     filter->q[0] = 1.0f; filter->q[1] = 0.0f; 
@@ -14,6 +16,8 @@ void Mahony_Init(MahonyFilter* filter, MahonyFilterParam param) {
 
 // 核心更新函数
 void Mahony_Update(MahonyFilter* filter, double gyro[3], double acc[3]) {
+    if (mahony_stopped) return;
+    
     double gx = gyro[0] * DEG_TO_RAD, gy = gyro[1] * DEG_TO_RAD, gz = gyro[2] * DEG_TO_RAD;
     double ax = acc[0], ay = acc[1], az = acc[2];
     double norm, vx, vy, vz, ex, ey, ez;
@@ -92,18 +96,28 @@ void Mahony_Update(MahonyFilter* filter, double gyro[3], double acc[3]) {
 
 void Mahony_Reset_Yaw(MahonyFilter* filter)
 {
+    mahony_stopped = true; // 停止更新，防止重置过程中状态变化导致不一致
     // 将当前yaw设为0，保持roll和pitch不变
-    double q0 = filter->q[0], q1 = filter->q[1], q2 = filter->q[2], q3 = filter->q[3];
-    double roll = atan2f(2.0f * (q0 * q1 + q2 * q3), q0 * q0 - q1 * q1 - q2 * q2 + q3 * q3);
-    double pitch = asinf(2.0f * (q0 * q2 - q1 * q3));
+    double roll = filter->output.euler[0] * DEG_TO_RAD;
+    double pitch = filter->output.euler[1] * DEG_TO_RAD;
     // 重新计算四元数，yaw设为0
-    double cy = cosf(0.0f);
-    double sp = sinf(pitch * 0.5f);
+    double yaw = 0.0f; // 初始航向角假设为0
+    double cy = cosf(yaw * 0.5f);
+    double sy = sinf(yaw * 0.5f);
     double cp = cosf(pitch * 0.5f);
-    filter->q[0] = q0 * cp + q3 * sp;
-    filter->q[1] = q1 * cp + q2 * sp;
-    filter->q[2] = q2 * cp - q1 * sp;
-    filter->q[3] = q3 * cp - q0 * sp;
-    filter->last_yaw = 0;
-    filter->output.euler[2] = 0;
+    double sp = sinf(pitch * 0.5f);
+    double cr = cosf(roll * 0.5f);
+    double sr = sinf(roll * 0.5f);
+    filter->q[0] = cr * cp * cy + sr * sp * sy; // q0
+    filter->q[1] = sr * cp * cy - cr * sp * sy; // q1
+    filter->q[2] = cr * sp * cy + sr * cp * sy; // q2
+    filter->q[3] = cr * cp * sy - sr * sp * cy; // q3
+    filter->last_yaw = 0.0f;
+    filter->output.euler[2] = 0.0f;
+    mahony_stopped = false; // 恢复更新
+}
+
+void Mahony_Stop(MahonyFilter* filter)
+{
+    mahony_stopped = true;
 }

@@ -4,6 +4,7 @@
 #include "save_manager.h"
 #include "control_state.h"
 #include "ins.h"
+#include "image.h"
 
 waypoint_node_t *current_target = NULL;
 uint8_t road_idx[5];
@@ -204,6 +205,7 @@ void location_update_2_1(void)
     if (!current_target) 
     {
         ins_stop();
+        now_element = SINGLE_SIDE;
         image_block = 1;
         current_state = STATE_DECLINE_FRONT_SINGLE_SIDE;
     }
@@ -245,6 +247,7 @@ void location_update_2_2(void)
     if (!current_target) 
     {
         ins_stop();
+        now_element = FRONT_STAIRS;
         image_block = 1;
         current_state = STATE_DE_STAIRS;
     }
