@@ -34,6 +34,7 @@ void show_saves()
             ips200_set_color(RGB565_BLACK, RGB565_WHITE);
         screen_printf(16, 16 * (i + 1), "Save %2d", i);
     }
+    // 最后一个是Exit选项
     if(save_manager_instance.active_save_idx == save_manager_instance.total_saves)
         ips200_set_color(RGB565_BLACK, RGB565_CYAN);
     else 
@@ -90,7 +91,7 @@ void save_manager_key_down_pressed(void)
     }
     save_manager_instance.active_save_idx++;
     // 最后一个是Exit菜单
-    if(save_manager_instance.active_save_idx > save_manager_instance.total_saves)
+    if(save_manager_instance.active_save_idx == save_manager_instance.total_saves)
         save_manager_instance.active_save_idx = 0;
     show_saves();
 }
