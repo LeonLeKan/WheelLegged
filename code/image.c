@@ -30,6 +30,7 @@ int error = 0;
 int error_calc_near_line = 42;
 int error_calc_far_line = 40;
 uint8_t threshold = 230;    //阈值
+bool on_single_side_road = 0;   // 是否进入单边桥之前的白色赛道
 //////////////////////// ////////// //////////////////
 
 
@@ -73,6 +74,9 @@ uint8_t right_nb = 0;
 uint8_t single_start_fps = 0;
 uint8_t single_start_fps_up;
 float single_dis = 0;
+
+// 颠簸路段
+int jolt_end_judge_cnt = 0;
 
 
 //补线需要的数据
@@ -146,145 +150,11 @@ void general_judgement() {
     uint8_t bend_judge_start = (road_start < 60) ? 60 : road_start;
     switch (step)
     {
-    case strai: bend(bend_judge_start); break;
+    case strai: break;
     case single_side: single_side_bridge_state_machine(); break;
     }
 }
 
-void bend(uint8_t start)
-{
-    uint8_t left_tubian_y = 0;
-    uint8_t right_tubian_y = 0;
-    uint8_t left_draw_y = 0;
-    uint8_t right_draw_y = 0;
-    int8_t j_max;
-    for (int i = start; i > top_road + 2; i--)
-    {
-        if (left_line[i] < LEFT_SIDE + 5 || (left_line[i] - left_line[i - 1]) > 10 || (left_line[i] - left_line[i - 1]) < -10)
-        {
-            left_tubian_y = (uint8_t)i;
-            break;
-        }
-        else if (2 * left_line[i] - left_line[i - 3] - left_line[i + 3] > 20)
-        {
-            j_max = 0;
-            for (uint8_t j = i; j > i - 4; j--)
-            {
-                if (left_line[j] - left_line[j - 1] > j_max)
-                {
-                    j_max = left_line[j] - left_line[j - 1];
-                    left_tubian_y = j;
-                }
-            }
-            break;
-        }
-        else if (2 * left_line[i] - left_line[i - 3] - left_line[i + 3] < -20)
-        {
-            j_max = 0;
-            for (uint8_t j = i; j > i - 4; j--)
-            {
-                if (left_line[j] - left_line[j - 1] < j_max)
-                {
-                    j_max = left_line[j] - left_line[j - 1];
-                    left_tubian_y = j;
-                }
-            }
-            break;
-        }
-        if (i == top_road + 3)
-        {
-            left_tubian_y = top_road + 2;
-        }
-    }
-    for (int i = start; i > top_road + 2; i--)
-    {
-        if (right_line[i] > RIGHT_SIDE - 5 || (right_line[i - 1] - right_line[i]) > 10 || (right_line[i - 1] - right_line[i]) < -10)
-        {
-            right_tubian_y = (uint8_t)i;
-            break;
-        }
-        else if (2 * right_line[i] - right_line[i - 3] - right_line[i + 3] > 20)
-        {
-            j_max = 0;
-            for (uint8_t j = i; j > i - 4; j--)
-            {
-                if (right_line[j] - right_line[j - 1] > j_max)
-                {
-                    j_max = right_line[j] - right_line[j - 1];
-                    right_tubian_y = j;
-                }
-            }
-            break;
-        }
-        else if (2 * right_line[i] - right_line[i - 3] - right_line[i + 3] < -20)
-        {
-            j_max = 0;
-            for (uint8_t j = i; j > i - 4; j--)
-            {
-                if (right_line[j] - right_line[j - 1] < j_max)
-                {
-                    j_max = right_line[j] - right_line[j - 1];
-                    right_tubian_y = j;
-                }
-            }
-            break;
-        }
-        if (i == top_road + 3)
-        {
-            right_tubian_y = top_road + 2;
-        }
-    }
-    if (right_tubian_y >= left_tubian_y)
-    {
-        right_draw_y = right_tubian_y + 6;
-        for (int i = right_tubian_y; i > top_road + 1; i--)
-        {
-            if ((left_line[i] > left_line[i - 1] && left_line[i - 1] >= left_line[i - 2]) || (left_line[i] - left_line[i - 1]) > 35 || (left_line[i] - left_line[i - 1]) < -35
-                || (left_line[i - 2] - left_line[i - 1]) > 35 || (left_line[i - 2] - left_line[i - 1]) < -35)
-            {
-                left_draw_y = i + 5;
-                break;
-            }
-            if (i == top_road + 2)
-            {
-                left_draw_y = i + 3;
-                break;
-            }
-        }
-    }
-    if (right_tubian_y < left_tubian_y)
-    {
-        left_draw_y = left_tubian_y + 6;
-        for (int i = left_tubian_y; i > top_road + 1; i--)
-        {
-            if ((right_line[i] < right_line[i - 1] && right_line[i - 1] <= right_line[i - 2]) || (right_line[i] - right_line[i - 1]) < -35 || (right_line[i] - right_line[i - 1]) > 35
-                || (right_line[i - 2] - right_line[i - 1]) < -35 || (right_line[i - 2] - right_line[i - 1]) > 35)
-            {
-                right_draw_y = i + 5;
-                break;
-            }
-            if (i == top_road + 2)
-            {
-                right_draw_y = i + 3;
-                break;
-            }
-        }
-    }
-    if (right_tubian_y == left_tubian_y)
-    {
-        left_draw_y = left_tubian_y + 6;
-        right_draw_y = right_tubian_y + 6;
-    }
-    if (left_draw_y != 0)
-    {
-        least_square_get_line(left_line, left_draw_y, 5, left_line_datas, left_draw_y, FAR_LINE);
-    }
-    if (right_draw_y != 0)
-    {
-        least_square_get_line(right_line, right_draw_y, 5, right_line_datas, right_draw_y, FAR_LINE);
-    }
-    //printf(" %d %d\n", left_draw_y, right_draw_y);
-}
 
 //单边桥状态机
 void single_side_bridge_state_machine()
@@ -2347,57 +2217,6 @@ void single_side_road_choose(void)
         }
     }
 }
-void get_white_threshold_avg(void)
-{
-    uint32_t threshold_sum = 0;
-    uint8_t threshold_avg = 0;
-    uint8_t* map = fullBuffer;
-    for (uint8_t i = 20; i < 100; i++)
-    {
-        for (uint8_t j = 20; j < 168; j++)
-        {
-            threshold_sum += *map;
-            map++;
-        }
-    }
-    threshold_avg = (threshold_sum / 80) / 148;
-    //printf("平均阈值 = %d\n", threshold_avg);
-}
-void threshold_decrease(void)
-{
-    uint8_t threshold_avg = 36;
-    uint8_t* map = fullBuffer;
-    for (uint8_t i = 0; i < 120; i++)
-    {
-        for (uint8_t j = 0; j < 188; j++)
-        {
-            if (*map > threshold_avg)
-            {
-                *map = 0;
-            }
-            else if (*map <= threshold_avg)
-            {
-                *map = threshold_avg - *map;
-                if (*map > 15)
-                {
-                    *map = 15;
-                }
-            }
-            map++;
-        }
-    }
-    map = fullBuffer;
-    for (uint8_t i = 0; i < 120; i++)
-    {
-        for (uint8_t j = 0; j < 188; j++)
-        {
-            printf("%d,", *map);
-            map++;
-        }
-        printf("\n");
-    }
-}
-
 ////////////////////////////////////////////
 //功能：二值化
 //输入：灰度图片
@@ -2425,38 +2244,9 @@ void THRE()
     }
 }
 
-/////////////
-//功能：去阴影
-/////////////
-void Reduce_Noise(uint8_t* input, uint8_t(*input1)[CAMERA_W])
-{
-    uint8_t* img = input + CAMERA_W;//第一行的二级指针
-    uint8_t(*imgline)[188] = input1 + 1;//第一行的一级指针
-
-    for (int nr = 1; nr < NEAR_LINE - 1; nr++)
-    {
-        img++;//获得第nr行第一个的二级指针
-        for (int nc = 1; nc < CAMERA_W - 1; nc++)
-        {
-            if (*img == black
-                && (*(*(imgline - 1) + nc) + *(*(imgline + 1) + nc) + *(img + 1) + *(img - 1) > 2))
-            {
-                *img = white;
-            }
-            else if (*img == white
-                && (*(*(imgline - 1) + nc) + *(*(imgline + 1) + nc) + *(img + 1) + *(img - 1) < 2))
-            {
-                *img = black;
-            }
-            img++;
-            if (nc == CAMERA_W - 2)img++;//nc仅寻到camear_w-1，所以要在最后结束前再加一次，凑够一行
-        }
-        imgline++;//得到第nr行的一级指针
-    }
-}
 
 ////////////////////////////////////////////
-//功能：粗犷的清车头
+//功能：清车头
 //输入：
 //输出：
 //备注：要根据自己车头的大小进行修改
@@ -2473,143 +2263,6 @@ void head_clear(void)//分为两部分进行清理，车头处有线挡着
         }
     }
 
-}
-void get_line_easy()///漫水算法扫线
-{
-    find_road();
-    find_all_connect_easy();
-}
-////////////////////////////////////////////
-//功能：寻找白条子连通性的同时自适应阈值
-//输入：
-//输出：
-//备注：
-///////////////////////////////////////////
-void find_all_connect_easy()///
-{
-
-    uint8_t i_start = NEAR_LINE;
-    uint8_t i = i_start - 1;
-    top_road = 0;
-    road_range* pRoad = &myroad_continue[i];//选道的白条子属性
-    road* currLine = &my_road[i_start];//当前行的赛道
-    road* preLine = currLine--;//上一行的赛道, currLine现在指向的是my_road[NEAR_LINE-1],preLine指向的是my_road[NEAR_LINE]
-    uint8_t pre_j_select = j_continue[i_start];//用来标记上一行选道的白条子编号
-    int16_t x;//列数
-    for (i = NEAR_LINE - 1; i >= FAR_LINE; i--, pRoad--, currLine--, preLine--)
-    {
-        uint8_t pre_connect_id = 0;//用来记录第i行白条子与第i+1行相连的处在第i+1行的白条子编号
-        uint8_t j = preLine->connected[1].left, white_num_i = 0;//j从上一行最左边的白条子左边开始寻找;  white_num_i用来记录第i行的白条子的数目
-        // uint8_t width_max = 0;//用来记录第i行最宽的白条子的宽度
-        uint8_t j_select = MISS;//标记选择作为选道的白条子的编号
-        //uint8_t new_width = 0;//用来记录相连的长度，*没用
-        uint8_t error = 0;
-        uint8_t d_min = 187;//计算差值的变量
-        //printf("j[%d]=%d\n",i,j);
-        road_range new_white = search_white_range_begin(i, j);//找到第i行的第一个白条子
-        j = new_white.right;
-        //printf("right[%d]=%d\n", i, j);
-        while (j != MISS && white_num_i < white_num_MAX - 1)      //找到白条且符合条件
-        {
-            uint8_t connect_id = is_connect(&new_white, preLine, pre_j_select);//new_white表示的是第i行的某个白条子属性，preLine是第i+1行的赛道属性，pre_j_select为i+1行选道的白条子编号
-            /* if (i == 50)
-             {
-                 printf("connect_id[%d]=%d\n", i, connect_id);
-                 printf("j=%d\n", j);
-             }*/
-            if (connect_id)     //找到了相连的白条子
-            {
-                white_num_i++;
-                currLine->connected[white_num_i] = new_white;//给my_road[120]赋值
-            }
-            else if (pre_connect_id == preLine->white_num)//本次不相连，且上一次已经和最后一个白条相连，本行搜索结束
-                break;
-            if (connect_id == pre_j_select) //找到了与上一行选道的白条子相连的白条子
-            {
-                uint8_t left = new_white.left;
-                uint8_t right = new_white.right;
-                uint8_t wide = right - left;
-                uint8_t mid = (left + right) / 2;
-                //选择与last_midline差值小的作为选道
-                error = My_abs(mid - last_midline);
-                // printf("left=%d\n", new_white.left);
-                // printf("right=%d\n", new_white.right);
-                if (error <= d_min && wide >= 15 && white_num_i <= 3)//优先选择宽度符合条件的白条子
-                {
-                    // printf("left999=%d\n", new_white.left);
-                    d_min = error;
-                    mid_choose = mid;
-                    j_select = white_num_i;
-                    //printf("mid_choose[%d]%d", i_start - 1, mid_choose);
-                }
-                else if ((white_num_i >= 4) && error <= d_min && (wide >= 2 || white_num_i == 1))//当前行白条数较多时，可能是斑马线放开宽度条件
-                {
-                    d_min = error;
-                    mid_choose = mid;
-                    j_select = white_num_i;
-                }
-                if (j_select == MISS && wide >= 5)//实在没找到，放开宽度选择
-                {
-                    if (error <= d_min)
-                    {
-                        //d_min = error;
-                        mid_choose = mid;
-                        j_select = white_num_i;
-
-                    }
-                }
-
-
-            }
-            //搜索下一个白条
-           // if (j > preLine->connected[pre_num].right) break;//该行寻找的白条子的右边界已经超过上一行最右的白条子的右边界，停止搜寻
-            new_white = search_white_range((uint8_t)i, (uint8_t)j + 1);
-            j = new_white.right;
-            pre_connect_id = connect_id;
-        }
-        //一行完毕，结算
-        currLine->white_num = white_num_i;
-        if (white_num_i > white_num_max)
-            white_num_max = white_num_i;//给white_num_max赋值
-        j_continue[i] = pre_j_select = j_select;
-        if (j_select != MISS)
-            *pRoad = currLine->connected[j_select];//给myroad_continue[120]赋值
-        if (i <= NEAR_LINE - (block / 2) && i >= FAR_LINE + (block / 2) && j_select != MISS)//对于选道的白条子再次二值化
-        {
-            x = pRoad->left;
-            if (x >= (block / 2) && x <= RIGHT_SIDE - (block / 2)) adaptive_threshold_2((uint8_t)i, (uint8_t)x);
-            x = pRoad->right;
-            //printf("x=[%d]%d\n", i, currLine->connected[j_select].left);
-            if (x >= (block / 2) && x <= RIGHT_SIDE - (block / 2)) adaptive_threshold_2((uint8_t)i, (uint8_t)x);
-            x = pRoad->left;
-            uint8_t connect_flag = 0;
-            uint8_t width_new = 0;
-            road_range select_white;
-            do
-            {
-                new_white = search_white_range_begin((uint8_t)i, (uint8_t)x);
-                connect_flag = is_connect_continue(&new_white, (pRoad + 1));
-                x = new_white.right + 1;
-                //找白条子最宽的为赛道
-                if (connect_flag && new_white.width >= width_new)
-                {
-                    width_new = new_white.width;
-                    select_white = new_white;
-                }
-            } while (x - 1 <= currLine->connected[white_num_i].right);
-            if (connect_flag)
-            {
-                //printf("left[%d]=%d\n",i, new_white.left);
-                *pRoad = select_white;
-            }
-        }
-        // printf("j_continue[%d]=%d", i, j_continue[i]);
-        if (!white_num_i)//如果当前的白条数为0
-        {
-            top_road = i + 1;
-            break;
-        }
-    }
 }
 road_range search_white_range_begin(uint8_t line, uint8_t col)//用来找到line行，从col列开始往右的白条子，找到就返回这个白条子的属性road_range
 {
@@ -2717,72 +2370,6 @@ uint8_t is_connect(road_range* new_white, road* pre_line, uint8_t continue_id)
     return jd_return;//没找到返回0   或返回一个相连的但不与选道联通的白条子编号
 }
 
-////////////////////////////////////////////
-//功能：用来找到line行，从col列开始往右的白条子，找到就返回这个白条子的属性road_range
-//输入：行数 line, 列数 col
-//输出：road_range
-//备注：指针提速
-///////////////////////////////////////////
-road_range  search_white_range(uint8_t line, uint8_t col)//用来找到line行，从col列开始往右的白条子，找到就返回这个白条子的属性road_range
-{
-    uint8_t j;
-    uint8_t* map = &IMG[line][col];
-    road_range result = { MISS, MISS, MISS };
-    for (j = col; j <= RIGHT_SIDE; j++, map++)
-    {
-        if ((*map))//遇白条左边界
-        {
-            result.left = j;
-            //开始向后一个一个像素点找这个白条右边界
-            map++;
-            j++;
-            while ((*map) && j <= RIGHT_SIDE)
-            {
-                map++;
-                j++;
-            }
-            result.right = j - 1;
-            result.width = result.right - result.left + 1;
-            return result;//找到就返回这个白条子的属性road_range
-        }
-    }
-    return result;//没找到就返回result = { MISS, MISS, MISS };
-}
-void adaptive_threshold_2(uint8_t y, uint8_t x)
-{
-    int half_block = block / 2;
-    int thres = 0;
-    uint8_t* map = fullBuffer;
-    uint8_t* my_map = NULL;
-    uint8_t num = 0;
-    //uint8_t min_thres = 0;
-
-    //计算平均阈值
-    for (int i = -half_block + y; i <= half_block + y; i++) {
-        map = fullBuffer + i * CAMERA_W;
-        for (int j = -half_block + x; j <= half_block + x; j++) {
-            thres += *(map + j);
-        }
-    }
-    thres = thres / (block * block) - 4;
-    //printf("thres[%d][%d]=%d\n", y , x, thres);
-     //开始二值化
-    for (int i = -half_block + y; i <= half_block + y; i++)
-    {
-        map = fullBuffer + i * CAMERA_W;
-        my_map = &IMG[i][0];
-        for (int j = -half_block + x; j <= half_block + x; j++) {
-
-            num++;
-            if (*(map + j) > thres)
-            {
-                *(my_map + j) = 1;
-
-            }
-            else *(my_map + j) = 0;
-        }
-    }
-}
 
 uint8_t is_connect_continue(road_range* new_white, road_range* pre_line)
 {
@@ -2921,42 +2508,6 @@ void find_all_connect()
     }
 }
 
-////////////////////////////////////////////
-//功能：寻找赛道
-//输入：
-//输出：
-//备注：
-///////////////////////////////////////////
-void find_road()
-{
-    my_memset(j_continue, MISS, CAMERA_H);
-    road* tmy_road = &my_road[NEAR_LINE];
-    uint8_t j = LEFT_SIDE, white_num_istart = 0;//j用来寻找一行的白条子便利的变量; white_num_istart是用来表示istart行的白条子数目
-    uint8_t width_max = 0;//用来找最宽的白条子
-    uint8_t j_select = 0;//用来标记选择作为赛道的白条子编号
-    road_range root = search_white_range(NEAR_LINE, j);//得到istart行的第一个白条子
-    j = root.right;
-    while (j != MISS && white_num_istart < white_num_MAX)
-    {
-        //确定上一个白条无误，统计信息
-        if (j - root.left > 5)//确保最下面一行的白条子有效
-        {
-            white_num_istart++;//符合条件，白条子数目加1
-            tmy_road->connected[white_num_istart] = root;//给my_road[istart]赋值
-            if (root.width > width_max)//确定istart行最宽的白条子
-            {
-                width_max = root.width;
-                j_select = white_num_istart;//找到最宽的白条子编号
-            }
-        }
-        //搜索下一个白条
-        root = search_white_range(NEAR_LINE, j + 1);
-        j = root.right;
-    }
-    tmy_road->white_num = white_num_istart;
-    myroad_continue[NEAR_LINE] = tmy_road->connected[j_select];//选最宽的白条作为选道
-    j_continue[NEAR_LINE] = j_select;
-}
 ////////////////////////////////////////////
 //功能：寻找赛道
 //输入：
@@ -3278,7 +2829,7 @@ void calc_stair_distance()
 void mend_stairs()
 {
     float input[2];
-    if (NEAR_LINE - road_start >= 2)
+    if (NEAR_LINE - road_start >= 2 && road_start - road_end >= 10)
     {
         least_square_get_line(left_line, road_start - 5, 5, input, NEAR_LINE, road_start - 5);
         least_square_get_line(right_line, road_start - 5, 5, input, NEAR_LINE, road_start - 5);
@@ -3300,7 +2851,33 @@ void mend_stairs()
     }
 }
 
-void out_check()
+// 远处的单边桥补线
+void mend_far_single_side()
+{
+    float input[2];
+    if (NEAR_LINE - road_start >= 2 && road_start - road_end >= 10)
+    {
+        least_square_get_line(left_line, road_start - 5, 5, input, NEAR_LINE, road_start - 5);
+        least_square_get_line(right_line, road_start - 5, 5, input, NEAR_LINE, road_start - 5);
+        on_single_side_road = 0;
+    }
+    else {
+        int white_count = 0;
+        for (int i = NEAR_LINE; i >= NEAR_LINE - 20; i--)
+        {
+            for (int j = 64; j <= 124; j++)
+            {
+                if (IMG[i][j])
+                    white_count++;
+            }
+        }
+        if (white_count >= 800)
+            on_single_side_road = 1;
+        else on_single_side_road = 0;
+    }
+}
+
+void stairs_end_check()
 {
     int white_count = 0;
     for (int i = NEAR_LINE; i >= NEAR_LINE - 20; i--)
@@ -3320,6 +2897,34 @@ void out_check()
     }
 }
 
+void jolt_end_check()
+{
+    int white_count = 0;
+    for (int i = NEAR_LINE; i >= NEAR_LINE - 20; i--)
+    {
+        for (int j = 64; j <= 124; j++)
+        {
+            if (IMG[i][j])
+                white_count++;
+        }
+    }
+    if (white_count < 300)
+    {
+        jolt_end_judge_cnt++;
+        if (jolt_end_judge_cnt > 20)
+        {
+            // 达到阈值，退出JOLT状态
+            jolt_end_judge_cnt = 0;
+            out_flag = 1;
+            now_element = NORM;
+        }
+    }
+    else {
+        out_flag = 0;
+        jolt_end_judge_cnt = 0;
+    }
+}
+
 ////////////////////////////////////////////
 //功能：图像处理主程序
 //输入：
@@ -3330,7 +2935,7 @@ void image_main()
 {
 #if ONBOARD
 #else 
-    now_element = FRONT_STAIRS;
+    now_element = JOLT;
 #endif
     datas_init();
     THRE();
@@ -3358,14 +2963,20 @@ void image_main()
     switch (now_element)
     {
     case SINGLE_SIDE:
-        general_judgement();
+        mend_far_single_side();
+        if(on_single_side_road)
+            general_judgement();
         get_mid_line();
         break;
+    case BACK_STAIRS:
     case FRONT_STAIRS:
         calc_stair_distance();
         mend_stairs();
-        out_check();
+        stairs_end_check();
         get_mid_line();
+        break;
+    case JOLT:
+        jolt_end_check();
         break;
     }
 

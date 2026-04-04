@@ -180,4 +180,3 @@ void get_line_b_and_k(uint8_t* line, uint8_t start, uint8_t end, float input[]);
 void get_line(uint8_t* line, uint8_t start, uint8_t end, float k, float b);
 void define_mid_255(void);
 #endif //
-extern uint8_t step;
