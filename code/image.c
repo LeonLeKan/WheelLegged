@@ -2420,7 +2420,7 @@ void search_white_range1()
     {
         map = &IMG[i][LEFT_SIDE];//指针行走加快访问速度
         tnum = 0;
-        bool found_long_white = 0;
+        uint8_t longest = 0;
         for (j = LEFT_SIDE; j <= RIGHT_SIDE; j++, map++)
         {
             if ((*map))//遇白条左边界
@@ -2440,20 +2440,20 @@ void search_white_range1()
                     j++;
                 }
                 now_white->right = j - 1;
-                if (now_white->right - now_white->left > 50)
+                if (now_white->right - now_white->left > longest)
                 {
-                    found_long_white = 1;
+                    longest = now_white->right - now_white->left;
                 }
                 now_white->connect_num = ++all_connect_num;//白条数加一，给这个白条编号
             }
         }
         white_range[i].num = tnum;
-        if (!found_road_start && found_long_white)
+        if (!found_road_start && longest >= 50)
         {
             found_road_start = 1;
             road_start = i;
         }
-        else if (!found_road_end && found_road_start && !found_long_white)
+        else if (!found_road_end && found_road_start && longest < 30)
         {
             found_road_end = 1;
             road_end = i;
@@ -2783,6 +2783,9 @@ void define_mid_255()
 //数值初始化
 void datas_init()
 {
+    road_start = NEAR_LINE;
+    road_end = FAR_LINE;
+
     left_f2_y = 0;//左边线二阶导拐点
     right_f2_y = 0;//右边线二阶导拐点
     left_guai_H = 0;//左下边界拐点
@@ -2831,10 +2834,20 @@ void calc_stair_distance()
 void mend_stairs()
 {
     float input[2];
-    if (NEAR_LINE - road_start >= 2 && road_start - road_end >= 10)
+    if (NEAR_LINE - road_start >= 2)
     {
-        least_square_get_line(left_line, road_start - 5, 5, input, NEAR_LINE, road_start - 5);
-        least_square_get_line(right_line, road_start - 5, 5, input, NEAR_LINE, road_start - 5);
+        if (road_start - road_end >= 10)
+        {
+            least_square_get_line(left_line, road_start - 5, 5, input, NEAR_LINE, road_start - 5);
+            least_square_get_line(right_line, road_start - 5, 5, input, NEAR_LINE, road_start - 5);
+        }
+        else {
+            for (int i = NEAR_LINE; i >= road_start; i--)
+            {
+                left_line[i] = 84;
+                right_line[i] = 104;
+            }
+        }
     }
     if (road_end - FAR_LINE >= 5)
     {
@@ -2886,7 +2899,7 @@ void front_stairs_end_check()
     {
         for (int j = 64; j <= 124; j++)
         {
-            if(IMG[i][j])
+            if (IMG[i][j])
                 white_count++;
         }
     }
@@ -2970,7 +2983,7 @@ void image_main()
     /*到此处为止，我们已经得到了属于赛道的结构体数组my_road[CAMERA_H]*/
 
     ordinary_two_line();
-    
+
     get_mid_line();
 #if ONBOARD
 #else
@@ -2988,10 +3001,10 @@ void image_main()
     {
     case SINGLE_SIDE:
         mend_far_single_side();
-        if(on_single_side_road)
+        if (on_single_side_road)
             general_judgement();
         break;
-    
+
     case FRONT_STAIRS:
         calc_stair_distance();
         mend_stairs();
@@ -3008,7 +3021,7 @@ void image_main()
     }
 
     get_mid_line();
-    
+
     define_mid_255();
     int sum = 0;
     for (int i = error_calc_near_line; i >= error_calc_far_line; i--)
@@ -3018,12 +3031,12 @@ void image_main()
     error = sum / (error_calc_near_line - error_calc_far_line + 1) - 94;
     if (error < -25) error = 0;
     if (error > 25) error = 0;
-    
+
     mid_update = 1;
     //print_f();
 #if ONBOARD
 #else
-    printf("dis: %d, end: %d\n", stair_distance, back_stairs_end_flag);
+    printf("dis: %d, start: %d, end: %d\n", stair_distance, road_start, road_end);
     for (int i = 0; i < CAMERA_W; i++)
     {
         IMG[error_calc_near_line][i] = purple;
