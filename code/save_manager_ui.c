@@ -111,18 +111,16 @@ void save_manager_key_ok_pressed(void)
         save_manager_instance.exit_callback();
         return;
     }
-    // todo: 根据类型加载
-    // bool ret = waypoint_list_load_from_flash(
-    //     save_manager_instance.active_save,
-    //     INS_FLASH_START_PAGE + save_manager_instance.active_save_idx
-    // );
-    // if (!ret)
-    // {
-    //     // 加载失败，清空当前数据，仍然进入显示点界面
-    //     waypoint_list_clear(save_manager_instance.active_save);
-    // }
     
-    waypoint_list_clear(save_manager_instance.active_save);
+    bool ret = waypoint_list_load_from_flash(
+        save_manager_instance.active_save,
+        INS_FLASH_START_PAGE + save_manager_instance.active_save_idx
+    );
+    if (!ret)
+    {
+        // 加载失败，清空当前数据，仍然进入显示点界面
+        waypoint_list_clear(save_manager_instance.active_save);
+    }
 
     save_manager_instance.showing_points = 1;
     show_ins_points();
