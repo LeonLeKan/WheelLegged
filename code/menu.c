@@ -7,10 +7,10 @@
 
 volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
-MENU *RootMenu, *Balance, *Image, *Element, *testnum, *road2, *saveall, *currentMenu;
+MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *saveall, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit, *show,
-    *thre, *farl, *nearl, *stdis, *saveim,
-    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *saveel;
+    *thre, *farl, *nearl, *stdis1, *stdis2, *stdis3, *saveim,
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *bastde, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
@@ -89,7 +89,7 @@ void clear_exec_flag(MENU *layerHead)
 
 void create_1st_menu(void)
 {
-    RootMenu = createMenu("RootMenu", 0, 1, MENU_TYPE_NORMAL, NULL);
+    WheelLeg = createMenu("WheelLeg", 0, 1, MENU_TYPE_NORMAL, NULL);
     Balance = createMenu("Balance", 1, 1, MENU_TYPE_NORMAL, NULL);
     Image = createMenu("Image", 1, 2, MENU_TYPE_NORMAL, NULL);
     Element = createMenu("Element", 1, 3, MENU_TYPE_NORMAL, NULL);
@@ -97,13 +97,13 @@ void create_1st_menu(void)
     road2 = createMenu("road2", 1, 5, MENU_TYPE_INT, NULL);
     saveall = createMenu("save", 1, 6, MENU_TYPE_FUNCTION, menu_save);
 
-    RootMenu->child = Balance;
-    Balance->parent = RootMenu;
-    Image->parent = RootMenu;
-    Element->parent = RootMenu;
-    testnum->parent = RootMenu;
-    road2->parent = RootMenu;
-    saveall->parent = RootMenu;
+    WheelLeg->child = Balance;
+    Balance->parent = WheelLeg;
+    Image->parent = WheelLeg;
+    Element->parent = WheelLeg;
+    testnum->parent = WheelLeg;
+    road2->parent = WheelLeg;
+    saveall->parent = WheelLeg;
 
     Balance->next = Image;
     Image->last = Balance;
@@ -118,7 +118,7 @@ void create_1st_menu(void)
     saveall->next = Balance;
     Balance->last = saveall;
 
-    currentMenu = RootMenu->child;
+    currentMenu = WheelLeg->child;
 }
 
 void create_2nd_menu(void)
@@ -142,8 +142,10 @@ void create_2nd_menu(void)
     thre = createMenu("thre", 2, 1, MENU_TYPE_INT, NULL);
     farl = createMenu("farl", 2, 2, MENU_TYPE_INT, NULL);
     nearl = createMenu("nearl", 2, 3, MENU_TYPE_INT, NULL);
-    stdis = createMenu("stdis", 2, 4, MENU_TYPE_INT, NULL);
-    saveim = createMenu("save", 2, 5, MENU_TYPE_FUNCTION, menu_save);
+    stdis1 = createMenu("stdis1", 2, 4, MENU_TYPE_INT, NULL);
+    stdis2 = createMenu("stdis2", 2, 5, MENU_TYPE_INT, NULL);
+    stdis3 = createMenu("stdis3", 2, 6, MENU_TYPE_INT, NULL);
+    saveim = createMenu("save", 2, 7, MENU_TYPE_FUNCTION, menu_save);
 
     change = createMenu("change", 2, 1, MENU_TYPE_FUNCTION, control_to_ins_menu);
     snspeed = createMenu("snspeed", 2, 2, MENU_TYPE_INT, NULL);
@@ -155,7 +157,8 @@ void create_2nd_menu(void)
     stspeed = createMenu("stspeed", 2, 8, MENU_TYPE_INT, NULL);
     jospeed = createMenu("jospeed", 2, 9, MENU_TYPE_INT, NULL);
     snlock = createMenu("snlock", 2, 10, MENU_TYPE_INT, NULL);
-    saveel = createMenu("save", 2, 11, MENU_TYPE_FUNCTION, menu_save);
+    bastde = createMenu("bastde", 2, 11, MENU_TYPE_INT, NULL);
+    saveel = createMenu("save", 2, 12, MENU_TYPE_FUNCTION, menu_save);
 
     speed->next = anloop1;
     anloop1->last = speed;
@@ -192,10 +195,14 @@ void create_2nd_menu(void)
     farl->last = thre;
     farl->next = nearl;
     nearl->last = farl;
-    nearl->next = stdis;
-    stdis->last = nearl;
-    stdis->next = saveim;
-    saveim->last = stdis;
+    nearl->next = stdis1;
+    stdis1->last = nearl;
+    stdis1->next = stdis2;
+    stdis2->last = stdis1;
+    stdis2->next = stdis3;
+    stdis3->last = stdis2;
+    stdis3->next = saveim;
+    saveim->last = stdis3;
     saveim->next = thre;
     thre->last = saveim;
 
@@ -217,8 +224,10 @@ void create_2nd_menu(void)
     jospeed->last = stspeed;
     jospeed->next = snlock;
     snlock->last = jospeed;
-    snlock->next = saveel;
-    saveel->last = snlock;
+    snlock->next = bastde;
+    bastde->last = snlock;
+    bastde->next = saveel;
+    saveel->last = bastde;
     saveel->next = change;
     change->last = saveel;
 
@@ -243,7 +252,9 @@ void create_2nd_menu(void)
     thre->parent = Image;
     farl->parent = Image;
     nearl->parent = Image;
-    stdis->parent = Image;
+    stdis1->parent = Image;
+    stdis2->parent = Image;
+    stdis3->parent = Image;
     saveim->parent = Image;
 
     Element->child = change;
@@ -257,6 +268,7 @@ void create_2nd_menu(void)
     stspeed->parent = Element;
     jospeed->parent = Element;
     snlock->parent = Element;
+    bastde->parent = Element;
     saveel->parent = Element;
 }
 

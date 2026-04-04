@@ -92,6 +92,10 @@ int main(void)
     // 菜单里读取陀螺仪固定偏置
     imu_set_gyro_bias(rollbias->data_float, pitchbias->data_float, yawbias->data_float);
 
+    threshold = (uint8_t)thre->data_int;
+    error_calc_far_line = (uint8_t)farl->data_int;
+    error_calc_near_line = (uint8_t)nearl->data_int;
+
     // 判断科目几，以及科目三的路径
     if (testnum->data_int == 2)
     {
@@ -125,7 +129,7 @@ int main(void)
             if (motion_mode4 == 0)
             {
                 wifi_send_data();
-                // wifi_send_image();
+                wifi_send_image();
             }
         }
 
@@ -257,9 +261,7 @@ void handle_channel(void)
 
     else if (last_ch4 != uart_receiver.channel[4])
     {
-        // 删除末尾的点
-        //waypoint_list_remove(&waypoints, waypoints.tail);
-        current_state = STATE_THUNDER;
+        // 特殊用途
     }
 
     else if (last_ch5 != uart_receiver.channel[5])

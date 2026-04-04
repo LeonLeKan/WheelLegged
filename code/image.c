@@ -2931,10 +2931,10 @@ void jolt_end_check()
                 white_count++;
         }
     }
-    if (white_count < 300)
+    if (white_count < 200)
     {
         jolt_end_judge_cnt++;
-        if (jolt_end_judge_cnt > 20)
+        if (jolt_end_judge_cnt > 100)
         {
             // 达到阈值，退出JOLT状态
             jolt_end_judge_cnt = 0;
@@ -2960,6 +2960,7 @@ void image_main()
 #else 
     now_element = BACK_STAIRS;
 #endif
+    // mid_update = 0;
     datas_init();
     THRE();
     head_clear();
@@ -2969,7 +2970,7 @@ void image_main()
     /*到此处为止，我们已经得到了属于赛道的结构体数组my_road[CAMERA_H]*/
 
     ordinary_two_line();
-    mid_update = 0;
+    
     get_mid_line();
 #if ONBOARD
 #else
@@ -3007,7 +3008,7 @@ void image_main()
     }
 
     get_mid_line();
-    mid_update = 1;
+    
     define_mid_255();
     int sum = 0;
     for (int i = error_calc_near_line; i >= error_calc_far_line; i--)
@@ -3017,7 +3018,8 @@ void image_main()
     error = sum / (error_calc_near_line - error_calc_far_line + 1) - 94;
     if (error < -25) error = 0;
     if (error > 25) error = 0;
-
+    
+    mid_update = 1;
     //print_f();
 #if ONBOARD
 #else

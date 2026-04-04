@@ -5,7 +5,6 @@
 #include "location.h"
 #include "ins.h"
 
-// ????
 volatile control_state_t current_state = STATE_IDLE;
 volatile uint8_t single_lock = 0;
 volatile uint32_t single_lock_count = 0;
@@ -95,7 +94,6 @@ static void quit_single_side(void)
                 image_block = 0;
                 road_num++;
                 save_manager_load(testnum->data_int + road_idx[road_num]);
-                speed_loop.ErrorInt = 0.0f;
                 current_state = STATE_ACCELERATE;
             }
         }
@@ -115,8 +113,23 @@ static void judge_time_to_jump(void)
 {
     if (current_state == STATE_DE_STAIRS || current_state == STATE_TRA_STAIRS)
     {
-        if (stair_distance <= stdis->data_int && jump_count <= 2)
+        if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1)
         {
+            mid_update = 0;
+            image_block = 0;
+            jump_count += 1;
+            current_state = STATE_JUMP_UP;
+        }
+        else if (stair_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1)
+        {
+            mid_update = 0;
+            image_block = 0;
+            jump_count += 1;
+            current_state = STATE_JUMP_UP;
+        }
+        else if (stair_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1)
+        {
+            mid_update = 0;
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
@@ -128,8 +141,65 @@ static void judge_time_to_jump(void)
             image_block = 0;
             road_num++;
             save_manager_load(testnum->data_int + road_idx[road_num]);
-            current_state = STATE_DEACCELERATE;
+            current_state = STATE_ACCELERATE;
         }
+    }
+}
+
+static void quit_follow_stairs(void)
+{
+    if (current_state == STATE_FOLLOW_STAIRS)
+    {
+        if (stair_distance <= stdis1->data_int && follow_stairs_count == 0 && mid_update == 1)
+        {
+            mid_update = 0;
+            image_block = 0;
+            follow_stairs_count += 1;
+            current_state = STATE_CLOSE_STAIRS;
+        }
+        else if (stair_distance <= stdis2->data_int && follow_stairs_count == 1 && mid_update == 1)
+        {
+            mid_update = 0;
+            image_block = 0;
+            follow_stairs_count += 1;
+            current_state = STATE_CLOSE_STAIRS;
+        }
+        else if (stair_distance <= stdis3->data_int && follow_stairs_count == 2 && mid_update == 1)
+        {
+            mid_update = 0;
+            image_block = 0;
+            follow_stairs_count += 1;
+            current_state = STATE_CLOSE_STAIRS;
+        }
+        else if (follow_stairs_count >= 3)
+        {
+            follow_stairs_count = 0;
+            ins_reset();
+            image_block = 0;
+            road_num++;
+            save_manager_load(testnum->data_int + road_idx[road_num]);
+            current_state = STATE_ACCELERATE;
+        }
+    }
+}
+
+static void de_to_tra_jolt(void)
+{
+    if (current_state == STATE_DE_JOLT && speed_loop.Actual <= (float)jospeed->data_int / 100.0f)
+    {
+        current_state = STATE_TRA_JOLT;
+    }
+}
+
+static void quit_jolt(void)
+{
+    if (current_state == STATE_JOLT && jolt_end_flag == 1)
+    {
+        ins_reset();
+        image_block = 0;
+        road_num++;
+        save_manager_load(testnum->data_int + road_idx[road_num]);
+        current_state = STATE_DEACCELERATE;
     }
 }
 
@@ -154,6 +224,17 @@ void control_state_switch(void)
     {
         decline_to_stairs();
         judge_time_to_jump();
+    }
+
+    else if (testnum->data_int == 2 && road_idx[road_num] == 3)
+    {
+        quit_follow_stairs();
+    }
+
+    else if (testnum->data_int == 2 && road_idx[road_num] == 4)
+    {
+        de_to_tra_jolt();
+        quit_jolt();
     }
 }
 
@@ -205,6 +286,12 @@ void control_state_update(void)
         break;
     case STATE_JUMP_UP:
         control_state_jump_up();
+        break;
+    case STATE_FOLLOW_STAIRS:
+        control_state_follow_stairs();
+        break;
+    case STATE_CLOSE_STAIRS:
+        control_state_close_stairs();
         break;
     case STATE_DE_JOLT:
         control_state_de_jolt();

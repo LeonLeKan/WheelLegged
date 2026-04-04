@@ -23,5 +23,7 @@ void location_update_1(void);
 void location_update_2_0(void);
 void location_update_2_1(void);
 void location_update_2_2(void);
+void location_update_2_3(void);
+void location_update_2_4(void);
 
 #endif

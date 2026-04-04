@@ -253,3 +253,96 @@ void location_update_2_2(void)
     }
 }
 
+void location_update_2_3(void)
+{
+    waypoint_list_t *list = save_manager_get_active_save();
+    
+    if (!current_target)
+    {
+        current_target = list->head->next;
+    }
+        
+    if (!current_target)
+    {
+        return;
+    }
+
+    double x_now = imu.output.position_x;
+    double y_now = imu.output.position_y;
+
+    double x_tgt = current_target->waypoint.x;
+    double y_tgt = current_target->waypoint.y;
+
+    double target_deg = direction_calculate(x_tgt, y_tgt, x_now, y_now);
+
+    yaw_loop.Target = target_deg;
+    yaw_loop.Actual = imu.output.euler[2];
+
+    double dx = x_tgt - x_now;
+    double dy = y_tgt - y_now;
+
+    if (fabs(dx) < XYMIN_BIA_2 && fabs(dy) < XYMIN_BIA_2)
+    {
+        advance_to_next_waypoint();
+    }
+
+    if (!current_target) 
+    {
+        ins_stop();
+        now_element = BACK_STAIRS;
+        image_block = 1;
+        current_state = STATE_FOLLOW_STAIRS;
+    }
+}
+
+void location_update_2_4(void)
+{
+    static uint8_t de_jolt_flag = 0;
+    waypoint_list_t *list = save_manager_get_active_save();
+    
+    if (!current_target)
+    {
+        current_target = list->head->next;
+    }
+        
+    if (!current_target)
+    {
+        return;
+    }
+
+    double x_now = imu.output.position_x;
+    double y_now = imu.output.position_y;
+
+    double x_tgt = current_target->waypoint.x;
+    double y_tgt = current_target->waypoint.y;
+
+    double target_deg = direction_calculate(x_tgt, y_tgt, x_now, y_now);
+
+    yaw_loop.Target = target_deg;
+    yaw_loop.Actual = imu.output.euler[2];
+
+    double dx = x_tgt - x_now;
+    double dy = y_tgt - y_now;
+
+    if (fabs(dx) < XYMIN_BIA_2 && fabs(dy) < XYMIN_BIA_2)
+    {
+        advance_to_next_waypoint();
+    }
+
+    if (current_target && !current_target->next && de_jolt_flag == 0) 
+    {
+        current_state = STATE_DE_JOLT;
+        de_jolt_flag = 1;
+    }
+
+    else if (!current_target) 
+    {
+        ins_stop();
+        de_jolt_flag = 0;
+        joy_loop.Target = 15.0f;
+        roll_base = rollba->data_float;
+        now_element = JOLT;
+        image_block = 1;
+        current_state = STATE_JOLT;
+    }
+}

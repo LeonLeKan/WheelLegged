@@ -11,6 +11,7 @@ volatile uint8_t image_block = 0;
 volatile float roll_base = 0.0f;
 volatile float yaw_test_bias = 0.0f;
 volatile uint8_t jump_count = 0;
+volatile uint8_t follow_stairs_count = 0;
 
 void control_init(void)
 {
@@ -485,7 +486,7 @@ void control_state_single_side(void)
 {
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
-    speed_loop.Ki = 0.0f;
+    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     snpid_update(snkp->data_float, snki->data_float, snkd->data_float);
@@ -565,8 +566,8 @@ void control_state_de_stairs(void)
         speed_loop.Target = (float)stspeed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
-        servo_set(110.0f, 70.0f,
-                  110.0f, 70.0f);
+        servo_set(100.0f, 80.0f,
+                  100.0f, 80.0f);
 
         turn_loop1.Target = 0.0f; 
         turn_loop1.Actual = (float)error;
@@ -689,6 +690,104 @@ void control_state_jump_up(void)
     }
 }
 
+void control_state_follow_stairs(void)
+{
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+    tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
+    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    threshold = (uint8_t)thre->data_int;
+    error_calc_far_line = (uint8_t)farl->data_int;
+    error_calc_near_line = (uint8_t)nearl->data_int;
+
+    static uint32_t count = 0;
+    count++;
+    if (count >= 4)
+    {
+        count = 0;
+
+        speed_loop.Target = (float)speed->data_int / 100.0f;
+        speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+
+        PID_Update_Lo(&speed_loop);
+
+        // 对speed_loop.Out进行低通滤波
+        static float filtered_speed_out = 0.0f;
+        static const float speed_alpha = 0.1f; 
+
+        filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
+
+        servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
+                  90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
+
+        turn_loop1.Target = 0.0f; 
+        turn_loop1.Actual = (float)error;
+        PID_Update_Lo(&turn_loop1);
+    }
+
+    turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual; 
+    turn_loop2.Actual = -imu.body.gyro[2];
+    PID_Update_Lo(&turn_loop2);
+
+    angle_loop2.Target = pzero->data_float;
+    angle_loop2.Actual = imu.output.euler[1];
+    PID_Update_Lo(&angle_loop2);
+
+    aspeed_loop.Target = angle_loop2.Out;
+    aspeed_loop.Actual = imu.output.gyro[1];
+    PID_Update_Lo(&aspeed_loop);
+
+    small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+}
+
+void control_state_close_stairs(void)
+{
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+
+    static uint32_t close_delay = 0;
+    static uint32_t count = 0;
+    close_delay++;
+    count++;
+    if (count >= 4)
+    {
+        count = 0;
+
+        speed_loop.Target = (float)speed->data_int / 100.0f;
+        speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+
+        PID_Update_Lo(&speed_loop);
+
+        // 对speed_loop.Out进行低通滤波
+        static float filtered_speed_out = 0.0f;
+        static const float speed_alpha = 0.1f; 
+
+        filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
+
+        servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
+                  90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
+    }
+
+    angle_loop2.Target = pzero->data_float;
+    angle_loop2.Actual = imu.output.euler[1];
+    PID_Update_Lo(&angle_loop2);
+
+    aspeed_loop.Target = angle_loop2.Out;
+    aspeed_loop.Actual = imu.output.gyro[1];
+    PID_Update_Lo(&aspeed_loop);
+
+    small_driver_set_duty((int16)(aspeed_loop.Out), (int16)(-aspeed_loop.Out));
+
+    if (close_delay >= 30)
+    {
+        close_delay = 0;
+        image_block = 1;
+        current_state = STATE_FOLLOW_STAIRS;
+    }
+}
+
 void control_state_de_jolt(void)
 {
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
@@ -709,8 +808,6 @@ void control_state_de_jolt(void)
         servo_set(110.0f, 70.0f,
                   110.0f, 70.0f);
 
-        yaw_loop.Target = 0.0f; 
-        yaw_loop.Actual = imu.output.euler[2];
         PID_Update_Lo(&yaw_loop);
     }
 
@@ -750,7 +847,7 @@ void control_state_tra_jolt(void)
 
         // 对speed_loop.Out进行低通滤波
         static float filtered_speed_out = 0.0f;
-        static const float speed_alpha = 0.1f; 
+        static const float speed_alpha = 0.1f;
 
         filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
 
@@ -805,7 +902,6 @@ void control_state_jolt(void)
 
         filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
 
-        joy_loop.Target = 0.0f; 
         joy_loop.Actual = imu.output.euler[2];
         PID_Update_Lo(&joy_loop);
     }
@@ -824,7 +920,7 @@ void control_state_jolt(void)
     servo_set(90.0f - filtered_speed_out - filtered_jos_out, 90.0f + filtered_speed_out + filtered_jos_out,
               90.0f - filtered_speed_out + filtered_jos_out, 90.0f + filtered_speed_out - filtered_jos_out);
 
-    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual; 
+    turn_loop2.Target = -joy_loop.Out * speed_loop.Actual; 
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 
@@ -852,7 +948,7 @@ void control_state_test(void)
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
 
-    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+    sppid_update(spkp->data_float, 0.0f, spkd->data_float);
     yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
     tu2pid_update_t(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
 

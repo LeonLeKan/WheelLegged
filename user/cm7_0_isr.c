@@ -65,10 +65,12 @@ void pit0_ch2_isr() // 定时器通道 2 周期中断服务函数
 {
     pit_isr_flag_clear(PIT_CH2);
     // 中断2: 惯导位置更新
-    if (current_state == STATE_ACCELERATE ||
-        current_state == STATE_FORWARD    ||
-        current_state == STATE_DE_THUNDER ||
-        current_state == STATE_TRA_THUNDER)
+    if (current_state == STATE_ACCELERATE  ||
+        current_state == STATE_FORWARD     ||
+        current_state == STATE_DE_THUNDER  ||
+        current_state == STATE_TRA_THUNDER ||
+        current_state == STATE_DE_JOLT     ||
+        current_state == STATE_TRA_JOLT)
     {
         if (testnum->data_int == 0)
         {
@@ -89,6 +91,14 @@ void pit0_ch2_isr() // 定时器通道 2 周期中断服务函数
         else if (testnum->data_int == 2 && road_idx[road_num] == 2)
         {
             location_update_2_2();
+        }
+        else if (testnum->data_int == 2 && road_idx[road_num] == 3)
+        {
+            location_update_2_3();
+        }
+        else if (testnum->data_int == 2 && road_idx[road_num] == 4)
+        {
+            location_update_2_4();
         }
     }
 }
