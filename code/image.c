@@ -25,7 +25,9 @@ typedef struct {
 // 1-单边桥 2-三级跳 3-下三级 4-颠簸路段
 element_t now_element;
 int stair_distance;     // 到下一级台阶的距离
-bool out_flag = 0;      // 是否出白色赛道（用于判断元素结束）
+bool front_stairs_end_flag = 0;
+bool back_stairs_end_flag = 0;
+bool jolt_end_flag = 0;
 int error = 0;
 int error_calc_near_line = 42;
 int error_calc_far_line = 40;
@@ -2877,7 +2879,7 @@ void mend_far_single_side()
     }
 }
 
-void stairs_end_check()
+void front_stairs_end_check()
 {
     int white_count = 0;
     for (int i = NEAR_LINE; i >= NEAR_LINE - 20; i--)
@@ -2890,12 +2892,33 @@ void stairs_end_check()
     }
     if (white_count < 600)
     {
-        out_flag = 1;
+        front_stairs_end_flag = 1;
     }
     else {
-        out_flag = 0;
+        front_stairs_end_flag = 0;
     }
 }
+
+void back_stairs_end_check()
+{
+    int white_count = 0;
+    for (int i = NEAR_LINE; i >= NEAR_LINE - 20; i--)
+    {
+        for (int j = 64; j <= 124; j++)
+        {
+            if (IMG[i][j])
+                white_count++;
+        }
+    }
+    if (white_count < 600)
+    {
+        back_stairs_end_flag = 1;
+    }
+    else {
+        back_stairs_end_flag = 0;
+    }
+}
+
 
 void jolt_end_check()
 {
@@ -2915,12 +2938,12 @@ void jolt_end_check()
         {
             // 达到阈值，退出JOLT状态
             jolt_end_judge_cnt = 0;
-            out_flag = 1;
+            jolt_end_flag = 1;
             now_element = NORM;
         }
     }
     else {
-        out_flag = 0;
+        jolt_end_flag = 0;
         jolt_end_judge_cnt = 0;
     }
 }
@@ -2935,7 +2958,7 @@ void image_main()
 {
 #if ONBOARD
 #else 
-    now_element = JOLT;
+    now_element = BACK_STAIRS;
 #endif
     datas_init();
     THRE();
@@ -2966,20 +2989,24 @@ void image_main()
         mend_far_single_side();
         if(on_single_side_road)
             general_judgement();
-        get_mid_line();
         break;
-    case BACK_STAIRS:
+    
     case FRONT_STAIRS:
         calc_stair_distance();
         mend_stairs();
-        stairs_end_check();
-        get_mid_line();
+        front_stairs_end_check();
+        break;
+    case BACK_STAIRS:
+        calc_stair_distance();
+        mend_stairs();
+        back_stairs_end_check();
         break;
     case JOLT:
         jolt_end_check();
         break;
     }
 
+    get_mid_line();
     mid_update = 1;
     define_mid_255();
     int sum = 0;
@@ -2994,7 +3021,7 @@ void image_main()
     //print_f();
 #if ONBOARD
 #else
-    printf("%d %d\n", stair_distance, out_flag);
+    printf("dis: %d, end: %d\n", stair_distance, back_stairs_end_flag);
     for (int i = 0; i < CAMERA_W; i++)
     {
         IMG[error_calc_near_line][i] = purple;
