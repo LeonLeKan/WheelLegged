@@ -77,6 +77,9 @@ uint8_t single_start_fps = 0;
 uint8_t single_start_fps_up;
 float single_dis = 0;
 
+int front_stairs_end_judge_cnt = 0;
+int back_stairs_end_judge_cnt = 0;
+
 // µßô¤Â·¶Î
 int jolt_end_judge_cnt = 0;
 
@@ -2903,11 +2906,17 @@ void front_stairs_end_check()
                 white_count++;
         }
     }
-    if (white_count < 600)
+    if (white_count < 300)
     {
-        front_stairs_end_flag = 1;
+        front_stairs_end_judge_cnt++;
+        if (front_stairs_end_judge_cnt > 100)
+        {
+            front_stairs_end_judge_cnt = 0;
+            front_stairs_end_flag = 1;
+        }
     }
     else {
+        front_stairs_end_judge_cnt = 0;
         front_stairs_end_flag = 0;
     }
 }
@@ -2923,11 +2932,17 @@ void back_stairs_end_check()
                 white_count++;
         }
     }
-    if (white_count < 600)
+    if (white_count < 300)
     {
-        back_stairs_end_flag = 1;
+        back_stairs_end_judge_cnt++;
+        if (back_stairs_end_judge_cnt > 100)
+        {
+            back_stairs_end_judge_cnt = 0;
+            back_stairs_end_flag = 1;
+        }
     }
     else {
+        back_stairs_end_judge_cnt = 0;
         back_stairs_end_flag = 0;
     }
 }

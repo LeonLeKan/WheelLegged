@@ -86,7 +86,7 @@ static void quit_single_side(void)
         if (single_lock == 3)
         {
             switch_from_single_side_to_forward_count++;
-            if (switch_from_single_side_to_forward_count >= 60)
+            if (switch_from_single_side_to_forward_count >= 100)
             {
                 single_lock = 0;
                 switch_from_single_side_to_forward_count = 0;
@@ -136,12 +136,16 @@ static void judge_time_to_jump(void)
         }
         else if (jump_count >= 3)
         {
-            jump_count = 0;
-            ins_reset();
-            image_block = 0;
-            road_num++;
-            save_manager_load(testnum->data_int + road_idx[road_num]);
-            current_state = STATE_ACCELERATE;
+            current_state = STATE_TRA_STAIRS;
+            if (front_stairs_end_flag == 1)
+            {
+                jump_count = 0;
+                image_block = 0;
+                ins_reset();
+                road_num++;
+                save_manager_load(testnum->data_int + road_idx[road_num]);
+                current_state = STATE_ACCELERATE;
+            }
         }
     }
 }
@@ -150,28 +154,33 @@ static void quit_follow_stairs(void)
 {
     if (current_state == STATE_FOLLOW_STAIRS)
     {
-        if (stair_distance <= stdis1->data_int && follow_stairs_count == 0 && mid_update == 1)
+        if (stair_distance <= stdis4->data_int && follow_stairs_count == 0 && mid_update == 1)
+        {
+            mid_update = 0;
+            follow_stairs_count += 1;
+        }
+        else if (stair_distance <= stdis5->data_int && follow_stairs_count == 1 && mid_update == 1)
         {
             mid_update = 0;
             image_block = 0;
             follow_stairs_count += 1;
             current_state = STATE_CLOSE_STAIRS;
         }
-        else if (stair_distance <= stdis2->data_int && follow_stairs_count == 1 && mid_update == 1)
+        else if (stair_distance <= stdis6->data_int && follow_stairs_count == 2 && mid_update == 1)
         {
             mid_update = 0;
             image_block = 0;
             follow_stairs_count += 1;
             current_state = STATE_CLOSE_STAIRS;
         }
-        else if (stair_distance <= stdis3->data_int && follow_stairs_count == 2 && mid_update == 1)
+        else if (stair_distance <= stdis7->data_int && follow_stairs_count == 3 && mid_update == 1)
         {
             mid_update = 0;
             image_block = 0;
             follow_stairs_count += 1;
             current_state = STATE_CLOSE_STAIRS;
         }
-        else if (follow_stairs_count >= 3)
+        else if (follow_stairs_count >= 4)
         {
             follow_stairs_count = 0;
             ins_reset();

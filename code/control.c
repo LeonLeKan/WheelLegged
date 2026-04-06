@@ -248,7 +248,7 @@ void control_state_thunder(void)
 
     if (yaw_thunder_memory <= 0)
     {
-        turn_loop2.Target = 360.0f;
+        turn_loop2.Target = rospeed->data_int;
         turn_loop2.Actual = -imu.body.gyro[2];
         PID_Update_Lo(&turn_loop2);
 
@@ -295,7 +295,7 @@ void control_state_thunder(void)
     }
     else if (yaw_thunder_memory > 0)
     {
-        turn_loop2.Target = -360.0f;
+        turn_loop2.Target = -rospeed->data_int;
         turn_loop2.Actual = -imu.body.gyro[2];
         PID_Update_Lo(&turn_loop2);
 
@@ -780,9 +780,12 @@ void control_state_close_stairs(void)
 
     small_driver_set_duty((int16)(aspeed_loop.Out), (int16)(-aspeed_loop.Out));
 
-    if (close_delay >= 30)
+    if (close_delay >= 100)
     {
         close_delay = 0;
+        angle_loop2.ErrorInt = 0.0f;
+        speed_loop.ErrorInt = 0.0f;
+        turn_loop2.ErrorInt = 0.0f;
         image_block = 1;
         current_state = STATE_FOLLOW_STAIRS;
     }
