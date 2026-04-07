@@ -102,7 +102,7 @@ int main(void)
         calculate_route();
         save_manager_load(testnum->data_int + road_idx[road_num]);
     }
-    else
+    else if (testnum->data_int == 1 || testnum->data_int == 0)
     {
         save_manager_load(testnum->data_int);
     }

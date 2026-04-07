@@ -339,7 +339,7 @@ void location_update_2_4(void)
     {
         ins_stop();
         de_jolt_flag = 0;
-        joy_loop.Target = 15.0f;
+        joy_loop.Target = joangle->data_float;
         roll_base = rollba->data_float;
         now_element = JOLT;
         image_block = 1;

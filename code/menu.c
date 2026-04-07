@@ -8,9 +8,9 @@
 volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
 MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *saveall, *currentMenu;
-MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit, *show,
+MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
     *thre, *farl, *nearl, *stdis1, *stdis2, *stdis3, *stdis4, *stdis5, *stdis6, *stdis7, *saveim,
-    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *saveel;
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
@@ -137,7 +137,6 @@ void create_2nd_menu(void)
     imubias = createMenu("imubias", 2, 12, MENU_TYPE_NORMAL, NULL);
     pzero = createMenu("pzero", 2, 13, MENU_TYPE_FLOAT, NULL);
     pinit = createMenu("pinit", 2, 14, MENU_TYPE_FLOAT, NULL);
-    show = createMenu("show", 2, 15, MENU_TYPE_FUNCTION, image_show);
 
     thre = createMenu("thre", 2, 1, MENU_TYPE_INT, NULL);
     farl = createMenu("farl", 2, 2, MENU_TYPE_INT, NULL);
@@ -162,7 +161,10 @@ void create_2nd_menu(void)
     jospeed = createMenu("jospeed", 2, 9, MENU_TYPE_INT, NULL);
     snlock = createMenu("snlock", 2, 10, MENU_TYPE_INT, NULL);
     rospeed = createMenu("rospeed", 2, 11, MENU_TYPE_INT, NULL);
-    saveel = createMenu("save", 2, 12, MENU_TYPE_FUNCTION, menu_save);
+    turnamj = createMenu("turnamj", 2, 12, MENU_TYPE_INT, NULL);
+    baspeed = createMenu("baspeed", 2, 13, MENU_TYPE_INT, NULL);
+    joangle = createMenu("joangle", 2, 14, MENU_TYPE_FLOAT, NULL);
+    saveel = createMenu("save", 2, 15, MENU_TYPE_FUNCTION, menu_save);
 
     speed->next = anloop1;
     anloop1->last = speed;
@@ -190,10 +192,8 @@ void create_2nd_menu(void)
     pzero->last = imubias;
     pzero->next = pinit;
     pinit->last = pzero;
-    pinit->next = show;
-    show->last = pinit;
-    show->next = speed;
-    speed->last = show;
+    pinit->next = speed;
+    speed->last = pinit;
 
     thre->next = farl;
     farl->last = thre;
@@ -238,8 +238,14 @@ void create_2nd_menu(void)
     snlock->last = jospeed;
     snlock->next = rospeed;
     rospeed->last = snlock;
-    rospeed->next = saveel;
-    saveel->last = rospeed;
+    rospeed->next = turnamj;
+    turnamj->last = rospeed;
+    turnamj->next = baspeed;
+    baspeed->last = turnamj;
+    baspeed->next = joangle;
+    joangle->last = baspeed;
+    joangle->next = saveel;
+    saveel->last = joangle;
     saveel->next = change;
     change->last = saveel;
 
@@ -258,7 +264,6 @@ void create_2nd_menu(void)
     imubias->parent = Balance;
     pzero->parent = Balance;
     pinit->parent = Balance;
-    show->parent = Balance;
 
     Image->child = thre;
     thre->parent = Image;
@@ -285,6 +290,9 @@ void create_2nd_menu(void)
     jospeed->parent = Element;
     snlock->parent = Element;
     rospeed->parent = Element;
+    turnamj->parent = Element;
+    baspeed->parent = Element;
+    joangle->parent = Element;
     saveel->parent = Element;
 }
 
@@ -1179,38 +1187,6 @@ void menu_zero(void)
     ips200_clear();
 }
 uint8_t my_img[CAMERA_H][CAMERA_W];
-
-void image_show(void)
-{
-    ips200_clear();
-
-    while (1)
-    {
-        image_main();
-        for (int i = 0; i < CAMERA_H; i++)
-        {
-            for (int j = 0; j < CAMERA_W; j++)
-            {
-                if (IMG[i][j])
-                    my_img[i][j] = 255;
-                else
-                    my_img[i][j] = 0;
-            }
-        }
-        // ips200_displayimage03x((const uint8 *)mt9v03x_image, 240, 150);
-        ips200_show_gray_image(0, 0, &my_img[0][0], MT9V03X_W, MT9V03X_H, MT9V03X_W, MT9V03X_H, 200);
-        if (gpio_get_level(BUTTON_LF) == 0)
-        {
-            system_delay_ms(80);
-            if (gpio_get_level(BUTTON_LF) == 0)
-            {
-                break;
-            }
-        }
-        system_delay_ms(30);
-    }
-    ips200_clear();
-}
 
 void ins_to_control_menu(void)
 {

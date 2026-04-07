@@ -98,7 +98,7 @@ void sppid_update(float kp, float ki, float kd)
     speed_loop.Kd = kd;
     speed_loop.OutMax = +30;
     speed_loop.OutMin = -30;
-    speed_loop.ErrorIntMax = 300;
+    speed_loop.ErrorIntMax = 500;
 }
 
 void sp_zero(void)
@@ -141,6 +141,16 @@ void tu2pid_update_t(float kp, float ki, float kd)
     turn_loop2.Kd = kd;
     turn_loop2.OutMax = +turnamt->data_int;
     turn_loop2.OutMin = -turnamt->data_int;
+    turn_loop2.ErrorIntMax = 200;
+}
+
+void tu2pid_update_j(float kp, float ki, float kd)
+{
+    turn_loop2.Kp = kp;
+    turn_loop2.Ki = ki;
+    turn_loop2.Kd = kd;
+    turn_loop2.OutMax = +turnamj->data_int;
+    turn_loop2.OutMin = -turnamj->data_int;
     turn_loop2.ErrorIntMax = 200;
 }
 

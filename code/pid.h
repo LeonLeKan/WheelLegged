@@ -46,6 +46,7 @@ void tu1pid_update(float kp, float ki, float kd);
 void tu1_zero(void);
 void tu2pid_update_f(float kp, float ki, float kd);
 void tu2pid_update_t(float kp, float ki, float kd);
+void tu2pid_update_j(float kp, float ki, float kd);
 void tu2_zero(void);
 void aspid_update(float kp, float ki, float kd);
 void as_zero(void);

@@ -707,7 +707,7 @@ void control_state_follow_stairs(void)
     {
         count = 0;
 
-        speed_loop.Target = (float)speed->data_int / 100.0f;
+        speed_loop.Target = (float)baspeed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
@@ -879,9 +879,10 @@ void control_state_jolt(void)
 {
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
+    angle_loop2.Ki = 0.0f;
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     joypid_update(joykp->data_float, joyki->data_float, joykd->data_float);
-    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    tu2pid_update_j(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     jospid_update(joskp->data_float, joski->data_float, joskd->data_float);
     threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
@@ -935,7 +936,11 @@ void control_state_jolt(void)
     aspeed_loop.Actual = imu.output.gyro[1];
     PID_Update_Lo(&aspeed_loop);
 
-    small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+    int16 duty1 = (int16)(aspeed_loop.Out - turn_loop2.Out);
+    int16 duty2 = (int16)(-(aspeed_loop.Out + turn_loop2.Out));
+    limit_min_output(&duty1, 100);
+    limit_min_output(&duty2, 100);
+    small_driver_set_duty((int16)(duty1), (int16)(duty2));
 }
 
 void control_state_test(void)
@@ -1005,4 +1010,17 @@ void control_state_stop(void)
     para_zero();
     out_zero();
     small_driver_set_duty(0, 0);
+}
+
+
+void limit_min_output(int16 *output, int16 limit)
+{
+    if (*output > 0 && *output < limit)
+    {
+        *output = limit;
+    }
+    else if (*output < 0 && *output > -limit)
+    {
+        *output = -limit;
+    }
 }

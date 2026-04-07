@@ -2906,7 +2906,7 @@ void front_stairs_end_check()
                 white_count++;
         }
     }
-    if (white_count < 300)
+    if (white_count < 150)
     {
         front_stairs_end_judge_cnt++;
         if (front_stairs_end_judge_cnt > 100)
@@ -3044,8 +3044,8 @@ void image_main()
         sum += mid_line[i];
     }
     error = sum / (error_calc_near_line - error_calc_far_line + 1) - 94;
-    if (error < -25) error = 0;
-    if (error > 25) error = 0;
+    if (error < -50) error = 0;
+    if (error > 50) error = 0;
 
     mid_update = 1;
     //print_f();

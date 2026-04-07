@@ -367,7 +367,7 @@ void move_selected_point(int dx, int dy) {
     info->selected_node->screen_param.plane_x += dx * MOVE_STEP;
     info->selected_node->screen_param.plane_y += dy * MOVE_STEP;
 
-    // 更新GPS坐标
+    // 更新点坐标
     info->plane_to_waypoint_callback(info->selected_node->screen_param.plane_x, 
                 info->selected_node->screen_param.plane_y,
                 &info->selected_node->waypoint);

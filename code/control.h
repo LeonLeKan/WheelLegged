@@ -37,4 +37,6 @@ void control_state_jolt(void);
 void control_state_test(void);
 void control_state_stop(void);
 
+void limit_min_output(int16 *output, int16 limit);
+
 #endif

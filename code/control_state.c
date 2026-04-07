@@ -204,11 +204,14 @@ static void quit_jolt(void)
 {
     if (current_state == STATE_JOLT && jolt_end_flag == 1)
     {
+        angle_loop2.ErrorInt = 0.0f;
+        speed_loop.ErrorInt = 0.0f;
+        turn_loop2.ErrorInt = 0.0f;
         ins_reset();
         image_block = 0;
         road_num++;
         save_manager_load(testnum->data_int + road_idx[road_num]);
-        current_state = STATE_DEACCELERATE;
+        current_state = STATE_ACCELERATE;
     }
 }
 
