@@ -157,7 +157,6 @@ static uint8_t min(uint8_t a, uint8_t b) {
 //////////////////////////////////
 void general_judgement() {
     state_judge();
-    uint8_t bend_judge_start = (road_start < 60) ? 60 : road_start;
     switch (step)
     {
     case strai: break;
@@ -1029,7 +1028,6 @@ void single_side_bridge_judge2(uint8_t start)
     uint8_t single_ok = 0;
     uint8_t single_white_num = 0;
 
-    float black_duty = 0;
     for (uint8_t i = top_road; i < top_road + 10; i++)
     {
         if (my_road[i].white_num > 1)
@@ -1231,52 +1229,9 @@ void single_side_bridge_judge2(uint8_t start)
             single_side_right_f2_y = top_road;
         }
     }
-    //防止避障误判成单边桥，增加判据
-    //利用单边桥占赛道的百分比
-    if (single_side_left_f2_y != 0 && single_side_right_f2_y != 0)
-    {
-        //右避障
-        if (single_side_right_f2_y > single_side_left_f2_y)
-        {
-            for (uint8_t i = single_side_right_f2_y; i > top_road + 1; i--)
-            {
-                if (right_line[i] <= right_line[i - 1] && right_line[i] <= right_line[i + 1] &&
-                    right_line[i] <= right_line[i - 2] && right_line[i] <= right_line[i + 2])
-                {
-                    single_right_guai = i;
-                    break;
-                }
-            }
-            black_duty = (float)(right_line[single_side_right_f2_y] - right_line[single_right_guai]) / (right_line[single_side_right_f2_y] - left_line[single_side_right_f2_y]);
-        }
-        //左避障
-        if (single_side_left_f2_y > single_side_right_f2_y)
-        {
-            for (uint8_t i = single_side_left_f2_y; i > top_road + 1; i--)
-            {
-                if (left_line[i] >= left_line[i - 1] && left_line[i] >= left_line[i + 1] &&
-                    left_line[i] >= left_line[i - 2] && left_line[i] >= left_line[i + 2])
-                {
-                    single_left_guai = i;
-                    break;
-                }
-            }
-            black_duty = (float)(left_line[single_left_guai] - left_line[single_side_left_f2_y]) / (right_line[single_side_left_f2_y] - left_line[single_side_left_f2_y]);
-        }
-    }
-    if (single_side_right_f2_y != 0 && single_side_left_f2_y != 0)
-    {
-        if (single_side_left_f2_y < 20 || single_side_right_f2_y < 20)
-        {
-            if ((single_side_right_f2_y - single_side_left_f2_y) > 8 || (single_side_right_f2_y - single_side_left_f2_y) < -8)
-            {
-                ok2 = 1;
-            }
-        }
-    }
 
     if (single_side_white_smller >= 6 && single_side_left_f2_y >= 5 && single_side_right_f2_y >= 5 &&
-        single_left_side_y == 0 && single_right_side_y == 0 && ok1 == 0 && ok2 == 0 && black_duty > 0.38 &&
+        single_left_side_y == 0 && single_right_side_y == 0 && ok1 == 0 &&
         ((single_side_left_f2_y - single_side_right_f2_y) >= 4 || (single_side_left_f2_y - single_side_right_f2_y) <= -4) &&
         roundabout_num >= single_round_d && cross_num >= single_cross_d && single_num < single_u)
     {
@@ -1302,109 +1257,6 @@ void single_side_bridge_judge2(uint8_t start)
     //    single_side_white_smller, single_side_left_f2_y, single_side_right_f2_y, single_left_side_y, single_right_side_y, ok1 ,road_max,black_duty);
 }
 
-//判断弯道，进入弯道状态机
-void bend_judge(void)
-{
-    uint8_t bend_start = 0;
-    uint8_t bend_num = 0;
-    switch (bend_state)
-    {
-    case 0: {
-        //判断是否为弯道
-        //右转
-        for (uint8_t i = NEAR_LINE; i > 4; i -= 4)
-        {
-            if (mid_line[i - 5] - mid_line[i] > 3 || mid_line[i] > RIGHT_SIDE - 5)
-            {
-                bend_start = i;
-                bend_num++;
-            }
-            else
-            {
-                bend_start = 0;
-                bend_num = 0;
-            }
-        }
-        //左转
-        if (bend_num < 3)
-        {
-            for (uint8_t i = NEAR_LINE; i > 4; i -= 4)
-            {
-                if (mid_line[i - 5] - mid_line[i] < -3 || mid_line[i] < LEFT_SIDE + 5)
-                {
-                    bend_start = i;
-                    bend_num++;
-                }
-                else
-                {
-                    bend_start = 0;
-                    bend_num = 0;
-                }
-            }
-        }
-        if (bend_num > 3)
-        {
-            bend_fps++;
-        }
-        else
-        {
-            bend_fps = 0;
-        }
-        if (bend_fps > 3)
-        {
-            bend_state = 1;
-            bend_fps = 0;
-        }
-        else
-        {
-            if (roundabout_state == 2)
-            {
-                bend_state = 1;
-                bend_fps = 1;
-            }
-        }
-    }break;
-    case 1: {
-        uint8_t bend_ok = 0;
-        for (uint8_t i = NEAR_LINE; i > 5; i -= 5)
-        {
-            if (mid_line[i] > RIGHT_SIDE - 20 || mid_line[i] < LEFT_SIDE + 20)
-            {
-                bend_ok = 1;
-            }
-        }
-        if (bend_ok == 0)
-        {
-            if (get_straight_line(mid_line, NEAR_LINE - 20, 1, 7) == 0)
-            {
-                if (mid_line[20] > 54 && mid_line[20] < 134)
-                {
-                    bend_fps++;
-                }
-                else
-                {
-                    bend_fps = 0;;
-                }
-            }
-            else
-            {
-                bend_fps = 0;
-            }
-        }
-        if (bend_fps > 2)
-        {
-            bend_state = 0;
-            bend_fps = 0;
-        }
-        else if ((roundabout_state <= 7 && (step == 3 || step == 4)))
-        {
-            bend_state = 1;
-            bend_fps = 0;
-        }
-    }
-          break;
-    }
-}
 //总体判断
 void state_judge()
 {
@@ -1422,29 +1274,10 @@ void state_judge()
     {
     case strai:
     {
-        if (element_ok == 0)
+        single_side_bridge_judge2(NEAR_LINE - 20);
+        if (step != single_side && element_sort % 10 == 1)
         {
-            if (single_start_fps < single_start_fps_up)
-            {
-                single_start_fps++;
-            }
-            else
-            {
-                single_start_fps = single_start_fps_up;
-            }
-            single_side_bridge_judge2(NEAR_LINE - 20);
-            if (step != single_side)
-            {
-                single_side_bridge_judge(50, top_road + 5);
-            }
-        }
-        else
-        {
-            single_side_bridge_judge2(NEAR_LINE - 20);
-            if (step != single_side && element_sort % 10 == 1)
-            {
-                single_side_bridge_judge(50, top_road + 5);
-            }
+            single_side_bridge_judge(50, top_road + 5);
         }
     }break;
     }
@@ -2846,7 +2679,7 @@ void calc_stair_distance()
 }
 
 // 三级台阶补线
-void mend_stairs(uint8_t *line)
+void mend_stairs(uint8_t* line)
 {
     float input[2];
     if (NEAR_LINE - road_start >= 2)
@@ -2855,14 +2688,14 @@ void mend_stairs(uint8_t *line)
         {
             least_square_get_line(line, road_start - 8, 5, input, NEAR_LINE, road_start - 8);
         }
-		else if (road_start - road_end >= 10)
+        else if (road_start - road_end >= 10)
         {
             least_square_get_line(line, road_start - 5, 5, input, NEAR_LINE, road_start - 5);
         }
         else {
             for (int i = NEAR_LINE; i >= road_start; i--)
             {
-				line[i] = 94;
+                line[i] = 94;
             }
         }
     }
@@ -2872,12 +2705,12 @@ void mend_stairs(uint8_t *line)
         {
             uint8_t f2 = get_line_f2_forward_y(line, road_end + 20, road_end, 5, 5);
             uint8_t mend_start = min(f2 + 10, NEAR_LINE);
-			least_square_get_line(line, mend_start, min(10, mend_start - f2), input, mend_start, FAR_LINE);
+            least_square_get_line(line, mend_start, min(10, mend_start - f2), input, mend_start, FAR_LINE);
         }
         else {
             for (int i = road_end; i >= FAR_LINE; i--)
             {
-				line[i] = 94;
+                line[i] = 94;
             }
         }
     }
@@ -2903,9 +2736,8 @@ void mend_far_single_side()
                     white_count++;
             }
         }
-        if (white_count >= 800)
+        if (white_count >= 800 && !on_single_side_road)
             on_single_side_road = 1;
-        else on_single_side_road = 0;
     }
 }
 
@@ -2987,7 +2819,7 @@ void image_main()
 {
 #if ONBOARD
 #else 
-    now_element = FRONT_STAIRS;
+    now_element = SINGLE_SIDE;
 #endif
     // mid_update = 0;
     datas_init();
@@ -3016,21 +2848,22 @@ void image_main()
     switch (now_element)
     {
     case SINGLE_SIDE:
-        mend_far_single_side();
-        if (on_single_side_road)
+        if(!on_single_side_road)
+            mend_far_single_side();
+        else
             general_judgement();
         break;
 
     case FRONT_STAIRS:
         calc_stair_distance();
         mend_stairs(left_line);
-		mend_stairs(right_line);
+        mend_stairs(right_line);
         front_stairs_end_check();
         break;
     case BACK_STAIRS:
         calc_stair_distance();
         mend_stairs(left_line);
-		mend_stairs(right_line);
+        mend_stairs(right_line);
         back_stairs_end_check();
         break;
     case JOLT:
@@ -3051,7 +2884,7 @@ void image_main()
             total++;
         }
     }
-    if(total == 0) total = 1;
+    if (total == 0) total = 1;
     error = sum / total - 94;
     if (error < -25) error = 0;
     if (error > 25) error = 0;
@@ -3060,7 +2893,7 @@ void image_main()
     //print_f();
 #if ONBOARD
 #else
-    printf("dis: %d, start: %d, end: %d\n", stair_distance, road_start, road_end);
+    printf("dis: %d, start: %d, end: %d, error: %d\n", stair_distance, road_start, road_end, error);
     for (int i = 0; i < CAMERA_W; i++)
     {
         IMG[error_calc_near_line][i] = purple;
