@@ -264,7 +264,7 @@ void control_state_switch(void)
         deaccelerate_to_thunder();
     }
 
-    else if (testnum->data_int == 2 && road_idx[road_num] == 1)
+    else if (testnum->data_int == 2 && (road_idx[road_num] == 1 || road_idx[road_num] == 5))
     {
         decline_to_single_side_stand();
         stand_to_single_side();
@@ -282,7 +282,7 @@ void control_state_switch(void)
         quit_follow_stairs();
     }
 
-    else if (testnum->data_int == 2 && road_idx[road_num] == 4)
+    else if (testnum->data_int == 2 && (road_idx[road_num] == 4 || road_idx[road_num] == 6))
     {
         de_to_tra_jolt();
         quit_jolt();

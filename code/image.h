@@ -85,6 +85,7 @@ extern int error_calc_far_line;
 extern uint8_t threshold; //阈值
 extern uint8_t single_side_state;
 extern uint8_t mid_update;
+extern int jolt_end_judge_cnt;
 //////////////////////// ////////// //////////////////
 
 extern uint8_t IMG[CAMERA_H][CAMERA_W];//二值化后图像数组

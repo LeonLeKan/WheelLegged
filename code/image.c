@@ -2961,15 +2961,14 @@ void jolt_end_check()
                 white_count++;
         }
     }
-    if (white_count < 200)
+    if (white_count < 300)
     {
         jolt_end_judge_cnt++;
-        if (jolt_end_judge_cnt > 100)
+        if (jolt_end_judge_cnt > 15)
         {
             // 达到阈值，退出JOLT状态
             jolt_end_judge_cnt = 0;
             jolt_end_flag = 1;
-            now_element = NORM;
         }
     }
     else {
@@ -3043,11 +3042,17 @@ void image_main()
 
     define_mid_255();
     int sum = 0;
+    int total = 0;
     for (int i = error_calc_near_line; i >= error_calc_far_line; i--)
     {
-        sum += mid_line[i];
+        if (mid_line[i] != MISS)
+        {
+            sum += mid_line[i];
+            total++;
+        }
     }
-    error = sum / (error_calc_near_line - error_calc_far_line + 1) - 94;
+    if(total == 0) total = 1;
+    error = sum / total - 94;
     if (error < -25) error = 0;
     if (error > 25) error = 0;
 

@@ -165,9 +165,10 @@ int main(void)
             while (true)
             {
                 remote_control();
-                if (image_block == 1)
+                if (image_block == 1 && mt9v03x_finish_flag == 1)
                 {
                     image_main();
+                    mt9v03x_finish_flag = 0;
                 }
 
                 // 如果需要，添加wifi

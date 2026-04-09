@@ -459,8 +459,8 @@ void control_state_stand_front_single_side(void)
 
         filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
 
-        servo_set(110.0f - filtered_speed_out, 110.0f + filtered_speed_out,
-                  70.0f - filtered_speed_out, 70.0f + filtered_speed_out);
+        servo_set(100.0f - filtered_speed_out, 100.0f + filtered_speed_out,
+                  80.0f - filtered_speed_out, 80.0f + filtered_speed_out);
 
         turn_loop1.Target = 0.0f; 
         turn_loop1.Actual = (float)error;
@@ -528,8 +528,8 @@ void control_state_single_side(void)
     
     filtered_single_out = single_alpha * single_loop.Out + (1.0f - single_alpha) * filtered_single_out;
     
-    servo_set(110.0f - filtered_speed_out - filtered_single_out, 110.0f + filtered_speed_out + filtered_single_out,
-              70.0f - filtered_speed_out + filtered_single_out, 70.0f + filtered_speed_out - filtered_single_out);
+    servo_set(100.0f - filtered_speed_out - filtered_single_out, 100.0f + filtered_speed_out + filtered_single_out,
+              80.0f - filtered_speed_out + filtered_single_out, 80.0f + filtered_speed_out - filtered_single_out);
 
     turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual; 
     turn_loop2.Actual = -imu.body.gyro[2];
