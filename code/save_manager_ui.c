@@ -77,7 +77,7 @@ void save_manager_key_up_pressed(void)
     }
     save_manager_instance.active_save_idx--;
     if(save_manager_instance.active_save_idx < 0)
-        save_manager_instance.active_save_idx = save_manager_instance.total_saves - 1;
+        save_manager_instance.active_save_idx = save_manager_instance.total_saves;
     
     show_saves();
 }
@@ -91,7 +91,7 @@ void save_manager_key_down_pressed(void)
     }
     save_manager_instance.active_save_idx++;
     // 最后一个是Exit菜单
-    if(save_manager_instance.active_save_idx == save_manager_instance.total_saves)
+    if(save_manager_instance.active_save_idx > save_manager_instance.total_saves)
         save_manager_instance.active_save_idx = 0;
     show_saves();
 }
