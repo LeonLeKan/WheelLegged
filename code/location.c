@@ -9,10 +9,12 @@
 waypoint_node_t *current_target = NULL;
 uint8_t road_idx[5];
 uint8_t road_num = 0;
+uint8_t disturb_flag = 0;
+float last_raw_yaw = 0.0f;
+float target_yaw = 0.0f;
 
 static double direction_calculate(double x_target, double y_target, double x_now, double y_now)
 {
-    static float last_raw_yaw = 0.0f, target_yaw = 0.0f;
     double dx = x_target - x_now;
     double dy = y_target - y_now;
 
@@ -110,7 +112,7 @@ void location_update_1(void)
 
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
-    if (fabs(dx) < XYMIN_THUNDER && fabs(dy) < XYMIN_THUNDER && fabs(dx) >= XYMIN_BIA_1 && fabs(dy) >= XYMIN_BIA_1 &&
+    if (fabs(dx) < xythun->data_float && fabs(dy) < xythun->data_float && fabs(dx) >= XYMIN_BIA_1 && fabs(dy) >= XYMIN_BIA_1 &&
         current_state != STATE_TRA_THUNDER && current_target->next)
     {
         current_state = STATE_DE_THUNDER;
@@ -332,6 +334,7 @@ void location_update_2_4(void)
     if (current_target && !current_target->next && de_jolt_flag == 0) 
     {
         current_state = STATE_DE_JOLT;
+        joy_loop.Target = joangle->data_float;
         de_jolt_flag = 1;
     }
 
@@ -339,7 +342,6 @@ void location_update_2_4(void)
     {
         ins_stop();
         de_jolt_flag = 0;
-        joy_loop.Target = joangle->data_float;
         roll_base = rollba->data_float;
         now_element = JOLT;
         image_block = 1;

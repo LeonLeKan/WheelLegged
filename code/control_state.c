@@ -11,6 +11,8 @@ volatile uint32_t single_lock_count = 0;
 volatile uint8_t single_delay = 0;
 volatile uint8_t test_state = 0;
 volatile float yaw_thunder_memory = 0.0f;
+volatile uint8_t jolt_lock = 0;
+volatile uint32_t jolt_lock_count = 0;
 
 static void accelerate_to_forward(void)
 {
@@ -88,13 +90,17 @@ static void quit_single_side(void)
             switch_from_single_side_to_forward_count++;
             if (switch_from_single_side_to_forward_count >= 100)
             {
+                disturb_flag = 1;
                 single_lock = 0;
                 switch_from_single_side_to_forward_count = 0;
+                last_raw_yaw = 0.0f;
+                target_yaw = 0.0f;
                 ins_reset();
                 image_block = 0;
                 road_num++;
                 save_manager_load(testnum->data_int + road_idx[road_num]);
                 current_state = STATE_ACCELERATE;
+                disturb_flag = 0;
             }
         }
     }
@@ -113,21 +119,21 @@ static void judge_time_to_jump(void)
 {
     if (current_state == STATE_DE_STAIRS || current_state == STATE_TRA_STAIRS)
     {
-        if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1)
+        if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && error <= 8)
         {
             mid_update = 0;
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
         }
-        else if (stair_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1)
+        else if (stair_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1 && error <= 8)
         {
             mid_update = 0;
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
         }
-        else if (stair_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1)
+        else if (stair_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1 && error <= 8)
         {
             mid_update = 0;
             image_block = 0;
@@ -139,12 +145,16 @@ static void judge_time_to_jump(void)
             current_state = STATE_TRA_STAIRS;
             if (front_stairs_end_flag == 1)
             {
+                disturb_flag = 1;
                 jump_count = 0;
                 image_block = 0;
+                last_raw_yaw = 0.0f;
+                target_yaw = 0.0f;
                 ins_reset();
                 road_num++;
                 save_manager_load(testnum->data_int + road_idx[road_num]);
                 current_state = STATE_ACCELERATE;
+                disturb_flag = 0;
             }
         }
     }
@@ -182,12 +192,16 @@ static void quit_follow_stairs(void)
         }
         else if (follow_stairs_count >= 4)
         {
+            disturb_flag = 1;
             follow_stairs_count = 0;
+            last_raw_yaw = 0.0f;
+            target_yaw = 0.0f;
             ins_reset();
             image_block = 0;
             road_num++;
             save_manager_load(testnum->data_int + road_idx[road_num]);
             current_state = STATE_ACCELERATE;
+            disturb_flag = 0;
         }
     }
 }
@@ -202,16 +216,41 @@ static void de_to_tra_jolt(void)
 
 static void quit_jolt(void)
 {
-    if (current_state == STATE_JOLT && jolt_end_flag == 1)
+    if (current_state == STATE_JOLT)
     {
-        angle_loop2.ErrorInt = 0.0f;
-        speed_loop.ErrorInt = 0.0f;
-        turn_loop2.ErrorInt = 0.0f;
-        ins_reset();
-        image_block = 0;
-        road_num++;
-        save_manager_load(testnum->data_int + road_idx[road_num]);
-        current_state = STATE_ACCELERATE;
+        if (jolt_lock == 0)
+        {
+            jolt_lock = 1;
+            jolt_lock_count = 0;
+        }
+        if (jolt_lock == 1)
+        {
+            jolt_lock_count++;
+            if (jolt_lock_count >= jolock->data_int)
+            {
+                jolt_lock = 2;
+                jolt_lock_count = 0;
+            }
+        }
+        if (jolt_lock == 2 && jolt_end_flag == 1)
+        {
+            jolt_lock = 3;
+        }
+        if (jolt_lock == 3)
+        {
+            disturb_flag = 1;
+            angle_loop2.ErrorInt = 0.0f;
+            speed_loop.ErrorInt = 0.0f;
+            turn_loop2.ErrorInt = 0.0f;
+            last_raw_yaw = 0.0f;
+            target_yaw = 0.0f;
+            ins_reset();
+            image_block = 0;
+            road_num++;
+            save_manager_load(testnum->data_int + road_idx[road_num]);
+            current_state = STATE_ACCELERATE;
+            disturb_flag = 0;
+        }
     }
 }
 

@@ -10,7 +10,7 @@ volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *saveall, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
     *thre, *farl, *nearl, *stdis1, *stdis2, *stdis3, *stdis4, *stdis5, *stdis6, *stdis7, *saveim,
-    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *saveel;
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
@@ -164,7 +164,9 @@ void create_2nd_menu(void)
     turnamj = createMenu("turnamj", 2, 12, MENU_TYPE_INT, NULL);
     baspeed = createMenu("baspeed", 2, 13, MENU_TYPE_INT, NULL);
     joangle = createMenu("joangle", 2, 14, MENU_TYPE_FLOAT, NULL);
-    saveel = createMenu("save", 2, 15, MENU_TYPE_FUNCTION, menu_save);
+    jolock = createMenu("jolock", 2, 15, MENU_TYPE_INT, NULL);
+    xythun = createMenu("xythun", 2, 16, MENU_TYPE_FLOAT, NULL);
+    saveel = createMenu("save", 2, 17, MENU_TYPE_FUNCTION, menu_save);
 
     speed->next = anloop1;
     anloop1->last = speed;
@@ -244,8 +246,12 @@ void create_2nd_menu(void)
     baspeed->last = turnamj;
     baspeed->next = joangle;
     joangle->last = baspeed;
-    joangle->next = saveel;
-    saveel->last = joangle;
+    joangle->next = jolock;
+    jolock->last = joangle;
+    jolock->next = xythun;
+    xythun->last = jolock;
+    xythun->next = saveel;
+    saveel->last = xythun;
     saveel->next = change;
     change->last = saveel;
 
@@ -293,6 +299,8 @@ void create_2nd_menu(void)
     turnamj->parent = Element;
     baspeed->parent = Element;
     joangle->parent = Element;
+    jolock->parent = Element;
+    xythun->parent = Element;
     saveel->parent = Element;
 }
 

@@ -593,7 +593,7 @@ void control_state_tra_stairs(void)
 {
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
-    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+    sppid_update(10.0f, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     threshold = (uint8_t)thre->data_int;
@@ -661,23 +661,17 @@ void control_state_jump_up(void)
 
     if (count < 17)
     {
-        servo_set(160.0f, 160.0f,
-                  20.0f, 20.0f);
+        servo_set(150.0f, 150.0f,
+                  30.0f, 30.0f);
     }
 
-    else if (count >= 17 && count < 42)
+    else if (count >= 17 && count < 30)
     {
-        servo_set(45.0f, 45.0f,
-                  135.0f, 135.0f);
+        servo_set(110.0f, 110.0f,
+                  70.0f, 70.0f);
     }
 
-    else if (count >= 42 && count < 50)
-    {
-        servo_set(120.0f, 120.0f,
-                  60.0f, 60.0f);
-    }
-
-    else if (count >= 50)
+    else if (count >= 30)
     {
         count = 0;
         image_block = 1;
@@ -811,6 +805,7 @@ void control_state_de_jolt(void)
         servo_set(110.0f, 70.0f,
                   110.0f, 70.0f);
 
+        joy_loop.Actual = imu.output.euler[2];
         PID_Update_Lo(&yaw_loop);
     }
 
@@ -857,6 +852,7 @@ void control_state_tra_jolt(void)
         servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
                   90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
 
+        joy_loop.Actual = imu.output.euler[2];
         PID_Update_Lo(&yaw_loop);
     }
 
@@ -906,6 +902,8 @@ void control_state_jolt(void)
 
         filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
 
+        yaw_loop.Target = 0.0f;
+        yaw_loop.Actual = imu.output.euler[2];
         joy_loop.Actual = imu.output.euler[2];
         PID_Update_Lo(&joy_loop);
     }

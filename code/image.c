@@ -2856,8 +2856,8 @@ void mend_stairs()
     {
         if (road_start - road_end >= 15)
         {
-            least_square_get_line(left_line, road_end + 10, 5, input, road_end + 10, FAR_LINE);
-            least_square_get_line(right_line, road_end + 10, 5, input, road_end + 10, FAR_LINE);
+            least_square_get_line(left_line, road_end + 15, 5, input, road_end + 15, FAR_LINE);
+            least_square_get_line(right_line, road_end + 15, 5, input, road_end + 15, FAR_LINE);
         }
         else {
             for (int i = road_end; i >= FAR_LINE; i--)
@@ -2962,7 +2962,7 @@ void jolt_end_check()
     if (white_count < 200)
     {
         jolt_end_judge_cnt++;
-        if (jolt_end_judge_cnt > 100)
+        if (jolt_end_judge_cnt > 120)
         {
             // 达到阈值，退出JOLT状态
             jolt_end_judge_cnt = 0;
