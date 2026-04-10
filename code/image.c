@@ -2889,6 +2889,12 @@ void image_main()
     if (error < -25) error = 0;
     if (error > 25) error = 0;
 
+    if(single_side_state)
+    {
+        if (error < -5) error = -5;
+        if (error > 5) error = 5;
+    }
+
     mid_update = 1;
     //print_f();
 #if ONBOARD

@@ -215,6 +215,7 @@ void location_update_2_1(void)
 
 void location_update_2_2(void)
 {
+    static uint8_t de_stairs_flag = 0;
     waypoint_list_t *list = save_manager_get_active_save();
     
     if (!current_target)
@@ -246,12 +247,19 @@ void location_update_2_2(void)
         advance_to_next_waypoint();
     }
 
+    if (current_target && !current_target->next && de_stairs_flag == 0) 
+    {
+        current_state = STATE_DE_STAIRS;
+        de_stairs_flag = 1;
+    }
+
     if (!current_target) 
     {
         ins_stop();
+        de_stairs_flag = 0;
         now_element = FRONT_STAIRS;
         image_block = 1;
-        current_state = STATE_DE_STAIRS;
+        current_state = STATE_FIND_JUMP;
     }
 }
 

@@ -28,6 +28,7 @@ void control_state_stand_front_single_side(void);
 void control_state_single_side(void);
 void control_state_de_stairs(void);
 void control_state_tra_stairs(void);
+void control_state_find_jump(void);
 void control_state_jump_up(void);
 void control_state_follow_stairs(void);
 void control_state_close_stairs(void);

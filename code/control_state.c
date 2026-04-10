@@ -109,7 +109,8 @@ static void quit_single_side(void)
 static void decline_to_stairs(void)
 {
     if (current_state == STATE_DE_STAIRS
-      && speed_loop.Actual < (float)stspeed->data_int / 100.0f)
+      && speed_loop.Actual < (float)stspeed->data_int / 100.0f
+      && current_target)
     {
         current_state = STATE_TRA_STAIRS;
     }
@@ -117,7 +118,7 @@ static void decline_to_stairs(void)
 
 static void judge_time_to_jump(void)
 {
-    if (current_state == STATE_DE_STAIRS || current_state == STATE_TRA_STAIRS)
+    if (current_state == STATE_FIND_JUMP)
     {
         if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && error <= 8)
         {
@@ -142,7 +143,7 @@ static void judge_time_to_jump(void)
         }
         else if (jump_count >= 3)
         {
-            current_state = STATE_TRA_STAIRS;
+            current_state = STATE_FIND_JUMP;
             if (front_stairs_end_flag == 1)
             {
                 disturb_flag = 1;
@@ -334,6 +335,9 @@ void control_state_update(void)
         break;
     case STATE_TRA_STAIRS:
         control_state_tra_stairs();
+        break;
+    case STATE_FIND_JUMP:
+        control_state_find_jump();
         break;
     case STATE_JUMP_UP:
         control_state_jump_up();
