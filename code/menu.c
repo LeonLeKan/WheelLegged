@@ -590,8 +590,11 @@ void key_handle_menu(void)
                 if (currentMenu->type == MENU_TYPE_FUNCTION && currentMenu->Function != NULL)
                 {
                     currentMenu->Function();
-                    currentMenu->exec_flag = 1;
-                    ips200_clear();
+                    if (currentMenu != change)
+                    {
+                        currentMenu->exec_flag = 1;
+                        ips200_clear();
+                    }
                 }
             }
         }
@@ -634,10 +637,6 @@ void key_handle_menu(void)
             ips200_clear();
             if (gpio_get_level(BUTTON_RT) == 0)
             {
-                if (currentMenu == change)
-                {
-                    currentMenu->Function();
-                }
                 if (currentMenu->type == MENU_TYPE_INT || currentMenu->type == MENU_TYPE_FLOAT)
                 {
                     edit_mode = 1;
