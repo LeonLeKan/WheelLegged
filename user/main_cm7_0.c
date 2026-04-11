@@ -38,7 +38,6 @@ bool showing_points = false;
 // 用于实现校准后的分层启动
 bool car_run_state = false;
 
-uint8_t initial_estimation_flag = 1;
 
 int main(void)
 {
@@ -109,7 +108,17 @@ int main(void)
 
     // 设置曝光度
     mt9v03x_set_exposure_time(imexp->data_int);
+   
+    if(gpio_get_level(DIP_3) == 0)
+    {
+        start_imu_auto_gyro_calibration();
+    }
+    else
+    {
+        start_imu_initial_estimation();
+    }
 
+    bool is_calib_saved = false;
     while (true)
     {
         // 主循环检测拨码的状态
@@ -118,21 +127,25 @@ int main(void)
         motion_mode3 = gpio_get_level(DIP_3);
         motion_mode4 = gpio_get_level(DIP_4);
 
-        if (motion_mode1 == 1 && motion_mode2 == 1 && motion_mode3 == 1)
+        if (motion_mode1 == 1 && motion_mode2 == 1)
         {
             current_state = STATE_IDLE;
-            if (initial_estimation_flag == 1)
-            {
-                start_imu_initial_estimation();
-                initial_estimation_flag = 0;
-            }
             imu_state_show();
+            
+            if(motion_mode3 == 0 && !is_calib_saved && imu.calib.is_calibrated == 1)
+            {
+                rollbias->data_float = imu.calib.gyro_bias[0];
+                pitchbias->data_float = imu.calib.gyro_bias[1];
+                yawbias->data_float = imu.calib.gyro_bias[2];
+                menu_save();
+                is_calib_saved = true;
+            }
 
             // 如果需要，添加wifi
             if (motion_mode4 == 0)
             {
                 wifi_send_data();
-                wifi_send_image();
+                //wifi_send_image();
             }
         }
 
