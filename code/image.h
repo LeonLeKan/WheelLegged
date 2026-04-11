@@ -86,6 +86,7 @@ extern uint8_t threshold; //阈值
 extern uint8_t single_side_state;
 extern uint8_t mid_update;
 extern int jolt_end_judge_cnt;
+extern int jolt_end_cnt_thre;
 //////////////////////// ////////// //////////////////
 
 extern uint8_t IMG[CAMERA_H][CAMERA_W];//二值化后图像数组
@@ -111,10 +112,7 @@ void head_clear(void);
 void THRE(void);
 int find_f(int a);
 void search_white_range1(void);//获取白条子
-road_range  search_white_range(uint8_t line, uint8_t col);
-void adaptive_threshold_2(uint8_t y, uint8_t x);
 void find_all_connect(void);
-void find_road(void);
 uint8_t find_continue(uint8_t i_start, uint8_t j_start);
 void ordinary_two_line(void);
 void my_memset(uint8_t* ptr, uint8_t num, uint8_t size);
@@ -122,12 +120,8 @@ void get_mid_line(void);
 void image_main(void);
 //==================================================其他函数======================================================
 uint8_t mid(uint8_t i);
-void find_all_connect_easy();
-void get_line_easy();
 void print_f(void);//打印数值的函数
 void datas_init(void);
-void get_white_threshold_avg(void);
-void threshold_decrease(void);
 road_range search_white_range_begin(uint8_t line, uint8_t col);
 uint8_t is_connect_continue(road_range* new_white, road_range* pre_line);
 uint8_t is_connect(road_range* new_white, road* pre_line, uint8_t continue_id);
@@ -138,14 +132,12 @@ void state_judge(void);
 void straight_judge(uint8_t start, uint8_t end);
 void single_side_bridge_judge2(uint8_t start);
 void single_side_bridge_judge(uint8_t start, uint8_t end);
-void bend_judge(void);
 
 //===================================================各元素状态机=================================================
 
 void general_judgement(void);
 void single_side_bridge_state_machine(void);
 void straight(void);
-void bend(uint8_t start);
 
 //====================================================选道====================================================
 void renew_road(void);                                                                //按中间选道

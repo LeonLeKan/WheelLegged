@@ -163,34 +163,16 @@ static void apply_bias_and_cordinate_transform(void)
     corrected_gyro[1] = imu.raw.gyro[1] - imu.calib.gyro_bias[1];
     corrected_gyro[2] = imu.raw.gyro[2] - imu.calib.gyro_bias[2];
 
-    if(imu.state == IMU_STATE_ROTATING)
+    if (fabs(corrected_gyro[2]) >= imu.rot_comp.param.rotation_thre)
     {
-        if(fabs(corrected_gyro[2]) < imu.rot_comp.param.rotation_thre)
-            imu.rot_comp.exit_cnt++;
-        else 
-            imu.rot_comp.exit_cnt = 0;
-        if(imu.rot_comp.exit_cnt >= 1)     // 连续检测到角速度小于阈值，退出旋转状态
-        {
-            imu.state = IMU_STATE_NORMAL;
-            imu.rot_comp.enter_cnt = 0;
-            imu.rot_comp.exit_cnt = 0;
-        }
-        // 进行旋转补偿
+        imu.state = IMU_STATE_ROTATING;
         if(corrected_gyro[2] < 0.0)
-            corrected_gyro[2] += imu.rot_comp.param.yaw_compensate_ccw;
-        else 
-            corrected_gyro[2] += imu.rot_comp.param.yaw_compensate_cw;
-    }
-    else {
-        if(fabs(corrected_gyro[2]) > imu.rot_comp.param.rotation_thre)
-            imu.rot_comp.enter_cnt++;
-        else 
-            imu.rot_comp.enter_cnt = 0;
-        if(imu.rot_comp.enter_cnt >= 1)    // 连续检测到角速度大于阈值，进入旋转状态
         {
-            imu.state = IMU_STATE_ROTATING;
-            imu.rot_comp.enter_cnt = 0;
-            imu.rot_comp.exit_cnt = 0;
+            corrected_gyro[2] += imu.rot_comp.param.yaw_compensate_ccw;
+        }
+        else
+        {
+            corrected_gyro[2] += imu.rot_comp.param.yaw_compensate_cw;
         }
     }
 
@@ -236,13 +218,12 @@ static void process_auto_calibration(void)
         imu.calib.gyro_bias[1] /= imu.calib.target_samples;
         imu.calib.gyro_bias[2] /= imu.calib.target_samples;
         imu.calib.is_calibrated = true;
+        imu.state = IMU_STATE_INITIAL_ESTIMATION;
     }
 }
 
 static void process_filter_update(void)
 {
-    static uint32_t ukf_update_counter = 0;
-    ukf_update_counter++;
     // mahony更新
     Mahony_Update(&imu.mahony_filter, imu.body.gyro, imu.body.acc);
 

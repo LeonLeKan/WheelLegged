@@ -33,6 +33,7 @@ int error_calc_near_line = 42;
 int error_calc_far_line = 40;
 uint8_t threshold = 230;    //阈值
 bool on_single_side_road = 0;   // 是否进入单边桥之前的白色赛道
+int jolt_end_cnt_thre = 30;
 //////////////////////// ////////// //////////////////
 
 
@@ -2796,7 +2797,7 @@ void jolt_end_check()
     if (white_count < 300)
     {
         jolt_end_judge_cnt++;
-        if (jolt_end_judge_cnt > 15)
+        if (jolt_end_judge_cnt > jolt_end_cnt_thre)
         {
             // 达到阈值，退出JOLT状态
             jolt_end_judge_cnt = 0;
@@ -2848,7 +2849,7 @@ void image_main()
     switch (now_element)
     {
     case SINGLE_SIDE:
-        if(!on_single_side_road)
+        if (!on_single_side_road)
             mend_far_single_side();
         else
             general_judgement();
@@ -2886,13 +2887,13 @@ void image_main()
     }
     if (total == 0) total = 1;
     error = sum / total - 94;
-    if (error < -25) error = 0;
-    if (error > 25) error = 0;
+    if (error < -50) error = 0;
+    if (error > 50) error = 0;
 
-    if(single_side_state)
+    if (single_side_state)
     {
-        if (error < -5) error = -5;
-        if (error > 5) error = 5;
+        // if (error < -5) error = -5;
+        // if (error > 5) error = 5;
     }
 
     mid_update = 1;

@@ -97,8 +97,8 @@ void control_state_accelerate(void)
         speed_loop.Target = (float)speed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
-        servo_set(70.0f, 110.0f,
-                  70.0f, 110.0f);
+        servo_set(60.0f, 120.0f,
+                  60.0f, 120.0f);
 
         PID_Update_Lo(&yaw_loop);
     }
@@ -356,7 +356,17 @@ void control_state_forward(void)
     {
         count = 0;
 
-        speed_loop.Target = (float)speed->data_int / 100.0f;
+        if (testnum->data_int == 0)
+        {
+            if (speed_0_change == 1)
+            {
+                speed_loop.Target = (float)speedl->data_int / 100.0f;
+            }
+            else if(speed_0_change == 0)
+            {
+                speed_loop.Target = (float)speed->data_int / 100.0f;
+            }
+        }
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);

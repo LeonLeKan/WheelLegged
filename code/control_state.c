@@ -13,10 +13,13 @@ volatile uint8_t test_state = 0;
 volatile float yaw_thunder_memory = 0.0f;
 volatile uint8_t jolt_lock = 0;
 volatile uint32_t jolt_lock_count = 0;
+volatile uint8_t speed_0_change = 0;
+volatile uint32_t jump_lock = 0;
+volatile uint32_t jump_lock_count = 0;
 
 static void accelerate_to_forward(void)
 {
-    if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed->data_int / 100.0f))
+    if (current_state == STATE_ACCELERATE && (speed_loop.Actual > ((float)speed->data_int / 100.0f - 2.0f)))
     {
         current_state = STATE_FORWARD;
     }
@@ -27,6 +30,37 @@ static void deaccelerate_to_stop(void)
     if (current_state == STATE_DEACCELERATE && (speed_loop.Actual < 0.1f))
     {
         current_state = STATE_STOP;
+    }
+}
+
+static void deaccelerate_within_0(void)
+{
+    if (current_target && current_target->next)
+    {
+        double x_within_now = imu.output.position_x;
+        double y_within_now = imu.output.position_y;
+        double x_within_tgt = current_target->waypoint.x;
+        double y_within_tgt = current_target->waypoint.y;
+        double x_within_tgt_next = current_target->next->waypoint.x;
+        double y_within_tgt_next = current_target->next->waypoint.y;
+
+        double dis_0 = sqrt((x_within_tgt - x_within_tgt_next) * (x_within_tgt - x_within_tgt_next) + (y_within_tgt - y_within_tgt_next) * (y_within_tgt - y_within_tgt_next));
+        double dis_1 = sqrt((x_within_now - x_within_tgt) * (x_within_now - x_within_tgt) + (y_within_now - y_within_tgt) * (y_within_now - y_within_tgt));
+        if (dis_0 < dis0->data_float)
+        {
+            if (dis_1 < dis1->data_float)
+            {
+                speed_0_change = 1;
+            }
+        }
+        else
+        {
+            speed_0_change = 0;
+        }
+    }
+    else if (current_target && !current_target->next)
+    {
+        speed_0_change = 0;
     }
 }
 
@@ -118,7 +152,7 @@ static void decline_to_stairs(void)
 
 static void judge_time_to_jump(void)
 {
-    if (current_state == STATE_FIND_JUMP)
+    if (current_state == STATE_FIND_JUMP && jump_lock == 0)
     {
         if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && error <= 8)
         {
@@ -126,6 +160,7 @@ static void judge_time_to_jump(void)
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
+            jump_lock = 1;
         }
         else if (stair_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1 && error <= 8)
         {
@@ -133,6 +168,7 @@ static void judge_time_to_jump(void)
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
+            jump_lock = 1;
         }
         else if (stair_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1 && error <= 8)
         {
@@ -140,6 +176,7 @@ static void judge_time_to_jump(void)
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
+            jump_lock = 1;
         }
         else if (jump_count >= 3)
         {
@@ -157,6 +194,15 @@ static void judge_time_to_jump(void)
                 current_state = STATE_ACCELERATE;
                 disturb_flag = 0;
             }
+        }
+    }
+    if (jump_lock == 1)
+    {
+        jump_lock_count++;
+        if (jump_lock_count >= 120)
+        {
+            jump_lock = 0;
+            jump_lock_count = 0;
         }
     }
 }
@@ -272,7 +318,12 @@ void control_state_switch(void)
     accelerate_to_forward();
     deaccelerate_to_stop();
 
-    if (testnum->data_int == 1)
+    if (testnum->data_int == 0)
+    {
+        deaccelerate_within_0();
+    }
+
+    else if (testnum->data_int == 1)
     {
         deaccelerate_to_thunder();
     }
