@@ -112,13 +112,13 @@ void location_update_1(void)
 
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
-    if (fabs(dx) < xythun->data_float && fabs(dy) < xythun->data_float && fabs(dx) >= XYMIN_BIA_1 && fabs(dy) >= XYMIN_BIA_1 &&
+    if (sqrt(dx * dx + dy * dy) < xythun->data_float && sqrt(dx * dx + dy * dy) >= XYMIN_BIA_1 &&
         current_state != STATE_TRA_THUNDER && current_target->next)
     {
         current_state = STATE_DE_THUNDER;
     }
 
-    if (fabs(dx) < XYMIN_BIA_1 && fabs(dy) < XYMIN_BIA_1)
+    if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_1)
     {
         advance_to_next_waypoint();
         if (!current_target)
