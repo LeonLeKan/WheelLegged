@@ -14,8 +14,6 @@ volatile float yaw_thunder_memory = 0.0f;
 volatile uint8_t jolt_lock = 0;
 volatile uint32_t jolt_lock_count = 0;
 volatile uint8_t speed_0_change = 0;
-volatile uint32_t jump_lock = 0;
-volatile uint32_t jump_lock_count = 0;
 
 static void accelerate_to_forward(void)
 {
@@ -152,7 +150,7 @@ static void decline_to_stairs(void)
 
 static void judge_time_to_jump(void)
 {
-    if (current_state == STATE_FIND_JUMP && jump_lock == 0)
+    if (current_state == STATE_FIND_JUMP)
     {
         if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && error <= 8)
         {
@@ -160,7 +158,6 @@ static void judge_time_to_jump(void)
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
-            jump_lock = 1;
         }
         else if (stair_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1 && error <= 8)
         {
@@ -168,7 +165,6 @@ static void judge_time_to_jump(void)
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
-            jump_lock = 1;
         }
         else if (stair_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1 && error <= 8)
         {
@@ -176,7 +172,6 @@ static void judge_time_to_jump(void)
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
-            jump_lock = 1;
         }
         else if (jump_count >= 3)
         {
@@ -194,15 +189,6 @@ static void judge_time_to_jump(void)
                 current_state = STATE_ACCELERATE;
                 disturb_flag = 0;
             }
-        }
-    }
-    if (jump_lock == 1)
-    {
-        jump_lock_count++;
-        if (jump_lock_count >= 120)
-        {
-            jump_lock = 0;
-            jump_lock_count = 0;
         }
     }
 }
