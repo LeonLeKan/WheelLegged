@@ -564,8 +564,8 @@ void control_state_de_stairs(void)
         speed_loop.Target = (float)stspeed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
-        servo_set(110.0f, 70.0f,
-                  110.0f, 70.0f);
+        servo_set(100.0f, 80.0f,
+                  100.0f, 80.0f);
 
         PID_Update_Lo(&yaw_loop);
     }
@@ -816,7 +816,7 @@ void control_state_close_stairs(void)
 
     small_driver_set_duty((int16)(aspeed_loop.Out), (int16)(-aspeed_loop.Out));
 
-    if (close_delay >= 100)
+    if (close_delay >= 110)
     {
         close_delay = 0;
         angle_loop2.ErrorInt = 0.0f;

@@ -163,12 +163,24 @@ static void judge_time_to_jump(void)
 
 static void quit_follow_stairs(void)
 {
+    static uint32_t follow_stairs_init_flag = 0;
+    static uint32_t follow_stairs_init_count = 0;
     if (current_state == STATE_FOLLOW_STAIRS)
     {
         if (stair_distance <= stdis4->data_int && follow_stairs_count == 0 && mid_update == 1)
         {
             mid_update = 0;
-            follow_stairs_count += 1;
+            follow_stairs_init_flag = 1;
+        }
+        if (follow_stairs_init_flag == 1)
+        {
+            follow_stairs_init_count++;
+            if (follow_stairs_init_count >= 100)
+            {
+                follow_stairs_init_flag = 0;
+                follow_stairs_init_count = 0;
+                follow_stairs_count += 1;
+            }
         }
         else if (stair_distance <= stdis5->data_int && follow_stairs_count == 1 && mid_update == 1)
         {
@@ -191,7 +203,7 @@ static void quit_follow_stairs(void)
             follow_stairs_count += 1;
             current_state = STATE_CLOSE_STAIRS;
         }
-        else if (follow_stairs_count >= 4)
+        else if (follow_stairs_count >= 4 && back_stairs_end_flag == 1)
         {
             disturb_flag = 1;
             follow_stairs_count = 0;

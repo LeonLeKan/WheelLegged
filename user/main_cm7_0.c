@@ -129,7 +129,7 @@ int main(void)
             if (motion_mode4 == 0)
             {
                 wifi_send_data();
-                wifi_send_image();
+                //wifi_send_image();
             }
         }
 

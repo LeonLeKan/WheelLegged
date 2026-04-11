@@ -31,12 +31,10 @@ void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
 
-    oscilloscope_data.data[0] = error;
+    oscilloscope_data.data[0] = stair_distance;
     oscilloscope_data.data[1] = current_state;
-    oscilloscope_data.data[2] = speed_loop.Actual;
-    oscilloscope_data.data[3] = speed_loop.Target;
 
-    oscilloscope_data.channel_num = 4;
+    oscilloscope_data.channel_num = 2;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 
