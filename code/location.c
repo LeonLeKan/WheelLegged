@@ -351,6 +351,7 @@ void location_update_2_4(void)
         ins_stop();
         de_jolt_flag = 0;
         roll_base = rollba->data_float;
+        jolt_end_cnt_thre = jocnt->data_int;
         now_element = JOLT;
         image_block = 1;
         current_state = STATE_JOLT;

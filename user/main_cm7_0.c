@@ -107,6 +107,9 @@ int main(void)
         save_manager_load(testnum->data_int);
     }
 
+    // 设置曝光度
+    mt9v03x_set_exposure_time(imexp->data_int);
+
     while (true)
     {
         // 主循环检测拨码的状态

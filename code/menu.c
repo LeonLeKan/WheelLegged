@@ -9,7 +9,7 @@ volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
 MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *saveall, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
-    *thre, *farl, *nearl, *stdis1, *stdis2, *stdis3, *stdis4, *stdis5, *stdis6, *stdis7, *jocnt, *saveim,
+    *thre, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *stdis4, *stdis5, *stdis6, *stdis7, *jocnt, *saveim,
     *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *dis0, *dis1, *speedl, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
@@ -139,17 +139,18 @@ void create_2nd_menu(void)
     pinit = createMenu("pinit", 2, 14, MENU_TYPE_FLOAT, NULL);
 
     thre = createMenu("thre", 2, 1, MENU_TYPE_INT, NULL);
-    farl = createMenu("farl", 2, 2, MENU_TYPE_INT, NULL);
-    nearl = createMenu("nearl", 2, 3, MENU_TYPE_INT, NULL);
-    stdis1 = createMenu("stdis1", 2, 4, MENU_TYPE_INT, NULL);
-    stdis2 = createMenu("stdis2", 2, 5, MENU_TYPE_INT, NULL);
-    stdis3 = createMenu("stdis3", 2, 6, MENU_TYPE_INT, NULL);
-    stdis4 = createMenu("stdis4", 2, 7, MENU_TYPE_INT, NULL);
-    stdis5 = createMenu("stdis5", 2, 8, MENU_TYPE_INT, NULL);
-    stdis6 = createMenu("stdis6", 2, 9, MENU_TYPE_INT, NULL);
-    stdis7 = createMenu("stdis7", 2, 10, MENU_TYPE_INT, NULL);
-    jocnt = createMenu("jocnt", 2, 11, MENU_TYPE_INT, NULL);
-    saveim = createMenu("save", 2, 12, MENU_TYPE_FUNCTION, menu_save);
+    imexp = createMenu("imexp", 2, 2, MENU_TYPE_INT, NULL);
+    farl = createMenu("farl", 2, 3, MENU_TYPE_INT, NULL);
+    nearl = createMenu("nearl", 2, 4, MENU_TYPE_INT, NULL);
+    stdis1 = createMenu("stdis1", 2, 5, MENU_TYPE_INT, NULL);
+    stdis2 = createMenu("stdis2", 2, 6, MENU_TYPE_INT, NULL);
+    stdis3 = createMenu("stdis3", 2, 7, MENU_TYPE_INT, NULL);
+    stdis4 = createMenu("stdis4", 2, 8, MENU_TYPE_INT, NULL);
+    stdis5 = createMenu("stdis5", 2, 9, MENU_TYPE_INT, NULL);
+    stdis6 = createMenu("stdis6", 2, 10, MENU_TYPE_INT, NULL);
+    stdis7 = createMenu("stdis7", 2, 11, MENU_TYPE_INT, NULL);
+    jocnt = createMenu("jocnt", 2, 12, MENU_TYPE_INT, NULL);
+    saveim = createMenu("save", 2, 13, MENU_TYPE_FUNCTION, menu_save);
 
     change = createMenu("change", 2, 1, MENU_TYPE_FUNCTION, control_to_ins_menu);
     snspeed = createMenu("snspeed", 2, 2, MENU_TYPE_INT, NULL);
@@ -201,8 +202,10 @@ void create_2nd_menu(void)
     pinit->next = speed;
     speed->last = pinit;
 
-    thre->next = farl;
-    farl->last = thre;
+    thre->next = imexp;
+    imexp->last = thre;
+    imexp->next = farl;
+    farl->last = imexp;
     farl->next = nearl;
     nearl->last = farl;
     nearl->next = stdis1;
@@ -285,6 +288,7 @@ void create_2nd_menu(void)
 
     Image->child = thre;
     thre->parent = Image;
+    imexp->parent = Image;
     farl->parent = Image;
     nearl->parent = Image;
     stdis1->parent = Image;
