@@ -2796,7 +2796,7 @@ void jolt_end_check()
     if (white_count < 300)
     {
         jolt_end_judge_cnt++;
-        if (jolt_end_judge_cnt > 15)
+        if (jolt_end_judge_cnt > 30)
         {
             // 达到阈值，退出JOLT状态
             jolt_end_judge_cnt = 0;
@@ -2886,13 +2886,13 @@ void image_main()
     }
     if (total == 0) total = 1;
     error = sum / total - 94;
-    if (error < -25) error = 0;
-    if (error > 25) error = 0;
+    if (error < -50) error = 0;
+    if (error > 50) error = 0;
 
     if(single_side_state)
     {
-        if (error < -5) error = -5;
-        if (error > 5) error = 5;
+        // if (error < -5) error = -5;
+        // if (error > 5) error = 5;
     }
 
     mid_update = 1;

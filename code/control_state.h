@@ -37,6 +37,7 @@ extern volatile uint8_t test_state;
 extern volatile float yaw_thunder_memory;
 extern volatile uint8_t jolt_lock;
 extern volatile uint32_t jolt_lock_count;
+extern volatile uint8_t speed_0_change;
 
 void control_state_switch(void);
 void control_state_update(void);
