@@ -805,7 +805,7 @@ void control_state_close_stairs(void)
     {
         count = 0;
 
-        speed_loop.Target = (float)speed->data_int / 100.0f;
+        speed_loop.Target = (float)baspeed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
