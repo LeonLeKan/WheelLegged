@@ -17,7 +17,7 @@ volatile uint8_t speed_0_change = 0;
 
 static void accelerate_to_forward(void)
 {
-    if (current_state == STATE_ACCELERATE && (speed_loop.Actual > ((float)speed->data_int / 100.0f - 2.0f)))
+    if (current_state == STATE_ACCELERATE && (speed_loop.Actual > ((float)speed->data_int / 100.0f - 1.0f)))
     {
         current_state = STATE_FORWARD;
     }
