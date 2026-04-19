@@ -65,7 +65,57 @@ void pit0_ch2_isr() // 定时器通道 2 周期中断服务函数
 {
     pit_isr_flag_clear(PIT_CH2);
     // 中断2: 惯导位置更新
-    // pos_update([现在x]，[现在y]，[当前航向角]);
+    if (current_state == STATE_ACCELERATE  ||
+        current_state == STATE_FORWARD     ||
+        current_state == STATE_DE_THUNDER  ||
+        current_state == STATE_TRA_THUNDER ||
+        current_state == STATE_DE_JOLT     ||
+        current_state == STATE_TRA_JOLT    ||
+        current_state == STATE_DE_STAIRS   ||
+        current_state == STATE_TRA_STAIRS  &&
+        disturb_flag  == 0)
+    {
+        if (testnum->data_int == 0)
+        {
+            location_update_0();
+        }
+        else if (testnum->data_int == 1)
+        {
+            location_update_1();
+        }
+        else if (testnum->data_int == 2 && road_idx[road_num] == 0)
+        {
+            location_update_2_0();
+        }
+        else if (testnum->data_int == 2 && road_idx[road_num] == 1)
+        {
+            location_update_2_1();
+        }
+        else if (testnum->data_int == 2 && road_idx[road_num] == 2)
+        {
+            location_update_2_2();
+        }
+        else if (testnum->data_int == 2 && road_idx[road_num] == 3)
+        {
+            location_update_2_3();
+        }
+        else if (testnum->data_int == 2 && road_idx[road_num] == 4)
+        {
+            location_update_2_4();
+        }
+        else if (testnum->data_int == 2 && road_idx[road_num] == 5)
+        {
+            location_update_2_1();
+        }
+        else if (testnum->data_int == 2 && road_idx[road_num] == 6)
+        {
+            location_update_2_4();
+        }
+        else if (testnum->data_int == 2 && road_idx[road_num] == 7)
+        {
+            location_update_2_0();
+        }
+    }
 }
 
 void pit0_ch10_isr() // 定时器通道 10 周期中断服务函数
@@ -138,198 +188,306 @@ void pit0_ch21_isr() // 定时器通道 21 周期中断服务函数
 }
 // **************************** PIT中断函数 ****************************
 
-// **************************** 外部中断函数 ****************************
-void gpio_0_exti_isr() // 外部 GPIO_0 中断服务函数
-{
-}
-
-void gpio_1_exti_isr() // 外部 GPIO_1 中断服务函数
-{
-    if (exti_flag_get(P01_0)) // 示例P1_0端口外部中断判断
-    {
-    }
-    if (exti_flag_get(P01_1))
-    {
-    }
-}
-
-void gpio_2_exti_isr() // 外部 GPIO_2 中断服务函数
-{
-    if (exti_flag_get(P02_0))
-    {
-    }
-    if (exti_flag_get(P02_4))
-    {
-    }
-}
-
-void gpio_3_exti_isr() // 外部 GPIO_3 中断服务函数
-{
-}
-
-void gpio_4_exti_isr() // 外部 GPIO_4 中断服务函数
-{
-}
-
-void gpio_5_exti_isr() // 外部 GPIO_5 中断服务函数
-{
-}
-
-void gpio_6_exti_isr() // 外部 GPIO_6 中断服务函数
-{
-}
-
-void gpio_7_exti_isr() // 外部 GPIO_7 中断服务函数
-{
-}
-
-void gpio_8_exti_isr() // 外部 GPIO_8 中断服务函数
-{
-}
-
-void gpio_9_exti_isr() // 外部 GPIO_9 中断服务函数
-{
-}
-
-void gpio_10_exti_isr() // 外部 GPIO_10 中断服务函数
-{
-}
-
-void gpio_11_exti_isr() // 外部 GPIO_11 中断服务函数
-{
-}
-
-void gpio_12_exti_isr() // 外部 GPIO_12 中断服务函数
-{
-}
-
-void gpio_13_exti_isr() // 外部 GPIO_13 中断服务函数
-{
-}
-
-void gpio_14_exti_isr() // 外部 GPIO_14 中断服务函数
-{
-}
-
-void gpio_15_exti_isr() // 外部 GPIO_15 中断服务函数
-{
-}
-
-void gpio_16_exti_isr() // 外部 GPIO_16 中断服务函数
-{
-}
-
-void gpio_17_exti_isr() // 外部 GPIO_17 中断服务函数
-{
-}
-
-void gpio_18_exti_isr() // 外部 GPIO_18 中断服务函数
-{
-}
-
-void gpio_19_exti_isr() // 外部 GPIO_19 中断服务函数
-{
-}
-
-void gpio_20_exti_isr() // 外部 GPIO_20 中断服务函数
-{
-}
-
-void gpio_21_exti_isr() // 外部 GPIO_21 中断服务函数
-{
-}
-
-void gpio_22_exti_isr() // 外部 GPIO_22 中断服务函数
-{
-}
-
-void gpio_23_exti_isr() // 外部 GPIO_23 中断服务函数
-{
-}
-// **************************** 外部中断函数 ****************************
-
-//// **************************** DMA中断函数 ****************************
-// void dma_event_callback(void* callback_arg, cyhal_dma_event_t event)
-//{
-//     CY_UNUSED_PARAMETER(event);
-//
-//
-//
-//
-// }
-//  **************************** DMA中断函数 ****************************
-
 // **************************** 串口中断函数 ****************************
 // 串口0默认作为调试串口
-void uart0_isr(void)
+void uart0_isr (void)
 {
-    if (Cy_SCB_GetRxInterruptMask(get_scb_module(UART_0)) & CY_SCB_UART_RX_NOT_EMPTY) // 串口0接收中断
+    if(uart_isr_mask(UART_0))            // 串口0接收中断
     {
-        Cy_SCB_ClearRxInterrupt(get_scb_module(UART_0), CY_SCB_UART_RX_NOT_EMPTY); // 清除接收中断标志位
-
-#if DEBUG_UART_USE_INTERRUPT       // 如果开启 debug 串口中断
-        debug_interrupr_handler(); // 调用 debug 串口接收处理函数 数据会被 debug 环形缓冲区读取
-#endif                             // 如果修改了 DEBUG_UART_INDEX 那这段代码需要放到对应的串口中断去
+        
+#if DEBUG_UART_USE_INTERRUPT             // 如果开启 debug 串口中断
+        debug_interrupr_handler();       // 调用 debug 串口接收处理函数 数据会被 debug 环形缓冲区读取
+#endif                                   // 如果修改了 DEBUG_UART_INDEX 那这段代码需要放到对应的串口中断去
+      
     }
-    else if (Cy_SCB_GetTxInterruptMask(get_scb_module(UART_0)) & CY_SCB_UART_TX_DONE) // 串口0发送中断
-    {
-        Cy_SCB_ClearTxInterrupt(get_scb_module(UART_0), CY_SCB_UART_TX_DONE); // 清除接收中断标志位
+    else                                 // 串口0发送中断
+    {           
+        
+        
+        
     }
 }
 
-void uart1_isr(void)
+void uart1_isr (void)
 {
-    if (Cy_SCB_GetRxInterruptMask(get_scb_module(UART_1)) & CY_SCB_UART_RX_NOT_EMPTY) // 串口1接收中断
+    if(uart_isr_mask(UART_1))            // 串口1接收中断
     {
-        Cy_SCB_ClearRxInterrupt(get_scb_module(UART_1), CY_SCB_UART_RX_NOT_EMPTY); // 清除接收中断标志位
-
-        wireless_module_uart_handler();
+        // sbus
+        uart_receiver_handler();
     }
-    else if (Cy_SCB_GetTxInterruptMask(get_scb_module(UART_1)) & CY_SCB_UART_TX_DONE) // 串口1发送中断
+    else                                // 串口1发送中断
     {
-        Cy_SCB_ClearTxInterrupt(get_scb_module(UART_1), CY_SCB_UART_TX_DONE); // 清除接收中断标志位
+      
+        
+        
     }
 }
 
-void uart2_isr(void)
+void uart2_isr (void)
 {
-    if (Cy_SCB_GetRxInterruptMask(get_scb_module(UART_2)) & CY_SCB_UART_RX_NOT_EMPTY) // 串口2接收中断
+    if(uart_isr_mask(UART_2))            // 串口2接收中断
     {
-        Cy_SCB_ClearRxInterrupt(get_scb_module(UART_2), CY_SCB_UART_RX_NOT_EMPTY); // 清除接收中断标志位
-
-        // gnss_uart_callback();
+        // motor
         uart_control_callback();
     }
-    else if (Cy_SCB_GetTxInterruptMask(get_scb_module(UART_2)) & CY_SCB_UART_TX_DONE) // 串口2发送中断
+    else                                // 串口2发送中断
     {
-        Cy_SCB_ClearTxInterrupt(get_scb_module(UART_2), CY_SCB_UART_TX_DONE); // 清除接收中断标志位
+        
+        
+       
     }
 }
 
-void uart3_isr(void)
+void uart3_isr (void)
 {
-    if (Cy_SCB_GetRxInterruptMask(get_scb_module(UART_3)) & CY_SCB_UART_RX_NOT_EMPTY) // 串口3接收中断
+    if(uart_isr_mask(UART_3))            // 串口3接收中断
     {
-        Cy_SCB_ClearRxInterrupt(get_scb_module(UART_3), CY_SCB_UART_RX_NOT_EMPTY); // 清除接收中断标志位
+        
+        
+        
     }
-    else if (Cy_SCB_GetTxInterruptMask(get_scb_module(UART_3)) & CY_SCB_UART_TX_DONE) // 串口3发送中断
+    else                                // 串口3发送中断
     {
-        Cy_SCB_ClearTxInterrupt(get_scb_module(UART_3), CY_SCB_UART_TX_DONE); // 清除接收中断标志位
+      
+        
+        
     }
 }
 
-void uart4_isr(void)
+void uart4_isr (void)
 {
-
-    if (Cy_SCB_GetRxInterruptMask(get_scb_module(UART_4)) & CY_SCB_UART_RX_NOT_EMPTY) // 串口4接收中断
+    if(uart_isr_mask(UART_4))            // 串口4接收中断
     {
-        Cy_SCB_ClearRxInterrupt(get_scb_module(UART_4), CY_SCB_UART_RX_NOT_EMPTY); // 清除接收中断标志位
-
-        uart_receiver_handler(); // 串口接收机回调函数
+        // gps
+        // gnss_uart_callback();                                                               // 串口接收机回调函数
+       
     }
-    else if (Cy_SCB_GetTxInterruptMask(get_scb_module(UART_4)) & CY_SCB_UART_TX_DONE) // 串口4发送中断
+    else                                // 串口4发送中断
     {
-        Cy_SCB_ClearTxInterrupt(get_scb_module(UART_4), CY_SCB_UART_TX_DONE); // 清除接收中断标志位
+      
+        
+        
+    }
+}
+
+void uart5_isr (void)
+{
+    if(uart_isr_mask(UART_5))            // 串口5接收中断
+    {
+        
+        
+       
+    }
+    else                                // 串口5发送中断
+    {
+      
+        
+        
+    }
+}
+
+void uart6_isr (void)
+{
+    if(uart_isr_mask(UART_6))            // 串口6接收中断
+    {
+
+        
+       
+    }
+    else                                // 串口6发送中断
+    {
+      
+        
+        
     }
 }
 // **************************** 串口中断函数 ****************************
+
+// **************************** 外部中断函数 ****************************
+void gpio_0_exti_isr()                  // 外部 GPIO_0 中断服务函数     
+{
+    
+  
+  
+}
+
+void gpio_1_exti_isr()                  // 外部 GPIO_1 中断服务函数     
+{
+    if(exti_flag_get(P01_0))		// 示例P1_0端口外部中断判断
+    {
+
+      
+      
+            
+    }
+    if(exti_flag_get(P01_1))
+    {
+
+            
+            
+    }
+}
+
+void gpio_2_exti_isr()                  // 外部 GPIO_2 中断服务函数     
+{
+    if(exti_flag_get(P02_0))
+    {
+            
+            
+    }
+    if(exti_flag_get(P02_4))
+    {
+            
+            
+    }
+
+}
+
+void gpio_3_exti_isr()                  // 外部 GPIO_3 中断服务函数     
+{
+
+
+
+}
+
+void gpio_4_exti_isr()                  // 外部 GPIO_4 中断服务函数     
+{
+
+
+
+}
+
+void gpio_5_exti_isr()                  // 外部 GPIO_5 中断服务函数     
+{
+
+
+
+}
+
+
+void gpio_6_exti_isr()                  // 外部 GPIO_6 中断服务函数     
+{
+    
+
+    
+}
+
+void gpio_7_exti_isr()                  // 外部 GPIO_7 中断服务函数     
+{
+
+
+
+}
+
+void gpio_8_exti_isr()                  // 外部 GPIO_8 中断服务函数     
+{
+
+
+
+}
+
+void gpio_9_exti_isr()                  // 外部 GPIO_9 中断服务函数     
+{
+
+
+
+}
+
+void gpio_10_exti_isr()                  // 外部 GPIO_10 中断服务函数     
+{
+
+
+
+}
+
+void gpio_11_exti_isr()                  // 外部 GPIO_11 中断服务函数     
+{
+
+
+
+}
+
+void gpio_12_exti_isr()                  // 外部 GPIO_12 中断服务函数     
+{
+
+
+
+}
+
+void gpio_13_exti_isr()                  // 外部 GPIO_13 中断服务函数     
+{
+
+
+
+}
+
+void gpio_14_exti_isr()                  // 外部 GPIO_14 中断服务函数     
+{
+
+
+
+}
+
+void gpio_15_exti_isr()                  // 外部 GPIO_15 中断服务函数     
+{
+
+
+
+}
+
+void gpio_16_exti_isr()                  // 外部 GPIO_16 中断服务函数     
+{
+
+
+
+}
+
+void gpio_17_exti_isr()                  // 外部 GPIO_17 中断服务函数     
+{
+
+
+
+}
+
+void gpio_18_exti_isr()                  // 外部 GPIO_18 中断服务函数     
+{
+
+
+
+}
+
+void gpio_19_exti_isr()                  // 外部 GPIO_19 中断服务函数     
+{
+
+
+
+}
+
+void gpio_20_exti_isr()                  // 外部 GPIO_20 中断服务函数     
+{
+
+
+
+}
+
+void gpio_21_exti_isr()                  // 外部 GPIO_21 中断服务函数     
+{
+
+
+
+}
+
+void gpio_22_exti_isr()                  // 外部 GPIO_22 中断服务函数     
+{
+
+
+
+}
+
+void gpio_23_exti_isr()                  // 外部 GPIO_23 中断服务函数     
+{
+
+
+
+}
+// **************************** 外部中断函数 ****************************

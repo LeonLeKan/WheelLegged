@@ -3,9 +3,19 @@
 
 #include "zf_common_headfile.h"
 
+#define MAX_NODES 100
+
+typedef enum {
+    ELEMENT_NORMAL,
+    ELEMENT_THUNDER,
+    ELEMENT_SINGLE_SIDE,
+    ELEMENT_STAIRS
+} point_type_t;
+
 typedef struct
 {
     double x, y;  
+    // point_type_t type;
 } waypoint_t;
 
 typedef struct
@@ -16,8 +26,9 @@ typedef struct
 
 typedef struct _waypoint_node
 {
-    waypoint_t* waypoint;               // 点数据
-    waypoint_screen_param_t* screen_param; // 显示相关属性
+    bool allocated;
+    waypoint_t waypoint;               // 点数据
+    waypoint_screen_param_t screen_param; // 显示相关属性
     struct _waypoint_node* next, * prev; // 前后指针
 } waypoint_node_t;
 
@@ -28,8 +39,10 @@ typedef struct
     int size;               // 点的数量（包括head）
 }waypoint_list_t;
 
+extern waypoint_list_t waypoints;
 
-waypoint_list_t* waypoint_list_create(waypoint_t waypoint, waypoint_screen_param_t screen_param);
+void waypoint_list_init(void);
+
 waypoint_node_t* waypoint_list_add_next(waypoint_list_t* list, waypoint_node_t* pNode,
                                 waypoint_t waypoint, waypoint_screen_param_t screen_param);
 void waypoint_list_remove(waypoint_list_t* list, waypoint_node_t* pNode);
@@ -37,6 +50,6 @@ void waypoint_list_clear(waypoint_list_t* list);
 
 void waypoint_list_save_to_flash(waypoint_list_t *list, uint32 flash_page);
 bool waypoint_list_load_from_flash(waypoint_list_t *list, uint32 flash_page);
-
+void waypoint_list_clear_flash_page(uint32 flash_page);
 
 #endif

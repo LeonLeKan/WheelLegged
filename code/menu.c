@@ -2,15 +2,15 @@
 #include "image.h"
 #include "imu.h"
 #include "screen_interface.h"
-#include "save_manager.h"
+#include "save_manager_ui.h"
 #include "pid.h"
 
 volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
-MENU *RootMenu, *Balance, *Image, *Element, *currentMenu;
-MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *pzero, *pinit, *show,
-    *thre, *farl, *nearl, *saveim,
-    *change, *snspeed, *rollba, *saveel;
+MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *saveall, *currentMenu;
+MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
+    *thre, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *stdis4, *stdis5, *stdis6, *stdis7, *jocnt, *saveim,
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *dis0, *dis1, *speedl, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
@@ -19,8 +19,11 @@ MENU *an1kp, *an1ki, *an1kd,
     *askp, *aski, *askd,
     *snkp, *snki, *snkd,
     *yakp, *yaki, *yakd,
-    *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn, *zeroya,
-    *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn, *saveya;
+    *joskp, *joski, *joskd,
+    *joykp, *joyki, *joykd,
+    *rollbias, *pitchbias, *yawbias,
+    *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn, *zeroya, *zerojos, *zerojoy, *zerobi,
+    *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn, *saveya, *savejos, *savejoy, *savebi;
 
 #define MENU_POOL_SIZE 128
 
@@ -86,29 +89,41 @@ void clear_exec_flag(MENU *layerHead)
 
 void create_1st_menu(void)
 {
-    RootMenu = createMenu("RootMenu", 0, 1, MENU_TYPE_NORMAL, NULL);
+    WheelLeg = createMenu("WheelLeg", 0, 1, MENU_TYPE_NORMAL, NULL);
     Balance = createMenu("Balance", 1, 1, MENU_TYPE_NORMAL, NULL);
     Image = createMenu("Image", 1, 2, MENU_TYPE_NORMAL, NULL);
     Element = createMenu("Element", 1, 3, MENU_TYPE_NORMAL, NULL);
+    testnum = createMenu("testnum", 1, 4, MENU_TYPE_INT, NULL);
+    road2 = createMenu("road2", 1, 5, MENU_TYPE_INT, NULL);
+    saveall = createMenu("save", 1, 6, MENU_TYPE_FUNCTION, menu_save);
 
-    RootMenu->child = Balance;
-    Balance->parent = RootMenu;
-    Image->parent = RootMenu;
-    Element->parent = RootMenu;
+    WheelLeg->child = Balance;
+    Balance->parent = WheelLeg;
+    Image->parent = WheelLeg;
+    Element->parent = WheelLeg;
+    testnum->parent = WheelLeg;
+    road2->parent = WheelLeg;
+    saveall->parent = WheelLeg;
 
     Balance->next = Image;
     Image->last = Balance;
     Image->next = Element;
     Element->last = Image;
-    Element->next = Balance;
-    Balance->last = Element;
+    Element->next = testnum;
+    testnum->last = Element;
+    testnum->next = road2;
+    road2->last = testnum;
+    road2->next = saveall;
+    saveall->last = road2;
+    saveall->next = Balance;
+    Balance->last = saveall;
 
-    currentMenu = RootMenu->child;
+    currentMenu = WheelLeg->child;
 }
 
 void create_2nd_menu(void)
 {
-    speed = createMenu("speed", 2, 1, MENU_TYPE_FLOAT, NULL);
+    speed = createMenu("speed", 2, 1, MENU_TYPE_INT, NULL);
     anloop1 = createMenu("anloop1", 2, 2, MENU_TYPE_NORMAL, NULL);
     anloop2 = createMenu("anloop2", 2, 3, MENU_TYPE_NORMAL, NULL);
     sploop = createMenu("sploop", 2, 4, MENU_TYPE_NORMAL, NULL);
@@ -117,19 +132,46 @@ void create_2nd_menu(void)
     asloop = createMenu("asloop", 2, 7, MENU_TYPE_NORMAL, NULL);
     snloop = createMenu("snloop", 2, 8, MENU_TYPE_NORMAL, NULL);
     yaloop = createMenu("yaloop", 2, 9, MENU_TYPE_NORMAL, NULL);
-    pzero = createMenu("pzero", 2, 10, MENU_TYPE_FLOAT, NULL);
-    pinit = createMenu("pinit", 2, 11, MENU_TYPE_FLOAT, NULL);
-    show = createMenu("show", 2, 12, MENU_TYPE_FUNCTION, image_show);
+    josloop = createMenu("josloop", 2, 10, MENU_TYPE_NORMAL, NULL);
+    joyloop = createMenu("joyloop", 2, 11, MENU_TYPE_NORMAL, NULL);
+    imubias = createMenu("imubias", 2, 12, MENU_TYPE_NORMAL, NULL);
+    pzero = createMenu("pzero", 2, 13, MENU_TYPE_FLOAT, NULL);
+    pinit = createMenu("pinit", 2, 14, MENU_TYPE_FLOAT, NULL);
 
     thre = createMenu("thre", 2, 1, MENU_TYPE_INT, NULL);
-    farl = createMenu("farl", 2, 2, MENU_TYPE_INT, NULL);
-    nearl = createMenu("nearl", 2, 3, MENU_TYPE_INT, NULL);
-    saveim = createMenu("save", 2, 4, MENU_TYPE_FUNCTION, menu_save);
+    imexp = createMenu("imexp", 2, 2, MENU_TYPE_INT, NULL);
+    farl = createMenu("farl", 2, 3, MENU_TYPE_INT, NULL);
+    nearl = createMenu("nearl", 2, 4, MENU_TYPE_INT, NULL);
+    stdis1 = createMenu("stdis1", 2, 5, MENU_TYPE_INT, NULL);
+    stdis2 = createMenu("stdis2", 2, 6, MENU_TYPE_INT, NULL);
+    stdis3 = createMenu("stdis3", 2, 7, MENU_TYPE_INT, NULL);
+    stdis4 = createMenu("stdis4", 2, 8, MENU_TYPE_INT, NULL);
+    stdis5 = createMenu("stdis5", 2, 9, MENU_TYPE_INT, NULL);
+    stdis6 = createMenu("stdis6", 2, 10, MENU_TYPE_INT, NULL);
+    stdis7 = createMenu("stdis7", 2, 11, MENU_TYPE_INT, NULL);
+    jocnt = createMenu("jocnt", 2, 12, MENU_TYPE_INT, NULL);
+    saveim = createMenu("save", 2, 13, MENU_TYPE_FUNCTION, menu_save);
 
     change = createMenu("change", 2, 1, MENU_TYPE_FUNCTION, control_to_ins_menu);
-    snspeed = createMenu("snspeed", 2, 2, MENU_TYPE_FLOAT, NULL);
+    snspeed = createMenu("snspeed", 2, 2, MENU_TYPE_INT, NULL);
     rollba = createMenu("rollba", 2, 3, MENU_TYPE_FLOAT, NULL);
-    saveel = createMenu("save", 2, 4, MENU_TYPE_FUNCTION, menu_save);
+    turnamf = createMenu("turnamf", 2, 4, MENU_TYPE_INT, NULL);
+    turnamt = createMenu("turnamt", 2, 5, MENU_TYPE_INT, NULL);
+    cwtucop = createMenu("cwtucop", 2, 6, MENU_TYPE_FLOAT, NULL);
+    ccwtucop = createMenu("ccwtucop", 2, 7, MENU_TYPE_FLOAT, NULL);
+    stspeed = createMenu("stspeed", 2, 8, MENU_TYPE_INT, NULL);
+    jospeed = createMenu("jospeed", 2, 9, MENU_TYPE_INT, NULL);
+    snlock = createMenu("snlock", 2, 10, MENU_TYPE_INT, NULL);
+    rospeed = createMenu("rospeed", 2, 11, MENU_TYPE_INT, NULL);
+    turnamj = createMenu("turnamj", 2, 12, MENU_TYPE_INT, NULL);
+    baspeed = createMenu("baspeed", 2, 13, MENU_TYPE_INT, NULL);
+    joangle = createMenu("joangle", 2, 14, MENU_TYPE_FLOAT, NULL);
+    jolock = createMenu("jolock", 2, 15, MENU_TYPE_INT, NULL);
+    xythun = createMenu("xythun", 2, 16, MENU_TYPE_FLOAT, NULL);
+    dis0 = createMenu("dis0", 2, 17, MENU_TYPE_FLOAT, NULL);
+    dis1 = createMenu("dis1", 2, 18, MENU_TYPE_FLOAT, NULL);
+    speedl = createMenu("speedl", 2, 19, MENU_TYPE_INT, NULL);
+    saveel = createMenu("save", 2, 20, MENU_TYPE_FUNCTION, menu_save);
 
     speed->next = anloop1;
     anloop1->last = speed;
@@ -147,21 +189,43 @@ void create_2nd_menu(void)
     snloop->last = asloop;
     snloop->next = yaloop;
     yaloop->last = snloop;
-    yaloop->next = pzero;
-    pzero->last = yaloop;
+    yaloop->next = josloop;
+    josloop->last = yaloop;
+    josloop->next = joyloop;
+    joyloop->last = josloop;
+    joyloop->next = imubias;
+    imubias->last = joyloop;
+    imubias->next = pzero;
+    pzero->last = imubias;
     pzero->next = pinit;
     pinit->last = pzero;
-    pinit->next = show;
-    show->last = pinit;
-    show->next = speed;
-    speed->last = show;
+    pinit->next = speed;
+    speed->last = pinit;
 
-    thre->next = farl;
-    farl->last = thre;
+    thre->next = imexp;
+    imexp->last = thre;
+    imexp->next = farl;
+    farl->last = imexp;
     farl->next = nearl;
     nearl->last = farl;
-    nearl->next = saveim;
-    saveim->last = nearl;
+    nearl->next = stdis1;
+    stdis1->last = nearl;
+    stdis1->next = stdis2;
+    stdis2->last = stdis1;
+    stdis2->next = stdis3;
+    stdis3->last = stdis2;
+    stdis3->next = stdis4;
+    stdis4->last = stdis3;
+    stdis4->next = stdis5;
+    stdis5->last = stdis4;
+    stdis5->next = stdis6;
+    stdis6->last = stdis5;
+    stdis6->next = stdis7;
+    stdis7->last = stdis6;
+    stdis7->next = jocnt;
+    jocnt->last = stdis7;
+    jocnt->next = saveim;
+    saveim->last = jocnt;
     saveim->next = thre;
     thre->last = saveim;
 
@@ -169,8 +233,40 @@ void create_2nd_menu(void)
     snspeed->last = change;
     snspeed->next = rollba;
     rollba->last = snspeed;
-    rollba->next = saveel;
-    saveel->last = rollba;
+    rollba->next = turnamf;
+    turnamf->last = rollba;
+    turnamf->next = turnamt;
+    turnamt->last = turnamf;
+    turnamt->next = cwtucop;
+    cwtucop->last = turnamt;
+    cwtucop->next = ccwtucop;
+    ccwtucop->last = cwtucop;
+    ccwtucop->next = stspeed;
+    stspeed->last = ccwtucop;
+    stspeed->next = jospeed;
+    jospeed->last = stspeed;
+    jospeed->next = snlock;
+    snlock->last = jospeed;
+    snlock->next = rospeed;
+    rospeed->last = snlock;
+    rospeed->next = turnamj;
+    turnamj->last = rospeed;
+    turnamj->next = baspeed;
+    baspeed->last = turnamj;
+    baspeed->next = joangle;
+    joangle->last = baspeed;
+    joangle->next = jolock;
+    jolock->last = joangle;
+    jolock->next = xythun;
+    xythun->last = jolock;
+    xythun->next = dis0;
+    dis0->last = xythun;
+    dis0->next = dis1;
+    dis1->last = dis0;
+    dis1->next = speedl;
+    speedl->last = dis1;
+    speedl->next = saveel;
+    saveel->last = speedl;
     saveel->next = change;
     change->last = saveel;
 
@@ -184,20 +280,47 @@ void create_2nd_menu(void)
     asloop->parent = Balance;
     snloop->parent = Balance;
     yaloop->parent = Balance;
+    josloop->parent = Balance;
+    joyloop->parent = Balance;
+    imubias->parent = Balance;
     pzero->parent = Balance;
     pinit->parent = Balance;
-    show->parent = Balance;
 
     Image->child = thre;
     thre->parent = Image;
+    imexp->parent = Image;
     farl->parent = Image;
     nearl->parent = Image;
+    stdis1->parent = Image;
+    stdis2->parent = Image;
+    stdis3->parent = Image;
+    stdis4->parent = Image;
+    stdis5->parent = Image;
+    stdis6->parent = Image;
+    stdis7->parent = Image;
+    jocnt->parent = Image;
     saveim->parent = Image;
 
     Element->child = change;
     change->parent = Element;
     snspeed->parent = Element;
     rollba->parent = Element;
+    turnamf->parent = Element;
+    turnamt->parent = Element;
+    cwtucop->parent = Element;
+    ccwtucop->parent = Element;
+    stspeed->parent = Element;
+    jospeed->parent = Element;
+    snlock->parent = Element;
+    rospeed->parent = Element;
+    turnamj->parent = Element;
+    baspeed->parent = Element;
+    joangle->parent = Element;
+    jolock->parent = Element;
+    xythun->parent = Element;
+    dis0->parent = Element;
+    dis1->parent = Element;
+    speedl->parent = Element;
     saveel->parent = Element;
 }
 
@@ -239,6 +362,18 @@ void create_3rd_menu(void)
     yaki = createMenu("yaki", 3, 2, MENU_TYPE_FLOAT, NULL);
     yakd = createMenu("yakd", 3, 3, MENU_TYPE_FLOAT, NULL);
 
+    joskp = createMenu("joskp", 3, 1, MENU_TYPE_FLOAT, NULL);
+    joski = createMenu("joski", 3, 2, MENU_TYPE_FLOAT, NULL);
+    joskd = createMenu("joskd", 3, 3, MENU_TYPE_FLOAT, NULL);
+
+    joykp = createMenu("joykp", 3, 1, MENU_TYPE_FLOAT, NULL);
+    joyki = createMenu("joyki", 3, 2, MENU_TYPE_FLOAT, NULL);
+    joykd = createMenu("joykd", 3, 3, MENU_TYPE_FLOAT, NULL);
+
+    rollbias = createMenu("rollbias", 3, 1, MENU_TYPE_FLOAT, NULL);
+    pitchbias = createMenu("pitchbias", 3, 2, MENU_TYPE_FLOAT, NULL);
+    yawbias = createMenu("yawbias", 3, 3, MENU_TYPE_FLOAT, NULL);
+
     savean1 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
     savean2 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
     savesp = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
@@ -247,6 +382,9 @@ void create_3rd_menu(void)
     saveas = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
     savesn = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
     saveya = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
+    savejos = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
+    savejoy = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
+    savebi = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
 
     zeroan1 = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
     zeroan2 = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
@@ -256,6 +394,9 @@ void create_3rd_menu(void)
     zeroas = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
     zerosn = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
     zeroya = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
+    zerojos = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
+    zerojoy = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
+    zerobi = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
 
     anloop1->child = an1kp;
     an1kp->next = an1ki;
@@ -353,6 +494,42 @@ void create_3rd_menu(void)
     zeroya->next = yakp;
     yakp->last = zeroya;
 
+    josloop->child = joskp;
+    joskp->next = joski;
+    joski->last = joskp;
+    joski->next = joskd;
+    joskd->last = joski;
+    joskd->next = savejos;
+    savejos->last = joskd;
+    savejos->next = zerojos;
+    zerojos->last = savejos;
+    zerojos->next = joskp;
+    joskp->last = zerojos;
+
+    joyloop->child = joykp;
+    joykp->next = joyki;
+    joyki->last = joykp;
+    joyki->next = joykd;
+    joykd->last = joyki;
+    joykd->next = savejoy;
+    savejoy->last = joykd;
+    savejoy->next = zerojoy;
+    zerojoy->last = savejoy;
+    zerojoy->next = joykp;
+    joykp->last = zerojoy;
+
+    imubias->child = rollbias;
+    rollbias->next = pitchbias;
+    pitchbias->last = rollbias;
+    pitchbias->next = yawbias;
+    yawbias->last = pitchbias;
+    yawbias->next = savebi;
+    savebi->last = yawbias;
+    savebi->next = zerobi;
+    zerobi->last = savebi;
+    zerobi->next = rollbias;
+    rollbias->last = zerobi;
+
     an1kp->parent = anloop1;
     an1ki->parent = anloop1;
     an1kd->parent = anloop1;
@@ -400,33 +577,48 @@ void create_3rd_menu(void)
     yakd->parent = yaloop;
     zeroya->parent = yaloop;
     saveya->parent = yaloop;
+
+    joskp->parent = josloop;
+    joski->parent = josloop;
+    joskd->parent = josloop;
+    zerojos->parent = josloop; 
+    savejos->parent = josloop;
+
+    joykp->parent = joyloop;
+    joyki->parent = joyloop;
+    joykd->parent = joyloop;
+    zerojoy->parent = joyloop;
+    savejoy->parent = joyloop;
+
+    rollbias->parent = imubias;
+    pitchbias->parent = imubias;
+    yawbias->parent = imubias;
+    zerobi->parent = imubias;
+    savebi->parent = imubias;
 }
 
 void key_handle_menu(void)
 {
-    static uint8_t last_switch_state = 1; // 上电前拉回高电平
-    uint8_t current_switch_state = gpio_get_level(BUTTON_OK);
-
-    uint8_t switch_changed = (last_switch_state != current_switch_state);
-
-    if (switch_changed)
-    {
-        if (!edit_mode)
-        {
-            if (currentMenu->type == MENU_TYPE_FUNCTION && currentMenu->Function != NULL && currentMenu != change)
-            {
-                currentMenu->Function();
-                currentMenu->exec_flag = 1;
-                ips200_clear();
-            }
-        }
-        last_switch_state = current_switch_state;
-        return;
-    }
-
     if (!edit_mode)
     {
-        if (gpio_get_level(BUTTON_DN) == 0)
+        if (gpio_get_level(BUTTON_OK) == 0)
+        {
+            system_delay_ms(10);
+            ips200_clear();
+            if (gpio_get_level(BUTTON_OK) == 0)
+            {
+                if (currentMenu->type == MENU_TYPE_FUNCTION && currentMenu->Function != NULL)
+                {
+                    currentMenu->Function();
+                    if (currentMenu != change)
+                    {
+                        currentMenu->exec_flag = 1;
+                        ips200_clear();
+                    }
+                }
+            }
+        }
+        else if (gpio_get_level(BUTTON_DN) == 0)
         {
             system_delay_ms(10);
             ips200_clear();
@@ -465,10 +657,6 @@ void key_handle_menu(void)
             ips200_clear();
             if (gpio_get_level(BUTTON_RT) == 0)
             {
-                if (currentMenu == change)
-                {
-                    currentMenu->Function();
-                }
                 if (currentMenu->type == MENU_TYPE_INT || currentMenu->type == MENU_TYPE_FLOAT)
                 {
                     edit_mode = 1;
@@ -479,7 +667,7 @@ void key_handle_menu(void)
                     }
                     else
                     {
-                        sprintf(edit_buf, "%+09.3f", currentMenu->data_float);
+                        sprintf(edit_buf, "%+09.4f", currentMenu->data_float);
                     }
                 }
                 else if (currentMenu->child != NULL && currentMenu->layer < MAX_LAYER)
@@ -603,7 +791,7 @@ void show_menu(void)
             }
             else
             {
-                sprintf(buf, "%+09.3f", currentMenu->data_float);
+                sprintf(buf, "%+09.4f", currentMenu->data_float);
             }
             pstr = buf;
         }
@@ -712,15 +900,15 @@ void show_menu(void)
 
     if (kp_node && ki_node && kd_node)
     {
-        sprintf(buf_float_kp, "%+09.3f", kp_node->data_float);
-        sprintf(buf_float_ki, "%+09.3f", ki_node->data_float);
-        sprintf(buf_float_kd, "%+09.3f", kd_node->data_float);
+        sprintf(buf_float_kp, "%+09.4f", kp_node->data_float);
+        sprintf(buf_float_ki, "%+09.4f", ki_node->data_float);
+        sprintf(buf_float_kd, "%+09.4f", kd_node->data_float);
     }
     else
     {
-        sprintf(buf_float_kp, "%+09.3f", 0.0);
-        sprintf(buf_float_ki, "%+09.3f", 0.0);
-        sprintf(buf_float_kd, "%+09.3f", 0.0);
+        sprintf(buf_float_kp, "%+09.4f", 0.0);
+        sprintf(buf_float_ki, "%+09.4f", 0.0);
+        sprintf(buf_float_kd, "%+09.4f", 0.0);
     }
 
     ips200_show_string(168, 192, buf_float_kp);
@@ -844,6 +1032,14 @@ void menu_save(void)
         } while (tmp != ele);
     }
 
+    MENU *test = testnum;
+    flash_union_buffer[index++].int32_type = test->data_int;
+    node_count++;
+
+    MENU *road = road2;
+    flash_union_buffer[index++].int32_type = road->data_int;
+    node_count++;
+
     flash_union_buffer[0].float_type = menu_magic;
     flash_union_buffer[1].uint32_type = node_count;
 
@@ -860,7 +1056,6 @@ void menu_load1(void)
         return;
 
     uint32_t idx = 2;
-    uint32_t real_count = 0;
 
     MENU *loop = Balance->child;
     if (loop == NULL)
@@ -875,7 +1070,6 @@ void menu_load1(void)
             {
                 loop->data_int = 0;
             }
-            real_count++;
         }
         else if (loop->type == MENU_TYPE_FLOAT)
         {
@@ -890,7 +1084,6 @@ void menu_load1(void)
             {
                 loop->data_float = 0.0f;
             }
-            real_count++;
         }
 
         MENU *param = loop->child;
@@ -906,7 +1099,6 @@ void menu_load1(void)
                     {
                         tmp->data_int = 0;
                     }
-                    real_count++;
                 }
                 else if (tmp->type == MENU_TYPE_FLOAT)
                 {
@@ -921,7 +1113,6 @@ void menu_load1(void)
                     {
                         tmp->data_float = 0;
                     }
-                    real_count++;
                 }
                 tmp = tmp->next;
             } while (tmp != param);
@@ -943,7 +1134,6 @@ void menu_load1(void)
                 {
                     tmp->data_int = 0;
                 }
-                real_count++;
             }
             tmp = tmp->next;
         } while (tmp != img);
@@ -962,7 +1152,6 @@ void menu_load1(void)
                 {
                     tmp->data_int = 0;
                 }
-                real_count++;
             }
             else if (tmp->type == MENU_TYPE_FLOAT)
             {
@@ -977,10 +1166,23 @@ void menu_load1(void)
                 {
                     tmp->data_float = 0;
                 }
-                real_count++;
             }
             tmp = tmp->next;
         } while (tmp != ele);
+    }
+
+    MENU *test = testnum;
+    test->data_int = (int)flash_union_buffer[idx++].int32_type;
+    if (fabs((float)test->data_int) >= 100000)
+    {
+        test->data_int = 0;
+    }
+
+    MENU *road = road2;
+    road->data_int = (int)flash_union_buffer[idx++].int32_type;
+    if (fabs((float)road->data_int) >= 100000)
+    {
+        road2->data_int = 0;
     }
 }
 
@@ -1013,38 +1215,6 @@ void menu_zero(void)
 }
 uint8_t my_img[CAMERA_H][CAMERA_W];
 
-static void image_show(void)
-{
-    ips200_clear();
-
-    while (1)
-    {
-        image_main();
-        for (int i = 0; i < CAMERA_H; i++)
-        {
-            for (int j = 0; j < CAMERA_W; j++)
-            {
-                if (IMG[i][j])
-                    my_img[i][j] = 255;
-                else
-                    my_img[i][j] = 0;
-            }
-        }
-        // ips200_displayimage03x((const uint8 *)mt9v03x_image, 240, 150);
-        ips200_show_gray_image(0, 0, &my_img[0][0], MT9V03X_W, MT9V03X_H, MT9V03X_W, MT9V03X_H, 200);
-        if (gpio_get_level(BUTTON_LF) == 0)
-        {
-            system_delay_ms(80);
-            if (gpio_get_level(BUTTON_LF) == 0)
-            {
-                break;
-            }
-        }
-        system_delay_ms(30);
-    }
-    ips200_clear();
-}
-
 void ins_to_control_menu(void)
 {
     menu_current_state = MENU_STATE_CONTROL;
@@ -1061,19 +1231,15 @@ void control_to_ins_menu(void)
 
 void key_handle_ins(void)
 {
-    static uint8_t last_switch_state = 1; // 上电前拉回高电平
-    uint8_t current_switch_state = gpio_get_level(BUTTON_OK);
-
-    uint8_t switch_changed = (last_switch_state != current_switch_state);
-
-    if (switch_changed)
+    if (gpio_get_level(BUTTON_OK) == 0)
     {
-        save_manager_key_ok_pressed();
-        last_switch_state = current_switch_state;
-        return;
+        system_delay_ms(80);
+        if (gpio_get_level(BUTTON_OK) == 0)
+        {
+            save_manager_key_ok_pressed();
+        }
     }
-
-    if (gpio_get_level(BUTTON_DN) == 0)
+    else if (gpio_get_level(BUTTON_DN) == 0)
     {
         system_delay_ms(80);
         if (gpio_get_level(BUTTON_DN) == 0)

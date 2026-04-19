@@ -3,11 +3,16 @@
 
 #include "zf_common_headfile.h"
 
-#define BUTTON_LF (P20_0)
-#define BUTTON_RT (P20_1)
-#define BUTTON_DN (P20_2)
-#define BUTTON_UP (P20_3)
-#define BUTTON_OK (P21_5)
+#define BUTTON_LF (P19_4)
+#define BUTTON_RT (P20_3)
+#define BUTTON_DN (P20_0)
+#define BUTTON_UP (P20_2)
+#define BUTTON_OK (P20_1)
+
+#define DIP_1 (P08_3)
+#define DIP_2 (P09_0)
+#define DIP_3 (P09_1)
+#define DIP_4 (P10_2)
 
 #define MAX_DISPLAY 10
 #define MAX_LAYER 3
@@ -45,10 +50,10 @@ typedef enum
     MENU_STATE_INS,
 } menu_state_t;
 
-extern MENU *RootMenu, *Balance, *Image, *Element, *currentMenu;
-extern MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *pzero, *pinit, *show,
-    *thre, *farl, *nearl, *saveim,
-    *change, *snspeed, *rollba, *saveel;
+extern MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *saveall, *currentMenu;
+extern MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
+    *thre, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *stdis4, *stdis5, *stdis6, *stdis7, *jocnt, *saveim,
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *dis0, *dis1, *speedl, *saveel;
 extern MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
@@ -57,8 +62,11 @@ extern MENU *an1kp, *an1ki, *an1kd,
     *askp, *aski, *askd,
     *snkp, *snki, *snkd,
     *yakp, *yaki, *yakd,
-    *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn, *zeroya,
-    *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn, *saveya;
+    *joskp, *joski, *joskd,
+    *joykp, *joyki, *joykd,
+    *rollbias, *pitchbias, *yawbias,
+    *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn, *zeroya, *zerojos, *zerojoy, *zerobi,
+    *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn, *saveya, *savejos, *savejoy, *savebi;
 
 extern volatile menu_state_t menu_current_state;
 
@@ -74,7 +82,6 @@ void key_handle_menu(void);
 void menu_save(void);
 void menu_load1(void);
 void menu_zero(void);
-static void image_show(void);
 void ins_to_control_menu(void);
 void control_to_ins_menu(void);
 void key_handle_ins(void);

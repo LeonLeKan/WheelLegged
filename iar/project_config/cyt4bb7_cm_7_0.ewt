@@ -1507,16 +1507,43 @@
             </file>
         </group>
         <group>
-            <name>ui</name>
+            <name>navigation</name>
             <group>
-                <name>ahrs_ui</name>
+                <name>mahony</name>
                 <file>
-                    <name>$PROJ_DIR$\..\..\code\ahrs_ui.c</name>
+                    <name>$PROJ_DIR$\..\..\code\mahony_filter.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\code\ahrs_ui.h</name>
+                    <name>$PROJ_DIR$\..\..\code\mahony_filter.h</name>
                 </file>
             </group>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\imu.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\imu.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\ins.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\ins.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\save_manager.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\save_manager.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\waypoint.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\code\waypoint.h</name>
+            </file>
+        </group>
+        <group>
+            <name>ui</name>
             <file>
                 <name>$PROJ_DIR$\..\..\code\menu.c</name>
             </file>
@@ -1530,49 +1557,16 @@
                 <name>$PROJ_DIR$\..\..\code\points_display.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\code\save_manager.c</name>
+                <name>$PROJ_DIR$\..\..\code\save_manager_ui.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\code\save_manager.h</name>
+                <name>$PROJ_DIR$\..\..\code\save_manager_ui.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\code\screen_interface.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\code\screen_interface.h</name>
-            </file>
-        </group>
-        <group>
-            <name>ukf_filter</name>
-            <group>
-                <name>ukfLib</name>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\mtxLib.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\mtxLib.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\System_Types.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\ukfLib.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\code\ukfLib.h</name>
-                </file>
-            </group>
-            <file>
-                <name>$PROJ_DIR$\..\..\code\ukf_filter.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\code\ukf_filter.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\code\ukfCfg1.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\code\ukfCfg1.h</name>
             </file>
         </group>
         <file>
@@ -1585,28 +1579,16 @@
             <name>$PROJ_DIR$\..\..\code\image.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\code\imu.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\code\imu.h</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\code\mahony_filter.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\code\mahony_filter.h</name>
-        </file>
-        <file>
             <name>$PROJ_DIR$\..\..\code\small_driver_uart_control.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\code\small_driver_uart_control.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\code\waypoint.c</name>
+            <name>$PROJ_DIR$\..\..\code\wifi.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\code\waypoint.h</name>
+            <name>$PROJ_DIR$\..\..\code\wifi.h</name>
         </file>
     </group>
     <group>
@@ -2443,6 +2425,18 @@
             <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_imu660ra.h</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_imu660rb.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_imu660rb.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_imu660rc.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_imu660rc.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_imu963ra.c</name>
         </file>
         <file>
@@ -2489,6 +2483,12 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_oled.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_pmw3901.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_pmw3901.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\libraries\zf_device\zf_device_tft180.c</name>

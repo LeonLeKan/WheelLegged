@@ -1,21 +1,26 @@
 // mahony_filter.c
 #include "mahony_filter.h"
 
+bool mahony_stopped = false;
+
 // 初始化
-void Mahony_Init(MahonyFilter* filter, MahonyFilterParam* param) {
+void Mahony_Init(MahonyFilter* filter, MahonyFilterParam param) {
     filter->q[0] = 1.0f; filter->q[1] = 0.0f; 
     filter->q[2] = 0.0f; filter->q[3] = 0.0f;
     filter->integralFB[0] = filter->integralFB[1] = filter->integralFB[2] = 0.0f;
-    filter->param.Kp = param->Kp;
-    filter->param.Ki = param->Ki;
-    filter->param.dt = param->dt;
+    filter->param.Kp = param.Kp;
+    filter->param.Ki = param.Ki;
+    filter->param.dt = param.dt;
+    filter->last_yaw = 0;
 }
 
 // 核心更新函数
-void Mahony_Update(MahonyFilter* filter, float gyro[3], float acc[3]) {
-    float gx = gyro[0] * DEG_TO_RAD, gy = gyro[1] * DEG_TO_RAD, gz = gyro[2] * DEG_TO_RAD;
-    float ax = acc[0], ay = acc[1], az = acc[2];
-    float norm, vx, vy, vz, ex, ey, ez;
+void Mahony_Update(MahonyFilter* filter, double gyro[3], double acc[3]) {
+    if (mahony_stopped) return;
+    
+    double gx = gyro[0] * DEG_TO_RAD, gy = gyro[1] * DEG_TO_RAD, gz = gyro[2] * DEG_TO_RAD;
+    double ax = acc[0], ay = acc[1], az = acc[2];
+    double norm, vx, vy, vz, ex, ey, ez;
     
     // 1. 归一化加速度计数据
     norm = sqrt(ax*ax + ay*ay + az*az);
@@ -31,7 +36,7 @@ void Mahony_Update(MahonyFilter* filter, float gyro[3], float acc[3]) {
     // 3. 计算加速度计测量值与估计值的误差（叉积）
     ex = (ay*vz - az*vy);
     ey = (az*vx - ax*vz);
-    ez = (ax*vy - ay*vx);
+    ez = 0; // 不使用加速度计修正yaw
     
     // 4. 误差积分（消除陀螺仪零偏）
     if (filter->param.Ki > 0.0f) {
@@ -51,13 +56,13 @@ void Mahony_Update(MahonyFilter* filter, float gyro[3], float acc[3]) {
     gz += filter->param.Kp * ez;
     
     // 6. 使用校正后的角速度积分更新四元数
-    float q0 = filter->q[0], q1 = filter->q[1], q2 = filter->q[2], q3 = filter->q[3];
-    float half_dt = 0.5f * filter->param.dt;
+    double q0_last = filter->q[0], q1_last = filter->q[1], q2_last = filter->q[2], q3_last = filter->q[3];
+    double half_dt = 0.5f * filter->param.dt;
     
-    q0 += (-q1*gx - q2*gy - q3*gz) * half_dt;
-    q1 += ( q0*gx + q2*gz - q3*gy) * half_dt;
-    q2 += ( q0*gy - q1*gz + q3*gx) * half_dt;
-    q3 += ( q0*gz + q1*gy - q2*gx) * half_dt;
+    float q0 = q0_last + (-q1_last*gx - q2_last*gy - q3_last*gz) * half_dt;
+    float q1 = q1_last + ( q0_last*gx + q2_last*gz - q3_last*gy) * half_dt;
+    float q2 = q2_last + ( q0_last*gy - q1_last*gz + q3_last*gx) * half_dt;
+    float q3 = q3_last + ( q0_last*gz + q1_last*gy - q2_last*gx) * half_dt;
     
     // 7. 归一化四元数
     norm = sqrt(q0*q0 + q1*q1 + q2*q2 + q3*q3);
@@ -72,5 +77,47 @@ void Mahony_Update(MahonyFilter* filter, float gyro[3], float acc[3]) {
     
     filter->output.euler[0] = atan2f(2.0f * (q0 * q1 + q2 * q3), q0 * q0 - q1 * q1 - q2 * q2 + q3 * q3) * RAD_TO_DEG;
     filter->output.euler[1] = asinf(2.0f * (q0 * q2 - q1 * q3)) * RAD_TO_DEG;
-    filter->output.euler[2] = atan2f(2.0f * (q0 * q3 + q1 * q2), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * RAD_TO_DEG;
+    double yaw = atan2f(2.0f * (q0 * q3 + q1 * q2), -2*q2*q2 - 2*q3*q3 + 1) * RAD_TO_DEG;
+    
+    // yaw unwrap
+    double delta = yaw - filter->last_yaw;
+    if(delta > 180.f) delta -= 360;
+    if(delta < -180.f) delta += 360;
+
+    double yaw_output = filter->output.euler[2] + delta;
+    // 防止输出大于360
+    if(yaw_output > 360.f) yaw_output -= 360;
+    if(yaw_output < -360.f) yaw_output += 360;
+
+    filter->output.euler[2] = yaw_output;
+    
+    filter->last_yaw = yaw;
+}
+
+void Mahony_Reset_Yaw(MahonyFilter* filter)
+{
+    mahony_stopped = true; // 停止更新，防止重置过程中状态变化导致不一致
+    // 将当前yaw设为0，保持roll和pitch不变
+    double roll = filter->output.euler[0] * DEG_TO_RAD;
+    double pitch = filter->output.euler[1] * DEG_TO_RAD;
+    // 重新计算四元数，yaw设为0
+    double yaw = 0.0f; // 初始航向角假设为0
+    double cy = cosf(yaw * 0.5f);
+    double sy = sinf(yaw * 0.5f);
+    double cp = cosf(pitch * 0.5f);
+    double sp = sinf(pitch * 0.5f);
+    double cr = cosf(roll * 0.5f);
+    double sr = sinf(roll * 0.5f);
+    filter->q[0] = cr * cp * cy + sr * sp * sy; // q0
+    filter->q[1] = sr * cp * cy - cr * sp * sy; // q1
+    filter->q[2] = cr * sp * cy + sr * cp * sy; // q2
+    filter->q[3] = cr * cp * sy - sr * sp * cy; // q3
+    filter->last_yaw = 0.0f;
+    filter->output.euler[2] = 0.0f;
+    mahony_stopped = false; // 恢复更新
+}
+
+void Mahony_Stop(MahonyFilter* filter)
+{
+    mahony_stopped = true;
 }

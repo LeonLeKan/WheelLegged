@@ -2,53 +2,42 @@
 #include "imu.h"
 #include "small_driver_uart_control.h"
 #include "screen_interface.h"
-#include "ahrs_ui.h"
+#include "ins.h"
 #include "menu.h"
 #include "image.h"
 #include "servo.h"
 #include "control.h"
 #include "control_state.h"
 #include "connecting_rod.h"
-#include "save_manager.h"
+#include "save_manager_ui.h"
 #include "pid.h"
-
-#define WIFI_SSID_TEST "Hhhyt"
-#define WIFI_PASSWORD_TEST "18273645"
-#define TCP_TARGET_IP "192.168.137.1"
-#define TCP_TARGET_PORT "8086"
-#define WIFI_LOCAL_PORT "6666"
-
-#define BUTTON_LF (P20_0)
-#define BUTTON_RT (P20_1)
-#define BUTTON_DN (P20_2)
-#define BUTTON_UP (P20_3)
-#define BUTTON_OK (P21_5)
+#include "location.h"
+#include "wifi.h"
 
 void gpio_init_all(void);
 void imu_state_show(void);
-void start_imu_calibration(void);
+void start_imu_initial_estimation(void);
+void start_imu_auto_gyro_calibration(void);
 
-void wifi_init(void);
-void wifi_send_data(void);
+void remote_control(void);
+void calculate_route(void);
 
 uint8_t motion_mode1 = 0;
 uint8_t motion_mode2 = 0;
+uint8_t motion_mode3 = 0;
+uint8_t motion_mode4 = 0;
 
 MahonyFilterParam mahony_filter_param = {
     .Kp = 0.7f,
     .Ki = 0.005f,
     .dt = IMU_UPDATE_INTERVAL_MS / 1000.0f};
 
-ukf_filter_param_t ukf_filter_param = {
-    .dt = UKF_UPDATE_INTERVAL_MS / 1000.0,
-    .q = {0.0001, 0.0001, 0.000015, 0.001, 0.01},
-    .r = {0.0001, 0.000, 0.0000}};
+RotationCompensationParam rotation_compensation_param;
 
 bool showing_points = false;
 // 用于实现校准后的分层启动
 bool car_run_state = false;
 
-uint8_t cali_flag = 1;
 
 int main(void)
 {
@@ -67,6 +56,7 @@ int main(void)
     car_balance();
     gpio_init_all();
     para_zero();
+    uart_receiver_init();
 
     // 菜单初始化
     create_1st_menu();
@@ -78,7 +68,15 @@ int main(void)
     save_manager_init(ins_to_control_menu);
 
     // 如有需要，添加wifi
-    //wifi_init();
+    if (gpio_get_level(DIP_4) == 0)
+    {
+        wifi_init();
+    }
+
+    // imu转圈偏移初始化
+    rotation_compensation_param.rotation_thre = 180;
+    rotation_compensation_param.yaw_compensate_cw  = cwtucop->data_float;
+    rotation_compensation_param.yaw_compensate_ccw = ccwtucop->data_float;
 
     // 屏幕初始化
     pit_ms_init(SCREEN_UPDATE_PIT, SCREEN_UPDATE_INTERVAL_MS);
@@ -88,34 +86,75 @@ int main(void)
     // imu初始化
     pit_ms_init(IMU_UPDATE_PIT, IMU_UPDATE_INTERVAL_MS);
     pit_disable(IMU_UPDATE_PIT);
-    imu_init(&mahony_filter_param, &ukf_filter_param);
+    imu_init(mahony_filter_param, rotation_compensation_param);
 
+    // 菜单里读取陀螺仪固定偏置
+    imu_set_gyro_bias(rollbias->data_float, pitchbias->data_float, yawbias->data_float);
+
+    threshold = (uint8_t)thre->data_int;
+    error_calc_far_line = (uint8_t)farl->data_int;
+    error_calc_near_line = (uint8_t)nearl->data_int;
+
+    // 判断科目几，以及科目三的路径
+    if (testnum->data_int == 2)
+    {
+        calculate_route();
+        save_manager_load(testnum->data_int + road_idx[road_num]);
+    }
+    else if (testnum->data_int == 1 || testnum->data_int == 0)
+    {
+        save_manager_load(testnum->data_int);
+    }
+
+    // 设置曝光度
+    mt9v03x_set_exposure_time(imexp->data_int);
+   
+    if(gpio_get_level(DIP_3) == 0)
+    {
+        start_imu_auto_gyro_calibration();
+    }
+    else
+    {
+        start_imu_initial_estimation();
+    }
+
+    bool is_calib_saved = false;
     while (true)
     {
         // 主循环检测拨码的状态
-        motion_mode1 = gpio_get_level(P21_6);
-        motion_mode2 = gpio_get_level(P21_5);
+        motion_mode1 = gpio_get_level(DIP_1);
+        motion_mode2 = gpio_get_level(DIP_2);
+        motion_mode3 = gpio_get_level(DIP_3);
+        motion_mode4 = gpio_get_level(DIP_4);
 
         if (motion_mode1 == 1 && motion_mode2 == 1)
         {
             current_state = STATE_IDLE;
-            if (cali_flag == 1)
-            {
-                start_imu_calibration();
-                cali_flag = 0;
-            }
             imu_state_show();
+            
+            if(motion_mode3 == 0 && !is_calib_saved && imu.calib.is_calibrated == 1)
+            {
+                rollbias->data_float = imu.calib.gyro_bias[0];
+                pitchbias->data_float = imu.calib.gyro_bias[1];
+                yawbias->data_float = imu.calib.gyro_bias[2];
+                menu_save();
+                is_calib_saved = true;
+            }
+
             // 如果需要，添加wifi
-            //wifi_send_data();
+            if (motion_mode4 == 0)
+            {
+                wifi_send_data();
+                wifi_send_image();
+            }
         }
 
-        else if (motion_mode1 == 0 && motion_mode2 == 1)
+        else if (motion_mode1 == 0 && motion_mode2 == 0 && motion_mode3 == 1)
         {
             current_state = STATE_IDLE;
             ips200_clear();
             while (true)
             {
-                // 调菜单
                 if (menu_current_state == MENU_STATE_CONTROL)
                 {
                     show_menu();
@@ -127,33 +166,48 @@ int main(void)
                 }
 
                 // 如果需要，添加wifi
-                //wifi_send_data();
+                if (motion_mode4 == 0)
+                {
+                    wifi_send_data();
+                    // wifi_send_image();
+                }
             }
         }
 
-        else if ((motion_mode1 == 1 && motion_mode2 == 0)
-              || (motion_mode1 == 0 && motion_mode2 == 0))
+        else if (motion_mode1 == 0 && motion_mode2 == 1 && motion_mode3 == 1)
         {
             ips200_clear();
             current_state = STATE_STAND_UP;
             while (true)
             {
-                // 跑
-                if (image_block == 1)
+                remote_control();
+                if (image_block == 1 && mt9v03x_finish_flag == 1)
                 {
                     image_main();
+                    mt9v03x_finish_flag = 0;
                 }
+
                 // 如果需要，添加wifi
-                // wifi_send_data();
+                if (motion_mode4 == 0)
+                {
+                    wifi_send_data();
+                    // wifi_send_image();
+                }
             }
         }
     }
 }
 
-void start_imu_calibration(void)
+void start_imu_initial_estimation(void)
 {
-    system_delay_ms(300);       // 确保系统稳定
-    imu_start_calibration(3000); // 采集3000个样本进行校准
+    system_delay_ms(300);        // 确保系统稳定
+    imu_start_initial_estimation(500); // 采集500个样本进行初始姿态估计
+}
+
+void start_imu_auto_gyro_calibration(void)
+{
+    system_delay_ms(300);        // 确保系统稳定
+    imu_start_auto_gyro_calibration(3000); // 采集3000个样本进行校准
 }
 
 void gpio_init_all(void)
@@ -163,41 +217,10 @@ void gpio_init_all(void)
     gpio_init(BUTTON_DN, GPI, 1, GPI_PULL_UP);
     gpio_init(BUTTON_UP, GPI, 1, GPI_PULL_UP);
     gpio_init(BUTTON_OK, GPI, 1, GPI_PULL_UP);
-    gpio_init(P21_6, GPI, 1, GPI_PULL_UP);
-}
-
-void wifi_init(void)
-{
-    while (wifi_spi_init(WIFI_SSID_TEST, WIFI_PASSWORD_TEST))
-    {
-        printf("\r\n connect wifi failed. \r\n");
-        system_delay_ms(100);
-    }
-
-    if (0 == WIFI_SPI_AUTO_CONNECT)
-    {
-        while (wifi_spi_socket_connect(
-            "TCP",
-            TCP_TARGET_IP,
-            TCP_TARGET_PORT,
-            WIFI_LOCAL_PORT))
-        {
-            printf("\r\n Connect TCP Servers error, try again.");
-            system_delay_ms(100);
-        }
-    }
-
-    seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_WIFI_SPI);
-}
-
-void wifi_send_data(void)
-{
-    seekfree_assistant_oscilloscope_struct oscilloscope_data;
-    oscilloscope_data.data[0] = imu.output.euler[0];
-    oscilloscope_data.data[1] = imu.output.euler[1];
-    oscilloscope_data.data[2] = imu.output.euler[2];
-    oscilloscope_data.channel_num = 3;
-    seekfree_assistant_oscilloscope_send(&oscilloscope_data);
+    gpio_init(DIP_1, GPI, 1, GPI_PULL_UP);
+    gpio_init(DIP_2, GPI, 1, GPI_PULL_UP);
+    gpio_init(DIP_3, GPI, 1, GPI_PULL_UP);
+    gpio_init(DIP_4, GPI, 1, GPI_PULL_UP);
 }
 
 void imu_state_show(void)
@@ -207,10 +230,13 @@ void imu_state_show(void)
     case IMU_STATE_UNINIT:
         screen_printf(0, 0, "IMU State: UNINIT     ");
         break;
-    case IMU_STATE_CALIBRATING:
+    case IMU_STATE_INITIAL_ESTIMATION:
+        screen_printf(0, 0, "IMU State: ESTIMATING ");
+        break;
+    case IMU_STATE_AUTO_GYRO_CALIBRATING:
         screen_printf(0, 0, "IMU State: CALIBRATING");
         break;
-    case IMU_STATE_RUNNING:
+    case IMU_STATE_NORMAL:
         screen_printf(0, 0, "IMU State: RUNNING    ");
         break;
     case IMU_STATE_ERROR:
@@ -219,5 +245,97 @@ void imu_state_show(void)
     default:
         screen_printf(0, 0, "IMU State: UNKNOWN    ");
         break;
+    }
+}
+
+void handle_channel(void)
+{
+    static uint16 last_ch2 = 0, last_ch4 = 0, last_ch5 = 0;
+
+    if (last_ch2 == 0)
+    {
+        last_ch2 = uart_receiver.channel[2];
+        return;
+    }
+    if (last_ch4 == 0)
+    {
+        last_ch4 = uart_receiver.channel[4];
+        return;
+    }
+    if (last_ch5 == 0)
+    {
+        last_ch5 = uart_receiver.channel[5];
+        return;
+    }
+
+    if (last_ch2 != uart_receiver.channel[2])
+    {
+        // 在末尾添加当前位置点
+        waypoint_t point;
+        ins_get_current_position(&point.x, &point.y);
+        ins_add_current(&waypoints, waypoints.tail, point);
+    }
+
+    else if (last_ch4 != uart_receiver.channel[4])
+    {
+        // 特殊用途
+    }
+
+    else if (last_ch5 != uart_receiver.channel[5])
+    {
+        // 保存到Flash，存入当前激活的存档
+        waypoint_list_save_to_flash(&waypoints, INS_FLASH_START_PAGE + save_manager_instance.active_save_idx);
+    }
+    last_ch2 = uart_receiver.channel[2];
+    last_ch4 = uart_receiver.channel[4];
+    last_ch5 = uart_receiver.channel[5];
+}
+
+void remote_control(void)
+{
+    if (1 == uart_receiver.finsh_flag)
+    {
+        speed_loop.Target = (uart_receiver.channel[1] - 800) / 200.0f;
+        yaw_test_bias = uart_receiver.channel[0] - 800;
+        if (uart_receiver.channel[3] == 1792 && test_state == 0)
+        {
+            test_state = 1;
+        }
+        handle_channel();
+        uart_receiver.finsh_flag = 0;
+    }
+}
+
+void calculate_route(void)
+{
+    int temp = road2->data_int;
+    uint8_t digits[5] = {0};
+    int count = 0;
+
+    if(temp == 0) 
+    {
+        digits[0] = 0;
+        count = 1;
+    } 
+    else 
+    {
+        while(temp > 0 && count < 5) 
+        {
+            digits[count] = (uint8_t)(temp % 10);
+            count++;
+            temp /= 10;
+        }
+    }
+    
+    for(int i = 0; i < 5; i++) 
+    {
+        if(i < count) 
+        {
+            road_idx[i] = digits[count - 1 - i];
+        } 
+        else 
+        {
+            road_idx[i] = 0;
+        }
     }
 }
