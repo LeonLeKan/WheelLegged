@@ -17,9 +17,19 @@ volatile uint8_t speed_0_change = 0;
 
 static void accelerate_to_forward(void)
 {
-    if (current_state == STATE_ACCELERATE && (speed_loop.Actual > ((float)speed->data_int / 100.0f - 1.0f)))
+    if (testnum->data_int == 1)
     {
-        current_state = STATE_FORWARD;
+        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > ((float)speed->data_int / 100.0f - 2.0f)))
+        {
+            current_state = STATE_FORWARD;
+        }
+    }
+    else if (testnum->data_int == 0 || testnum->data_int == 2)
+    {
+        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed->data_int / 100.0f))
+        {
+            current_state = STATE_FORWARD;
+        }
     }
 }
 
@@ -64,7 +74,7 @@ static void deaccelerate_within_0(void)
 
 static void deaccelerate_to_thunder(void)
 {
-    if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 1.0f))
+    if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 3.0f))
     {
         current_state = STATE_TRA_THUNDER;
     }
@@ -73,7 +83,7 @@ static void deaccelerate_to_thunder(void)
 static void decline_to_single_side_stand(void)
 {
     if (current_state == STATE_DECLINE_FRONT_SINGLE_SIDE
-      && speed_loop.Actual < (float)snspeed->data_int / 100.0f)
+      && speed_loop.Actual < (float)snspeed->data_int / 100.0f + 2.0f)
     {
         current_state = STATE_STAND_FRONT_SINGLE_SIDE;
     }
@@ -141,7 +151,7 @@ static void quit_single_side(void)
 static void decline_to_stairs(void)
 {
     if (current_state == STATE_DE_STAIRS
-      && speed_loop.Actual < (float)stspeed->data_int / 100.0f
+      && speed_loop.Actual < ((float)stspeed->data_int / 100.0f + 2.0f)
       && current_target)
     {
         current_state = STATE_TRA_STAIRS;
@@ -253,7 +263,7 @@ static void quit_follow_stairs(void)
 
 static void de_to_tra_jolt(void)
 {
-    if (current_state == STATE_DE_JOLT && speed_loop.Actual <= (float)jospeed->data_int / 100.0f)
+    if (current_state == STATE_DE_JOLT && speed_loop.Actual <= (float)jospeed->data_int / 100.0f + 2.0f)
     {
         current_state = STATE_TRA_JOLT;
     }
@@ -390,6 +400,9 @@ void control_state_update(void)
         break;
     case STATE_JUMP_UP:
         control_state_jump_up();
+        break;
+    case STATE_TRA_FOLLOW:
+        control_state_tra_follow();
         break;
     case STATE_FOLLOW_STAIRS:
         control_state_follow_stairs();

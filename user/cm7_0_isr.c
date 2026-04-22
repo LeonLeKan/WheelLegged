@@ -72,7 +72,8 @@ void pit0_ch2_isr() // 定时器通道 2 周期中断服务函数
         current_state == STATE_DE_JOLT     ||
         current_state == STATE_TRA_JOLT    ||
         current_state == STATE_DE_STAIRS   ||
-        current_state == STATE_TRA_STAIRS  &&
+        current_state == STATE_TRA_STAIRS  ||
+        current_state == STATE_TRA_FOLLOW  &&
         disturb_flag  == 0)
     {
         if (testnum->data_int == 0)

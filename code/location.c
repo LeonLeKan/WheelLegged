@@ -265,6 +265,7 @@ void location_update_2_2(void)
 
 void location_update_2_3(void)
 {
+    static uint8_t tra_follow_stairs_flag = 0;
     waypoint_list_t *list = save_manager_get_active_save();
     
     if (!current_target)
@@ -294,6 +295,12 @@ void location_update_2_3(void)
     if (fabs(dx) < XYMIN_BIA_2 && fabs(dy) < XYMIN_BIA_2)
     {
         advance_to_next_waypoint();
+    }
+
+    if (current_target && !current_target->next && tra_follow_stairs_flag == 0) 
+    {
+        current_state = STATE_TRA_FOLLOW;
+        tra_follow_stairs_flag = 1;
     }
 
     if (!current_target) 
