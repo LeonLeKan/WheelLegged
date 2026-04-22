@@ -97,8 +97,8 @@ void control_state_accelerate(void)
         speed_loop.Target = (float)speed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
-        servo_set(50.0f, 130.0f,
-                  50.0f, 130.0f);
+        servo_set(50.0f, 120.0f,
+                  60.0f, 130.0f);
 
         PID_Update_Lo(&yaw_loop);
     }
