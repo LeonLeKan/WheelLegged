@@ -83,7 +83,7 @@ static void deaccelerate_to_thunder(void)
 static void decline_to_single_side_stand(void)
 {
     if (current_state == STATE_DECLINE_FRONT_SINGLE_SIDE
-      && speed_loop.Actual < (float)snspeed->data_int / 100.0f + 2.0f)
+      && speed_loop.Actual < (float)snspeed->data_int / 100.0f)
     {
         current_state = STATE_STAND_FRONT_SINGLE_SIDE;
     }
@@ -151,7 +151,7 @@ static void quit_single_side(void)
 static void decline_to_stairs(void)
 {
     if (current_state == STATE_DE_STAIRS
-      && speed_loop.Actual < ((float)stspeed->data_int / 100.0f + 2.0f)
+      && speed_loop.Actual < ((float)stspeed->data_int / 100.0f)
       && current_target)
     {
         current_state = STATE_TRA_STAIRS;
