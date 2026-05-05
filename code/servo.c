@@ -2,10 +2,10 @@
 
 void servo_init(void)
 {
-    pwm_init(SERVO_MOTOR_PWM1, SERVO_MOTOR_FREQ, 583);
-    pwm_init(SERVO_MOTOR_PWM2, SERVO_MOTOR_FREQ, 583);
-    pwm_init(SERVO_MOTOR_PWM3, SERVO_MOTOR_FREQ, 917);
-    pwm_init(SERVO_MOTOR_PWM4, SERVO_MOTOR_FREQ, 917);
+    pwm_init(SERVO_MOTOR_PWM1, SERVO_MOTOR_FREQ, 750);
+    pwm_init(SERVO_MOTOR_PWM2, SERVO_MOTOR_FREQ, 750);
+    pwm_init(SERVO_MOTOR_PWM3, SERVO_MOTOR_FREQ, 750);
+    pwm_init(SERVO_MOTOR_PWM4, SERVO_MOTOR_FREQ, 750);
 }
 
 void servo1_set_angle(float angle)
@@ -34,10 +34,10 @@ void servo4_set_angle(float angle)
 
 void car_balance(void)
 {
-    servo1_set_angle(60.0f);
-    servo2_set_angle(60.0f);
-    servo3_set_angle(120.0f);
-    servo4_set_angle(120.0f);
+    servo1_set_angle(90.0f);
+    servo2_set_angle(90.0f);
+    servo3_set_angle(90.0f);
+    servo4_set_angle(90.0f);
 }
 
 static float clamp_angle(float angle) 

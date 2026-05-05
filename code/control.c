@@ -367,10 +367,22 @@ void control_state_forward(void)
                 speed_loop.Target = (float)speed->data_int / 100.0f;
             }
         }
-        else if (testnum->data_int == 1 || testnum->data_int == 2)
+        else if (testnum->data_int == 1)
         {
             speed_loop.Target = (float)speed->data_int / 100.0f;
         }
+        else if (testnum->data_int == 2)
+        {
+            if (speed_2_change == 1)
+            {
+                speed_loop.Target = (float)speedl->data_int / 100.0f;
+            }
+            else if(speed_2_change == 0)
+            {
+                speed_loop.Target = (float)speed->data_int / 100.0f;
+            }
+        }
+
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
@@ -721,13 +733,13 @@ void control_state_jump_up(void)
                   30.0f, 30.0f);
     }
 
-    else if (count >= 17 && count < 30)
+    else if (count >= 17 && count < 40)
     {
-        servo_set(110.0f, 110.0f,
-                  70.0f, 70.0f);
+        servo_set(100.0f, 100.0f,
+                  80.0f, 80.0f);
     }
 
-    else if (count >= 30)
+    else if (count >= 40)
     {
         count = 0;
         image_block = 1;
@@ -876,7 +888,7 @@ void control_state_close_stairs(void)
 
     small_driver_set_duty((int16)(aspeed_loop.Out), (int16)(-aspeed_loop.Out));
 
-    if (close_delay >= 40)
+    if (close_delay >= 30)
     {
         close_delay = 0;
         angle_loop2.ErrorInt = 0.0f;

@@ -14,6 +14,9 @@ volatile float yaw_thunder_memory = 0.0f;
 volatile uint8_t jolt_lock = 0;
 volatile uint32_t jolt_lock_count = 0;
 volatile uint8_t speed_0_change = 0;
+volatile uint8_t speed_2_change = 0;
+volatile uint8_t jump_lock = 0;
+volatile uint32_t jump_lock_count = 0;
 
 static void accelerate_to_forward(void)
 {
@@ -77,6 +80,18 @@ static void deaccelerate_to_thunder(void)
     if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 3.0f))
     {
         current_state = STATE_TRA_THUNDER;
+    }
+}
+
+static void deaccelerate_within_2(void)
+{
+    if (current_state == STATE_FORWARD && (fabs(imu.output.euler[2]) > 45.0f && fabs(imu.output.euler[2]) < 135.0f))
+    {
+        speed_2_change = 1;
+    }
+    else
+    {
+        speed_2_change = 0;
     }
 }
 
@@ -160,7 +175,7 @@ static void decline_to_stairs(void)
 
 static void judge_time_to_jump(void)
 {
-    if (current_state == STATE_FIND_JUMP)
+    if (current_state == STATE_FIND_JUMP && jump_lock == 0)
     {
         if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && error <= 8)
         {
@@ -168,6 +183,7 @@ static void judge_time_to_jump(void)
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
+            jump_lock = 1;
         }
         else if (stair_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1 && error <= 8)
         {
@@ -175,6 +191,7 @@ static void judge_time_to_jump(void)
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
+            jump_lock = 1;
         }
         else if (stair_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1 && error <= 8)
         {
@@ -182,6 +199,7 @@ static void judge_time_to_jump(void)
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
+            jump_lock = 1;
         }
         else if (jump_count >= 3)
         {
@@ -199,6 +217,15 @@ static void judge_time_to_jump(void)
                 current_state = STATE_ACCELERATE;
                 disturb_flag = 0;
             }
+        }
+    }
+    if (jump_lock == 1)
+    {
+        jump_lock_count++;
+        if (jump_lock_count >= 100)
+        {
+            jump_lock = 0;
+            jump_lock_count = 0;
         }
     }
 }
@@ -326,6 +353,7 @@ void control_state_switch(void)
 
     else if (testnum->data_int == 2 && (road_idx[road_num] == 1 || road_idx[road_num] == 5))
     {
+        deaccelerate_within_2();
         decline_to_single_side_stand();
         stand_to_single_side();
         quit_single_side();
@@ -333,17 +361,20 @@ void control_state_switch(void)
 
     else if (testnum->data_int == 2 && road_idx[road_num] == 2)
     {
+        deaccelerate_within_2();
         decline_to_stairs();
         judge_time_to_jump();
     }
 
     else if (testnum->data_int == 2 && road_idx[road_num] == 3)
     {
+        deaccelerate_within_2();
         quit_follow_stairs();
     }
 
     else if (testnum->data_int == 2 && (road_idx[road_num] == 4 || road_idx[road_num] == 6))
     {
+        deaccelerate_within_2();
         de_to_tra_jolt();
         quit_jolt();
     }

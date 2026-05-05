@@ -200,13 +200,13 @@ int main(void)
 
 void start_imu_initial_estimation(void)
 {
-    system_delay_ms(300);        // 确保系统稳定
+    system_delay_ms(800);        // 确保系统稳定
     imu_start_initial_estimation(500); // 采集500个样本进行初始姿态估计
 }
 
 void start_imu_auto_gyro_calibration(void)
 {
-    system_delay_ms(300);        // 确保系统稳定
+    system_delay_ms(800);        // 确保系统稳定
     imu_start_auto_gyro_calibration(3000); // 采集3000个样本进行校准
 }
 

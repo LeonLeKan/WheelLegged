@@ -127,8 +127,6 @@ static void read_encoder_data(void)
     imu.encoder.v_right = -(double)motor_value.receive_right_speed_data * PI * WHEEL_D / 60.0f;
 
     imu.encoder.speed = (imu.encoder.v_left + imu.encoder.v_right) / 2.0f;
-
-    imu.encoder.yaw_rate = (imu.encoder.v_right - imu.encoder.v_left) / WHEELBASE * RAD_TO_DEG;
 }
 
 static void set_mahony_initial_estimation(void)
