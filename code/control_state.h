@@ -22,7 +22,6 @@ typedef enum {
     STATE_JUMP_UP,
     STATE_TRA_FOLLOW,
     STATE_FOLLOW_STAIRS,
-    STATE_CLOSE_STAIRS,
     STATE_DE_JOLT,
     STATE_TRA_JOLT,
     STATE_JOLT,
@@ -39,9 +38,14 @@ extern volatile float yaw_thunder_memory;
 extern volatile uint8_t jolt_lock;
 extern volatile uint32_t jolt_lock_count;
 extern volatile uint8_t speed_0_change;
+extern volatile uint8_t speed_1_change; 
 extern volatile uint8_t speed_2_change;
 extern volatile uint8_t jump_lock;
 extern volatile uint32_t jump_lock_count;
+extern volatile uint8_t follow_lock;
+extern volatile uint32_t follow_lock_count_1;
+extern volatile uint32_t follow_lock_count_2;
+extern volatile uint8_t follow_speed_change;
 
 void control_state_switch(void);
 void control_state_update(void);

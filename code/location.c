@@ -12,6 +12,7 @@ uint8_t road_num = 0;
 uint8_t disturb_flag = 0;
 float last_raw_yaw = 0.0f;
 float target_yaw = 0.0f;
+uint8_t thunder_count = 0;
 
 static double direction_calculate(double x_target, double y_target, double x_now, double y_now)
 {
@@ -113,7 +114,7 @@ void location_update_1(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
     if (sqrt(dx * dx + dy * dy) < xythun->data_float && sqrt(dx * dx + dy * dy) >= XYMIN_BIA_1 &&
-        current_state != STATE_TRA_THUNDER && current_target->next)
+        current_state != STATE_TRA_THUNDER && thunder_count < thnum->data_int)
     {
         current_state = STATE_DE_THUNDER;
     }
@@ -125,8 +126,9 @@ void location_update_1(void)
         {
             current_state = STATE_DEACCELERATE;
         }
-        else
+        if (thunder_count < thnum->data_int)
         {
+            thunder_count++;
             yaw_thunder_memory = yaw_loop.Actual;
             current_state = STATE_THUNDER;
         }
@@ -265,7 +267,6 @@ void location_update_2_2(void)
 
 void location_update_2_3(void)
 {
-    static uint8_t tra_follow_stairs_flag = 0;
     waypoint_list_t *list = save_manager_get_active_save();
     
     if (!current_target)
@@ -297,10 +298,9 @@ void location_update_2_3(void)
         advance_to_next_waypoint();
     }
 
-    if (current_target && !current_target->next && tra_follow_stairs_flag == 0) 
+    if (current_target && !current_target->next) 
     {
         current_state = STATE_TRA_FOLLOW;
-        tra_follow_stairs_flag = 1;
     }
 
     if (!current_target) 

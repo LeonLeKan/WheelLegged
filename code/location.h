@@ -19,6 +19,7 @@ extern uint8_t road_num;
 extern uint8_t disturb_flag;
 extern float last_raw_yaw;
 extern float target_yaw;
+extern uint8_t thunder_count;
 
 void location_update_0(void);
 void location_update_1(void);
