@@ -36,6 +36,7 @@ void control_state_de_jolt(void);
 void control_state_tra_jolt(void);
 void control_state_jolt(void);
 void control_state_test(void);
+void control_state_uturn(void);
 void control_state_stop(void);
 
 void limit_min_output(int16 *output, int16 limit);

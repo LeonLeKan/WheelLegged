@@ -77,7 +77,15 @@ void location_update_0(void)
     double dy = y_tgt - y_now;
     if (fabs(dx) < XYMIN_BIA_0 && fabs(dy) < XYMIN_BIA_0)
     {
-        advance_to_next_waypoint();
+        if (current_target->id_startup == 3)
+        {
+            current_state = STATE_UTURN;
+            advance_to_next_waypoint();
+        }
+        else
+        {
+            advance_to_next_waypoint();
+        }
     }
 
     if (!current_target) 

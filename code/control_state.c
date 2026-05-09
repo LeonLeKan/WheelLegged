@@ -69,6 +69,13 @@ static void deaccelerate_within_0(void)
                 speed_0_change = 1;
             }
         }
+        if(current_target->id_startup == 3)
+        {
+            if (dis_1 < dis1->data_float)
+            {
+                speed_0_change = 2;
+            }
+        }
         else
         {
             speed_0_change = 0;
@@ -482,6 +489,9 @@ void control_state_update(void)
         break;
     case STATE_TEST:
         control_state_test();
+        break;
+    case STATE_UTURN:
+        control_state_uturn();
         break;
     case STATE_STOP:
         control_state_stop();
