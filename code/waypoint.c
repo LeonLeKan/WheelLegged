@@ -100,6 +100,18 @@ void waypoint_list_clear(waypoint_list_t *list)
     list->size = 1;
 }
 
+void waypoint_list_id_init(waypoint_list_t* list)
+{
+    uint16_t id = 0;
+    waypoint_node_t* now_node = list->head;
+    while(now_node)
+    {
+        now_node->id_startup = id++;
+        now_node = now_node->next;
+    }
+}
+
+
 union double_converter
 {
     double d;
@@ -160,6 +172,7 @@ bool waypoint_list_load_from_flash(waypoint_list_t *list, uint32 flash_page)
         waypoint_list_add_next(list, list->tail,
             (waypoint_t) { t_x, t_y }, (waypoint_screen_param_t) { t_x, t_y, 0, 0 });
     }
+    waypoint_list_id_init(list);
     return true;
 }
 
