@@ -43,7 +43,7 @@ static void accelerate_to_forward(void)
 
 static void deaccelerate_to_stop(void)
 {
-    if (current_state == STATE_DEACCELERATE && (speed_loop.Actual < 0.1f))
+    if (current_state == STATE_DEACCELERATE && (speed_loop.Actual < 1.0f))
     {
         current_state = STATE_STOP;
     }
@@ -426,9 +426,6 @@ void control_state_update(void)
     {
     case STATE_IDLE:
         control_state_idle();
-        break;
-    case STATE_STAND_UP:
-        control_state_stand_up();
         break;
     case STATE_STAND_STILL:
         control_state_stand_still();

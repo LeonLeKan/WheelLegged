@@ -5,7 +5,6 @@
 
 typedef enum {
     STATE_IDLE,
-    STATE_STAND_UP,
     STATE_STAND_STILL,
     STATE_ACCELERATE,
     STATE_DEACCELERATE,

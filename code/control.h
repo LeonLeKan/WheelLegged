@@ -10,12 +10,11 @@ extern volatile uint8_t image_block;
 extern volatile float roll_base;
 extern volatile float yaw_test_bias;
 extern volatile uint8_t jump_count;
-extern volatile uint8_t follow_stairs_count;
+extern volatile float yaw_de_final;
 
 void control_init(void);
 
 void control_state_idle(void);
-void control_state_stand_up(void);
 void control_state_stand_still(void);
 void control_state_accelerate(void);
 void control_state_deaccelerate(void);

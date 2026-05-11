@@ -11,6 +11,7 @@ volatile uint8_t image_block = 0;
 volatile float roll_base = 0.0f;
 volatile float yaw_test_bias = 0.0f;
 volatile uint8_t jump_count = 0;
+volatile float yaw_de_final = 0.0f;
 
 void control_init(void)
 {
@@ -25,28 +26,6 @@ void control_state_idle(void)
     para_zero();
     out_zero();
     small_driver_set_duty(0, 0);
-}
-
-void control_state_stand_up(void)
-{
-    static uint32_t count = 0;
-    count++;
-    if (count >= 400)
-    {
-        an1pid_update(an1kp->data_float, an1ki->data_float, an1kd->data_float);
-
-        angle_loop1.Target = pinit->data_float;
-        angle_loop1.Actual = imu.output.euler[1];
-        PID_Update_Lo(&angle_loop1);
-
-        small_driver_set_duty((int16)angle_loop1.Out, (int16)-angle_loop1.Out);
-
-        if (count >= 450)
-        {
-            count = 0;
-            current_state = STATE_STAND_STILL;
-        }
-    }
 }
 
 void control_state_stand_still(void)
@@ -120,7 +99,16 @@ void control_state_deaccelerate(void)
 
         servo_set(130.0f, 50.0f,
                   130.0f, 50.0f);
+
+        yaw_loop.Target = yaw_de_final;
+        yaw_loop.Actual = imu.output.euler[2];
+        PID_Update_Lo(&yaw_loop);
     }
+
+    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual;
+    turn_loop2.Actual = -imu.body.gyro[2];
+    PID_Update_Lo(&turn_loop2);
+
     angle_loop2.Target = pzero->data_float;
     angle_loop2.Actual = imu.output.euler[1];
     PID_Update_Lo(&angle_loop2);
@@ -321,7 +309,7 @@ void control_state_thunder(void)
             yaw_thunder_flag = 0;
             yaw_accumulate = 0.0f;
             speed_loop.Actual = 0.0f;
-            current_state = STATE_ACCELERATE;
+            current_state = STATE_FORWARD;
         }
     }
 }
