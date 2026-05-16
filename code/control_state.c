@@ -76,7 +76,7 @@ static void deaccelerate_within_0(void)
                 speed_0_change = 2;
             }
         }
-        else
+        if(current_target->id_startup != 3 && dis_0 >= dis0->data_float)
         {
             speed_0_change = 0;
         }

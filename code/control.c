@@ -1006,7 +1006,7 @@ void control_state_test(void)
 {
     static uint16_t last_channel_0 = 0;
 
-    if (last_channel_0 != 800 && uart_receiver.channel[0] == 800)
+    if (fabs(last_channel_0 - 777) > 5.0f && fabs(uart_receiver.channel[0] - 777) <= 5.0f)
     {
         yaw_loop.Target = imu.output.euler[2];
     }
@@ -1054,7 +1054,7 @@ void control_state_test(void)
     aspeed_loop.Actual = imu.output.gyro[1];
     PID_Update_Lo(&aspeed_loop);
 
-    if (uart_receiver.channel[0] == 800)
+    if (fabs(uart_receiver.channel[0] - 777) <= 5.0f)
     {
         small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
     }
