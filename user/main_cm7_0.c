@@ -114,7 +114,7 @@ int main(void)
     }
     else if (gpio_get_level(DIP_3) == 1 && gpio_get_level(DIP_1) == 1 && gpio_get_level(DIP_2) == 1)
     {
-        start_imu_initial_estimation();
+        imu_skip_initial_estimation();
     }
 
     bool is_calib_saved = false;
