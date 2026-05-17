@@ -309,7 +309,7 @@ void control_state_thunder(void)
             yaw_thunder_flag = 0;
             yaw_accumulate = 0.0f;
             speed_loop.Actual = 0.0f;
-            current_state = STATE_FORWARD;
+            current_state = STATE_ACCELERATE;
         }
     }
 }
@@ -354,6 +354,10 @@ void control_state_forward(void)
                 else if (speed_1_change == 0)
                 {
                     speed_loop.Target = (float)speed->data_int / 100.0f;
+                }
+                else if (speed_1_change == 2)
+                {
+                    speed_loop.Target = 2.0f;
                 }
             }
             else if (thunder_count < thnum->data_int)
@@ -475,8 +479,8 @@ void control_state_stand_front_single_side(void)
 
         filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
 
-        servo_set(115.0f - filtered_speed_out, 115.0f + filtered_speed_out,
-                  65.0f - filtered_speed_out, 65.0f + filtered_speed_out);
+        servo_set(80.0f - filtered_speed_out, 100.0f + filtered_speed_out,
+                  100.0f - filtered_speed_out, 80.0f + filtered_speed_out);
 
         turn_loop1.Target = 0.0f;
         turn_loop1.Actual = (float)error;
@@ -544,8 +548,8 @@ void control_state_single_side(void)
 
     filtered_single_out = single_alpha * single_loop.Out + (1.0f - single_alpha) * filtered_single_out;
 
-    servo_set(115.0f - filtered_speed_out - filtered_single_out, 115.0f + filtered_speed_out + filtered_single_out,
-              65.0f - filtered_speed_out + filtered_single_out, 65.0f + filtered_speed_out - filtered_single_out);
+    servo_set(80.0f - filtered_speed_out - filtered_single_out, 100.0f + filtered_speed_out + filtered_single_out,
+              100.0f - filtered_speed_out + filtered_single_out, 80.0f + filtered_speed_out - filtered_single_out);
 
     turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual;
     turn_loop2.Actual = -imu.body.gyro[2];
@@ -719,14 +723,14 @@ void control_state_jump_up(void)
 
     if (count < 17)
     {
-        servo_set(150.0f, 150.0f,
-                  30.0f, 30.0f);
+        servo_set(20.0f, 160.0f,
+                  160.0f, 20.0f);
     }
 
     else if (count >= 17 && count < 40)
     {
-        servo_set(100.0f, 100.0f,
-                  80.0f, 80.0f);
+        servo_set(110.0f, 70.0f,
+                  70.0f, 110.0f);
     }
 
     else if (count >= 40)
@@ -1006,7 +1010,7 @@ void control_state_test(void)
 {
     static uint16_t last_channel_0 = 0;
 
-    if (fabs(last_channel_0 - 777) > 5.0f && fabs(uart_receiver.channel[0] - 777) <= 5.0f)
+    if (fabs(last_channel_0 - 777) > 50.0f && fabs(uart_receiver.channel[0] - 777) <= 50.0f)
     {
         yaw_loop.Target = imu.output.euler[2];
     }
@@ -1054,7 +1058,7 @@ void control_state_test(void)
     aspeed_loop.Actual = imu.output.gyro[1];
     PID_Update_Lo(&aspeed_loop);
 
-    if (fabs(uart_receiver.channel[0] - 777) <= 5.0f)
+    if (fabs(uart_receiver.channel[0] - 777) <= 50.0f)
     {
         small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
     }
@@ -1073,7 +1077,7 @@ void control_state_uturn(void)
     servo_set(90.0f, 90.0f,
               90.0f, 90.0f);
 
-    turn_loop2.Target = -rospeed->data_int;
+    turn_loop2.Target = 140.0f;
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 

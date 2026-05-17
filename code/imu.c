@@ -224,7 +224,7 @@ static void process_auto_calibration(void)
         imu.calib.gyro_bias[1] /= imu.calib.target_samples;
         imu.calib.gyro_bias[2] /= imu.calib.target_samples;
         imu.calib.is_calibrated = true;
-        imu.state = IMU_STATE_INITIAL_ESTIMATION;
+        imu.state = IMU_STATE_UNINIT;
     }
 }
 

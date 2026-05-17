@@ -72,7 +72,7 @@ int main(void)
     }
 
     // imu转圈偏移初始化
-    rotation_compensation_param.rotation_thre = 180;
+    rotation_compensation_param.rotation_thre = 120;
     rotation_compensation_param.yaw_compensate_cw = cwtucop->data_float;
     rotation_compensation_param.yaw_compensate_ccw = ccwtucop->data_float;
 
@@ -109,6 +109,7 @@ int main(void)
 
     if (gpio_get_level(DIP_3) == 0 && gpio_get_level(DIP_1) == 1 && gpio_get_level(DIP_2) == 1)
     {
+        imu_skip_initial_estimation();
         start_imu_auto_gyro_calibration();
         cali_finish_flag = 1;
     }
@@ -312,7 +313,7 @@ void remote_control(void)
     if (1 == uart_receiver.finsh_flag)
     {
         speed_loop.Target = (uart_receiver.channel[1] - 808) / 200.0f;
-        yaw_test_bias = uart_receiver.channel[0] - 777;
+        yaw_test_bias = (uart_receiver.channel[0] - 777) * 1.5;
         if (uart_receiver.channel[3] == 1792 && test_state == 0)
         {
             test_state = 1;

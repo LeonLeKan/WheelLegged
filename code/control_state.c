@@ -62,21 +62,21 @@ static void deaccelerate_within_0(void)
 
         double dis_0 = sqrt((x_within_tgt - x_within_tgt_next) * (x_within_tgt - x_within_tgt_next) + (y_within_tgt - y_within_tgt_next) * (y_within_tgt - y_within_tgt_next));
         double dis_1 = sqrt((x_within_now - x_within_tgt) * (x_within_now - x_within_tgt) + (y_within_now - y_within_tgt) * (y_within_now - y_within_tgt));
-        if (dis_0 < dis0->data_float)
+        if (current_target->id_startup != tunum->data_int && dis_0 < dis0->data_float)
         {
             if (dis_1 < dis1->data_float)
             {
                 speed_0_change = 1;
             }
         }
-        if(current_target->id_startup == 3)
+        if(current_target->id_startup == tunum->data_int)
         {
             if (dis_1 < dis1->data_float)
             {
                 speed_0_change = 2;
             }
         }
-        if(current_target->id_startup != 3 && dis_0 >= dis0->data_float)
+        if(current_target->id_startup != tunum->data_int && dis_0 >= dis0->data_float)
         {
             speed_0_change = 0;
         }
@@ -100,14 +100,21 @@ static void deaccelerate_within_1(void)
 
         double dis_0 = sqrt((x_within_tgt - x_within_tgt_next) * (x_within_tgt - x_within_tgt_next) + (y_within_tgt - y_within_tgt_next) * (y_within_tgt - y_within_tgt_next));
         double dis_1 = sqrt((x_within_now - x_within_tgt) * (x_within_now - x_within_tgt) + (y_within_now - y_within_tgt) * (y_within_now - y_within_tgt));
-        if (dis_0 < dis0->data_float)
+        if (current_target->id_startup != tunum->data_int && dis_0 < dis0->data_float)
         {
             if (dis_1 < dis1->data_float)
             {
                 speed_1_change = 1;
             }
         }
-        else
+        if(current_target->id_startup == tunum->data_int)
+        {
+            if (dis_1 < dis1->data_float)
+            {
+                speed_1_change = 2;
+            }
+        }
+        if(current_target->id_startup != tunum->data_int && dis_0 >= dis0->data_float)
         {
             speed_1_change = 0;
         }
@@ -199,6 +206,7 @@ static void quit_single_side(void)
                 image_block = 0;
                 road_num++;
                 save_manager_load(testnum->data_int + road_idx[road_num]);
+                speed_loop.ErrorInt = 0.0f;
                 current_state = STATE_ACCELERATE;
                 disturb_flag = 0;
             }
@@ -257,6 +265,7 @@ static void judge_time_to_jump(void)
                 ins_reset();
                 road_num++;
                 save_manager_load(testnum->data_int + road_idx[road_num]);
+                speed_loop.ErrorInt = 0.0f;
                 current_state = STATE_ACCELERATE;
                 disturb_flag = 0;
             }
@@ -285,7 +294,7 @@ static void quit_follow_stairs(void)
         if (follow_lock == 1)
         {
             follow_lock_count_1++;
-            if (follow_lock_count_1 >= 120)
+            if (follow_lock_count_1 >= 100)
             {
                 follow_lock = 2;
                 follow_lock_count_1 = 0;
@@ -315,6 +324,7 @@ static void quit_follow_stairs(void)
             image_block = 0;
             road_num++;
             save_manager_load(testnum->data_int + road_idx[road_num]);
+            speed_loop.ErrorInt = 0.0f;
             current_state = STATE_ACCELERATE;
             disturb_flag = 0;
         }
@@ -323,7 +333,7 @@ static void quit_follow_stairs(void)
 
 static void de_to_tra_jolt(void)
 {
-    if (current_state == STATE_DE_JOLT && speed_loop.Actual <= (float)jospeed->data_int / 100.0f + 2.0f)
+    if (current_state == STATE_DE_JOLT && speed_loop.Actual <= (float)jospeed->data_int / 100.0f + 0.5f)
     {
         current_state = STATE_TRA_JOLT;
     }
