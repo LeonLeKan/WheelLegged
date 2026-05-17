@@ -1,7 +1,13 @@
 #include "image.h"
 
 #if ONBOARD
+#include "control_state.h"
 uint8_t* fullBuffer = &mt9v03x_image[0][0];
+#endif
+
+#if ONBOARD
+#else
+uint8_t follow_lock;    // 调试用
 #endif
 
 int f[10 * CAMERA_H];//考察连通域联通性
@@ -34,6 +40,7 @@ int error_calc_far_line = 40;
 uint8_t threshold = 120;    //阈值
 bool on_single_side_road = 0;   // 是否进入单边桥之前的白色赛道
 int jolt_end_cnt_thre = 30;
+int back_stairs_end_cnt_thre = 15;
 //////////////////////// ////////// //////////////////
 
 
@@ -80,6 +87,7 @@ float single_dis = 0;
 
 // 颠簸路段
 int jolt_end_judge_cnt = 0;
+int back_stairs_end_judge_cnt = 0;
 
 
 //补线需要的数据
@@ -2776,6 +2784,10 @@ void calc_stair_distance()
     else {
         stair_distance = NEAR_LINE - road_end;
     }
+    if(stair_distance == 0)
+    {
+        stair_distance = 120;
+    }
 }
 
 // 三级台阶补线
@@ -2852,7 +2864,7 @@ void front_stairs_end_check()
                 white_count++;
         }
     }
-    if (white_count < 600)
+    if (white_count < 400)
     {
         front_stairs_end_flag = 1;
     }
@@ -2872,12 +2884,19 @@ void back_stairs_end_check()
                 white_count++;
         }
     }
-    if (white_count < 600)
+    if (follow_lock == 3 && white_count < 400)
     {
-        back_stairs_end_flag = 1;
+        back_stairs_end_judge_cnt++;
+        if (back_stairs_end_judge_cnt > back_stairs_end_cnt_thre)
+        {
+            // 达到阈值，退出BACK_STAIRS状态
+            back_stairs_end_judge_cnt = 0;
+            back_stairs_end_flag = 1;
+        }
     }
     else {
         back_stairs_end_flag = 0;
+        back_stairs_end_judge_cnt = 0;
     }
 }
 
@@ -2893,7 +2912,7 @@ void jolt_end_check()
                 white_count++;
         }
     }
-    if (white_count < 300)
+    if (white_count < 400)
     {
         jolt_end_judge_cnt++;
         if (jolt_end_judge_cnt > jolt_end_cnt_thre)
@@ -2986,9 +3005,23 @@ void image_main()
     }
     if (total == 0) total = 1;
     error = sum / total - 94;
+    switch (now_element)
+    {
+    case BACK_STAIRS:
+        if(follow_lock == 3)
+        {
+            // 防止最后一段error过大导致车子乱转
+            if (error < -20) error = 0;
+            if (error > 20) error = 0;
+            if (back_stairs_end_judge_cnt > 5)
+            {
+                error = 0;
+            }
+        }
+        break;
+    }
     if (error < -50) error = 0;
     if (error > 50) error = 0;
-
     if (single_side_state)
     {
         // if (error < -5) error = -5;

@@ -7,10 +7,10 @@
 
 volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
-MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *saveall, *currentMenu;
+MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *thnum, *tunum, *saveall, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
     *thre, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *stdis4, *stdis5, *stdis6, *stdis7, *jocnt, *saveim,
-    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *dis0, *dis1, *speedl, *saveel;
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *dis0, *dis1, *speedl, *balspeed, *thsp, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
@@ -95,7 +95,9 @@ void create_1st_menu(void)
     Element = createMenu("Element", 1, 3, MENU_TYPE_NORMAL, NULL);
     testnum = createMenu("testnum", 1, 4, MENU_TYPE_INT, NULL);
     road2 = createMenu("road2", 1, 5, MENU_TYPE_INT, NULL);
-    saveall = createMenu("save", 1, 6, MENU_TYPE_FUNCTION, menu_save);
+    thnum = createMenu("thnum", 1, 6, MENU_TYPE_INT, NULL);
+    tunum = createMenu("tunum", 1, 7, MENU_TYPE_INT, NULL);
+    saveall = createMenu("save", 1, 8, MENU_TYPE_FUNCTION, menu_save);
 
     WheelLeg->child = Balance;
     Balance->parent = WheelLeg;
@@ -103,6 +105,8 @@ void create_1st_menu(void)
     Element->parent = WheelLeg;
     testnum->parent = WheelLeg;
     road2->parent = WheelLeg;
+    thnum->parent = WheelLeg;
+    tunum->parent = WheelLeg;
     saveall->parent = WheelLeg;
 
     Balance->next = Image;
@@ -113,8 +117,12 @@ void create_1st_menu(void)
     testnum->last = Element;
     testnum->next = road2;
     road2->last = testnum;
-    road2->next = saveall;
-    saveall->last = road2;
+    road2->next = thnum;
+    thnum->last = road2;
+    thnum->next = tunum;
+    tunum->last = thnum;
+    tunum->next = saveall;
+    saveall->last = tunum;
     saveall->next = Balance;
     Balance->last = saveall;
 
@@ -171,7 +179,9 @@ void create_2nd_menu(void)
     dis0 = createMenu("dis0", 2, 17, MENU_TYPE_FLOAT, NULL);
     dis1 = createMenu("dis1", 2, 18, MENU_TYPE_FLOAT, NULL);
     speedl = createMenu("speedl", 2, 19, MENU_TYPE_INT, NULL);
-    saveel = createMenu("save", 2, 20, MENU_TYPE_FUNCTION, menu_save);
+    balspeed = createMenu("balspeed", 2, 20, MENU_TYPE_INT, NULL);
+    thsp = createMenu("thsp", 2, 21, MENU_TYPE_INT, NULL);
+    saveel = createMenu("save", 2, 22, MENU_TYPE_FUNCTION, menu_save);
 
     speed->next = anloop1;
     anloop1->last = speed;
@@ -265,8 +275,12 @@ void create_2nd_menu(void)
     dis1->last = dis0;
     dis1->next = speedl;
     speedl->last = dis1;
-    speedl->next = saveel;
-    saveel->last = speedl;
+    speedl->next = balspeed;
+    balspeed->last = speedl;
+    balspeed->next = thsp;
+    thsp->last = balspeed;
+    thsp->next = saveel;
+    saveel->last = thsp;
     saveel->next = change;
     change->last = saveel;
 
@@ -321,6 +335,8 @@ void create_2nd_menu(void)
     dis0->parent = Element;
     dis1->parent = Element;
     speedl->parent = Element;
+    balspeed->parent = Element;
+    thsp->parent = Element;
     saveel->parent = Element;
 }
 
@@ -1040,6 +1056,14 @@ void menu_save(void)
     flash_union_buffer[index++].int32_type = road->data_int;
     node_count++;
 
+    MENU *thun_num = thnum;
+    flash_union_buffer[index++].int32_type = thun_num->data_int;
+    node_count++;
+
+    MENU *turn_num = tunum;
+    flash_union_buffer[index++].int32_type = turn_num->data_int;
+    node_count++;
+
     flash_union_buffer[0].float_type = menu_magic;
     flash_union_buffer[1].uint32_type = node_count;
 
@@ -1182,7 +1206,21 @@ void menu_load1(void)
     road->data_int = (int)flash_union_buffer[idx++].int32_type;
     if (fabs((float)road->data_int) >= 100000)
     {
-        road2->data_int = 0;
+        road->data_int = 0;
+    }
+
+    MENU *thun_num = thnum;
+    thun_num->data_int = (int)flash_union_buffer[idx++].int32_type;
+    if (fabs((float)thun_num->data_int) >= 100000)
+    {
+        thun_num->data_int = 0;
+    }
+
+    MENU *turn_num = tunum;
+    turn_num->data_int = (int)flash_union_buffer[idx++].int32_type;
+    if (fabs((float)turn_num->data_int) >= 100000)
+    {
+        turn_num->data_int = 0;
     }
 }
 

@@ -39,6 +39,11 @@ void imu_start_initial_estimation(uint32_t target_samples)
     imu.state = IMU_STATE_INITIAL_ESTIMATION;
 }
 
+void imu_skip_initial_estimation(void)
+{
+    imu.initial_estimation.is_estimated = true;
+}
+
 void imu_set_gyro_bias(double bias_x, double bias_y, double bias_z)
 {
     imu.calib.gyro_bias[0] = bias_x;
@@ -66,14 +71,17 @@ void imu_update(void)
     read_sensor_data();
     read_encoder_data();
 
-    // 如果已经校准并且完成初始估计，则进入正常运行状态
-    if(imu.calib.is_calibrated && imu.initial_estimation.is_estimated)
-    {
-        imu.state = IMU_STATE_NORMAL;
-    }
-
     switch (imu.state)
     {
+        case IMU_STATE_UNINIT:
+        {
+            // 如果已经校准并且完成初始估计，则进入正常运行状态
+            if(imu.calib.is_calibrated && imu.initial_estimation.is_estimated)
+            {
+                imu.state = IMU_STATE_NORMAL;
+            }
+            break;
+        } 
         case IMU_STATE_INITIAL_ESTIMATION:
         {
             process_initial_estimation();
@@ -216,7 +224,7 @@ static void process_auto_calibration(void)
         imu.calib.gyro_bias[1] /= imu.calib.target_samples;
         imu.calib.gyro_bias[2] /= imu.calib.target_samples;
         imu.calib.is_calibrated = true;
-        imu.state = IMU_STATE_INITIAL_ESTIMATION;
+        imu.state = IMU_STATE_UNINIT;
     }
 }
 

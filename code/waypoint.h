@@ -26,6 +26,7 @@ typedef struct
 
 typedef struct _waypoint_node
 {
+    uint16_t id_startup;  // 节点id，仅在开机时分配，之后不再修改，删除节点时不回收id
     bool allocated;
     waypoint_t waypoint;               // 点数据
     waypoint_screen_param_t screen_param; // 显示相关属性
@@ -47,6 +48,7 @@ waypoint_node_t* waypoint_list_add_next(waypoint_list_t* list, waypoint_node_t* 
                                 waypoint_t waypoint, waypoint_screen_param_t screen_param);
 void waypoint_list_remove(waypoint_list_t* list, waypoint_node_t* pNode);
 void waypoint_list_clear(waypoint_list_t* list);
+void waypoint_list_id_init(waypoint_list_t* list);
 
 void waypoint_list_save_to_flash(waypoint_list_t *list, uint32 flash_page);
 bool waypoint_list_load_from_flash(waypoint_list_t *list, uint32 flash_page);

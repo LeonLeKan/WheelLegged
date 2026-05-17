@@ -83,6 +83,7 @@ extern imu_t imu;
 void imu_init(MahonyFilterParam mahony_param, RotationCompensationParam rot_comp_param);
 void imu_reset_mahony_filter(MahonyFilterParam param);
 void imu_start_initial_estimation(uint32_t target_samples);
+void imu_skip_initial_estimation(void);
 void imu_set_gyro_bias(double bias_x, double bias_y, double bias_z);
 void imu_start_auto_gyro_calibration(uint32_t target_samples);
 void imu_update(void);  // 在定时中断中调用

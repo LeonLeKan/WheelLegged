@@ -27,17 +27,15 @@ uint8_t motion_mode2 = 0;
 uint8_t motion_mode3 = 0;
 uint8_t motion_mode4 = 0;
 
+uint8_t cali_finish_flag = 0;
+uint8_t get_ready = 0;
+
 MahonyFilterParam mahony_filter_param = {
     .Kp = 0.7f,
     .Ki = 0.005f,
     .dt = IMU_UPDATE_INTERVAL_MS / 1000.0f};
 
 RotationCompensationParam rotation_compensation_param;
-
-bool showing_points = false;
-// 用于实现校准后的分层启动
-bool car_run_state = false;
-
 
 int main(void)
 {
@@ -74,8 +72,8 @@ int main(void)
     }
 
     // imu转圈偏移初始化
-    rotation_compensation_param.rotation_thre = 180;
-    rotation_compensation_param.yaw_compensate_cw  = cwtucop->data_float;
+    rotation_compensation_param.rotation_thre = 120;
+    rotation_compensation_param.yaw_compensate_cw = cwtucop->data_float;
     rotation_compensation_param.yaw_compensate_ccw = ccwtucop->data_float;
 
     // 屏幕初始化
@@ -108,14 +106,16 @@ int main(void)
 
     // 设置曝光度
     mt9v03x_set_exposure_time(imexp->data_int);
-   
-    if(gpio_get_level(DIP_3) == 0)
+
+    if (gpio_get_level(DIP_3) == 0 && gpio_get_level(DIP_1) == 1 && gpio_get_level(DIP_2) == 1)
     {
+        imu_skip_initial_estimation();
         start_imu_auto_gyro_calibration();
+        cali_finish_flag = 1;
     }
-    else
+    else if (gpio_get_level(DIP_3) == 1 && gpio_get_level(DIP_1) == 1 && gpio_get_level(DIP_2) == 1)
     {
-        start_imu_initial_estimation();
+        imu_skip_initial_estimation();
     }
 
     bool is_calib_saved = false;
@@ -131,8 +131,8 @@ int main(void)
         {
             current_state = STATE_IDLE;
             imu_state_show();
-            
-            if(motion_mode3 == 0 && !is_calib_saved && imu.calib.is_calibrated == 1)
+
+            if (motion_mode3 == 0 && !is_calib_saved && imu.calib.is_calibrated == 1)
             {
                 rollbias->data_float = imu.calib.gyro_bias[0];
                 pitchbias->data_float = imu.calib.gyro_bias[1];
@@ -141,11 +141,51 @@ int main(void)
                 is_calib_saved = true;
             }
 
-            // 如果需要，添加wifi
             if (motion_mode4 == 0)
             {
                 wifi_send_data();
                 wifi_send_image();
+            }
+        }
+
+        else if (motion_mode1 == 0 && motion_mode2 == 1 && motion_mode3 == 1 && cali_finish_flag == 0)
+        {
+            system_delay_ms(1000);
+            ips200_clear();
+            while (true)
+            {
+                remote_control();
+                current_state = STATE_STAND_STILL;
+                imu_state_show();
+                if (gpio_get_level(BUTTON_OK) == 0 && get_ready == 0)
+                {
+                    get_ready = 1;
+                    system_delay_ms(2000);
+                    if (test_state == 1)
+                    {
+                        current_state = STATE_TEST;
+                        ins_reset();
+                    }
+                    else if (test_state == 0)
+                    {
+                        current_state = STATE_ACCELERATE;
+                        ins_reset();
+                    }
+                    while (true)
+                    {
+                        remote_control();
+                        if (image_block == 1 && mt9v03x_finish_flag == 1)
+                        {
+                            image_main();
+                            mt9v03x_finish_flag = 0;
+                        }
+
+                        if (motion_mode4 == 0)
+                        {
+                            wifi_send_data();
+                        }
+                    }
+                }
             }
         }
 
@@ -165,33 +205,9 @@ int main(void)
                     key_handle_ins();
                 }
 
-                // 如果需要，添加wifi
                 if (motion_mode4 == 0)
                 {
                     wifi_send_data();
-                    // wifi_send_image();
-                }
-            }
-        }
-
-        else if (motion_mode1 == 0 && motion_mode2 == 1 && motion_mode3 == 1)
-        {
-            ips200_clear();
-            current_state = STATE_STAND_UP;
-            while (true)
-            {
-                remote_control();
-                if (image_block == 1 && mt9v03x_finish_flag == 1)
-                {
-                    image_main();
-                    mt9v03x_finish_flag = 0;
-                }
-
-                // 如果需要，添加wifi
-                if (motion_mode4 == 0)
-                {
-                    wifi_send_data();
-                    // wifi_send_image();
                 }
             }
         }
@@ -200,13 +216,13 @@ int main(void)
 
 void start_imu_initial_estimation(void)
 {
-    system_delay_ms(800);        // 确保系统稳定
+    system_delay_ms(1000);             // 确保系统稳定
     imu_start_initial_estimation(500); // 采集500个样本进行初始姿态估计
 }
 
 void start_imu_auto_gyro_calibration(void)
 {
-    system_delay_ms(800);        // 确保系统稳定
+    system_delay_ms(1000);                 // 确保系统稳定
     imu_start_auto_gyro_calibration(3000); // 采集3000个样本进行校准
 }
 
@@ -279,6 +295,7 @@ void handle_channel(void)
     else if (last_ch4 != uart_receiver.channel[4])
     {
         // 特殊用途
+        current_state = STATE_THUNDER;
     }
 
     else if (last_ch5 != uart_receiver.channel[5])
@@ -295,8 +312,8 @@ void remote_control(void)
 {
     if (1 == uart_receiver.finsh_flag)
     {
-        speed_loop.Target = (uart_receiver.channel[1] - 800) / 200.0f;
-        yaw_test_bias = uart_receiver.channel[0] - 800;
+        speed_loop.Target = (uart_receiver.channel[1] - 808) / 200.0f;
+        yaw_test_bias = (uart_receiver.channel[0] - 777) * 1.5;
         if (uart_receiver.channel[3] == 1792 && test_state == 0)
         {
             test_state = 1;
@@ -312,28 +329,28 @@ void calculate_route(void)
     uint8_t digits[5] = {0};
     int count = 0;
 
-    if(temp == 0) 
+    if (temp == 0)
     {
         digits[0] = 0;
         count = 1;
-    } 
-    else 
+    }
+    else
     {
-        while(temp > 0 && count < 5) 
+        while (temp > 0 && count < 5)
         {
             digits[count] = (uint8_t)(temp % 10);
             count++;
             temp /= 10;
         }
     }
-    
-    for(int i = 0; i < 5; i++) 
+
+    for (int i = 0; i < 5; i++)
     {
-        if(i < count) 
+        if (i < count)
         {
             road_idx[i] = digits[count - 1 - i];
-        } 
-        else 
+        }
+        else
         {
             road_idx[i] = 0;
         }
