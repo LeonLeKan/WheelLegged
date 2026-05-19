@@ -956,16 +956,38 @@ void control_state_jolt(void)
     static float filtered_speed_out = 0.0f;
     static const float speed_alpha = 0.1f;
 
+    static uint8_t jolt_speed_change_flag = 0;
+    static uint32_t jolt_speed_change_count = 0;
+
     if (count >= 4)
     {
         count = 0;
 
-        speed_loop.Target = (float)jospeed->data_int / 100.0f;
-        speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+        // if (jolt_speed_change_flag == 0)
+        // {
+        //     speed_loop.Target = 3.5f;
+        //     jolt_speed_change_count++;
+        //     if (jolt_speed_change_count >= 25)
+        //     {
+        //         jolt_speed_change_count = 0;
+        //         jolt_speed_change_flag = 1;
+        //     }
+        // }
+        // else if (jolt_speed_change_flag == 1)
+        // {
+        //     speed_loop.Target = 3.5f;
+        //     jolt_speed_change_count++;
+        //     if (jolt_speed_change_count >= 25)
+        //     {
+        //         jolt_speed_change_count = 0;
+        //         jolt_speed_change_flag = 0;
+        //     }
+        // }
+        // speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
-        PID_Update_Lo(&speed_loop);
+        // PID_Update_Lo(&speed_loop);
 
-        filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
+        // filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
 
         yaw_loop.Target = 0.0f;
         yaw_loop.Actual = imu.output.euler[2];
@@ -973,19 +995,42 @@ void control_state_jolt(void)
         PID_Update_Lo(&joy_loop);
     }
 
-    // 单边桥控制
-    jos_loop.Target = roll_base;
-    jos_loop.Actual = imu.output.euler[0];
-    PID_Update_Lo(&jos_loop);
+    // // 单边桥控制
+    // jos_loop.Target = roll_base;
+    // jos_loop.Actual = imu.output.euler[0];
+    // PID_Update_Lo(&jos_loop);
 
-    // 对jos_loop.Out进行低通滤波
-    static float filtered_jos_out = 0.0f;
-    static const float jos_alpha = 0.1f;
+    // // 对jos_loop.Out进行低通滤波
+    // static float filtered_jos_out = 0.0f;
+    // static const float jos_alpha = 0.1f;
 
-    filtered_jos_out = jos_alpha * jos_loop.Out + (1.0f - jos_alpha) * filtered_jos_out;
+    // filtered_jos_out = jos_alpha * jos_loop.Out + (1.0f - jos_alpha) * filtered_jos_out;
 
-    servo_set(90.0f - filtered_speed_out - filtered_jos_out, 90.0f + filtered_speed_out + filtered_jos_out,
-              90.0f - filtered_speed_out + filtered_jos_out, 90.0f + filtered_speed_out - filtered_jos_out);
+    // servo_set(90.0f - filtered_speed_out - filtered_jos_out, 90.0f + filtered_speed_out + filtered_jos_out,
+    //           90.0f - filtered_speed_out + filtered_jos_out, 90.0f + filtered_speed_out - filtered_jos_out);
+
+    if (jolt_speed_change_flag == 0)
+    {
+        servo_set(50.0f, 120.0f,
+                  60.0f, 130.0f);
+        jolt_speed_change_count++;
+        if (jolt_speed_change_count >= 25)
+        {
+            jolt_speed_change_count = 0;
+            jolt_speed_change_flag = 1;
+        }
+    }
+    else if (jolt_speed_change_flag == 1)
+    {
+        servo_set(100.0f, 80.0f,
+                  100.0f, 80.0f);
+        jolt_speed_change_count++;
+        if (jolt_speed_change_count >= 25)
+        {
+            jolt_speed_change_count = 0;
+            jolt_speed_change_flag = 0;
+        }
+    }
 
     turn_loop2.Target = -joy_loop.Out * speed_loop.Actual;
     turn_loop2.Actual = -imu.body.gyro[2];

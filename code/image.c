@@ -2374,21 +2374,26 @@ void search_white_range1()
         {
             if ((*map))//遇白条左边界
             {
-                tnum++;
-                if (tnum >= white_num_MAX)break;
-                range* now_white = &white_range[i].area[tnum];
-                now_white->left = j;
-
+                uint8_t left = j;
                 //开始向后一个一个像素点找这个白条右边界
                 map++;
                 j++;
-
                 while ((*map) && j <= RIGHT_SIDE)
                 {
                     map++;
                     j++;
                 }
-                now_white->right = j - 1;
+
+                uint8_t right = j - 1;
+
+                if(i > 60 && right - left < 80) 
+                    continue;//如果白条太短了，跳过不处理
+                tnum++;
+                if (tnum >= white_num_MAX)break;
+                range* now_white = &white_range[i].area[tnum];
+                now_white->left = left;
+                now_white->right = right;
+
                 if (now_white->right - now_white->left > longest)
                 {
                     longest = now_white->right - now_white->left;
