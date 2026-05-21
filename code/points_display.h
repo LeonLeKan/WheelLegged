@@ -21,6 +21,12 @@ typedef struct
     void (*quit_callback)(void);
 }points_display_config_t;
 
+typedef enum
+{
+    NONE, 
+    MOVING_POINT,
+    MOVING_RELATIVELY
+}points_display_state_t;
 
 typedef struct
 {
@@ -39,7 +45,9 @@ typedef struct
     // 状态变量
     waypoint_node_t* selected_node; // 选中节点指针
     int selected_node_idx; // 选中节点索引
-    bool moving_point; // 是否处于移动点状态
+    points_display_state_t state; // 当前状态
+    double moving_dx; // 相对移动的累计偏移X（米）
+    double moving_dy; // 相对移动的累计偏移Y（米）
     // 菜单功能
     func_menu_t funcs[10];
     int total_funcs;
@@ -54,6 +62,15 @@ typedef struct
     int screen_x, screen_y; // 当前定位点屏幕坐标
 }points_display_instance_t;
 
+typedef enum 
+{
+    KEY_DOWN,
+    KEY_UP,
+    KEY_LEFT,
+    KEY_RIGHT,
+    KEY_OK
+}key_event_t;
+
 // 全局点显示实例(单例)
 extern points_display_instance_t points_display_instance;
 
@@ -64,6 +81,7 @@ void points_display_show(void);
 void points_display_update_current_position(void);
 
 // 按键功能函数
+void points_display_handle_key_event(key_event_t event);
 void points_display_key_down_pressed(void);
 void points_display_key_up_pressed(void);
 void points_display_key_left_pressed(void);
