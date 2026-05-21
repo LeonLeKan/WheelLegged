@@ -966,7 +966,7 @@ void control_state_jolt(void)
     {
         jolt_control_state_count++;
     }
-    if (jolt_control_state_count <= 250)
+    if (jolt_control_state_count <= 200)
     {
         if (count >= 4)
         {
@@ -1000,7 +1000,7 @@ void control_state_jolt(void)
                   90.0f - filtered_speed_out + filtered_jos_out, 90.0f + filtered_speed_out - filtered_jos_out);
     }
 
-    else if (jolt_control_state_count > 250)
+    else if (jolt_control_state_count > 200)
     {
         jolt_control_state = 1;
         if (count >= 4)
@@ -1028,8 +1028,8 @@ void control_state_jolt(void)
 
         if (jolt_speed_change_flag == 0)
         {
-            servo_set(50.0f - filtered_jos_out, 130.0f + filtered_jos_out,
-                      50.0f + filtered_jos_out, 130.0f - filtered_jos_out);
+            servo_set(45.0f - filtered_jos_out, 135.0f + filtered_jos_out,
+                      45.0f + filtered_jos_out, 135.0f - filtered_jos_out);
             jolt_speed_change_count++;
             if (jolt_speed_change_count >= 80)
             {
@@ -1039,8 +1039,8 @@ void control_state_jolt(void)
         }
         else if (jolt_speed_change_flag == 1)
         {
-            servo_set(100.0f - filtered_jos_out, 80.0f + filtered_jos_out,
-                      100.0f + filtered_jos_out, 80.0f - filtered_jos_out);
+            servo_set(90.0f - filtered_jos_out, 90.0f + filtered_jos_out,
+                      90.0f + filtered_jos_out, 90.0f - filtered_jos_out);
             jolt_speed_change_count++;
             if (jolt_speed_change_count >= 80)
             {
@@ -1140,7 +1140,7 @@ void control_state_uturn(void)
     servo_set(90.0f, 90.0f,
               90.0f, 90.0f);
 
-    turn_loop2.Target = 140.0f;
+    turn_loop2.Target = -140.0f;
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 
