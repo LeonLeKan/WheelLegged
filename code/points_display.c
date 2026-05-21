@@ -78,7 +78,9 @@ void points_display_configure(points_display_config_t* create_info)
     // 状态变量
     info->selected_node = NULL;
     info->selected_node_idx = 0;
-    info->moving_point = 0;
+    info->state = NONE;
+    info->moving_dx = 0.0;
+    info->moving_dy = 0.0;
     // 菜单功能
     info->total_funcs = 0;
     info->active_func_idx = 0;
@@ -367,6 +369,10 @@ void move_selected_point(int dx, int dy) {
     info->selected_node->screen_param.plane_x += dx * MOVE_STEP;
     info->selected_node->screen_param.plane_y += dy * MOVE_STEP;
 
+    // 累计相对移动的偏移量
+    info->moving_dx += dx * MOVE_STEP;
+    info->moving_dy += dy * MOVE_STEP;
+
     // 更新点坐标
     info->plane_to_waypoint_callback(info->selected_node->screen_param.plane_x, 
                 info->selected_node->screen_param.plane_y,
@@ -460,9 +466,21 @@ void show_current_cordinates(void)
 void func_move_point(void)
 {
     points_display_info_t* info = &points_display_instance.info;
-    info->moving_point = 1;
+    info->state = MOVING_POINT;
+    info->moving_dx = 0.0;
+    info->moving_dy = 0.0;
     ips200_set_color(COLOR_MENU_TEXT, COLOR_MENU_HIGHLIGHT);
     ips200_show_string(0, 304, "Moving Point...");
+}
+
+void func_move_relatively(void)
+{
+    points_display_info_t* info = &points_display_instance.info;
+    info->state = MOVING_RELATIVELY;
+    info->moving_dx = 0.0;
+    info->moving_dy = 0.0;
+    ips200_set_color(COLOR_MENU_TEXT, COLOR_MENU_HIGHLIGHT);
+    ips200_show_string(0, 304, "Moving Relatively...");
 }
 
 void func_add_current_point_next(void)
@@ -523,6 +541,7 @@ void funcs_init(void)
     info->total_funcs = 0;
     info->active_func_idx = 0;
     new_func("Move Point        ", func_move_point);
+    new_func("Move Relatively   ", func_move_relatively);
     new_func("Add Current Point ", func_add_current_point_next);
     new_func("Remove Point      ", func_remove_point);
     new_func("Save and Quit     ", func_save_and_quit);
@@ -556,54 +575,108 @@ void show_prev_func(void)
 
 
 // ====================== 按键功能函数实现 ======================
-void points_display_key_down_pressed(void)
+static void handle_none_state_key_event(key_event_t event)
 {
     points_display_info_t* info = &points_display_instance.info;
-    if(!info->moving_point) 
-        select_next_point();
-    else
-        move_selected_point(0, -1);
+    switch(event)
+    {
+        case KEY_DOWN: select_next_point(); break;
+        case KEY_UP: select_prev_point(); break;
+        case KEY_LEFT: show_prev_func(); break;
+        case KEY_RIGHT: show_next_func(); break;
+        case KEY_OK: info->funcs[info->active_func_idx].func(); break;
+    }
+}
+
+static void handle_moving_point_state_key_event(key_event_t event)
+{
+    points_display_info_t* info = &points_display_instance.info;
+    switch(event)
+    {
+        case KEY_DOWN: move_selected_point(0, -1); break;
+        case KEY_UP: move_selected_point(0, 1); break;
+        case KEY_LEFT: move_selected_point(-1, 0); break;
+        case KEY_RIGHT: move_selected_point(1, 0); break;
+        case KEY_OK:
+            info->state = NONE;
+            show_func();
+            break;
+    }
+}
+
+
+static void handle_moving_relatively_state_key_event(key_event_t event)
+{
+    points_display_info_t* info = &points_display_instance.info;
+    switch(event)
+    {
+        case KEY_DOWN: move_selected_point(0, -1);; break;
+        case KEY_UP: move_selected_point(0, 1); break;
+        case KEY_LEFT: move_selected_point(-1, 0); break;
+        case KEY_RIGHT: move_selected_point(1, 0); break;
+        case KEY_OK:
+        {
+            // 将后续点按照累计的相对偏移量进行更新
+            waypoint_node_t* current = info->selected_node->next;
+            while (current)
+            {
+                // 更新平面坐标
+                current->screen_param.plane_x += info->moving_dx;
+                current->screen_param.plane_y += info->moving_dy;
+                // 更新点坐标
+                info->plane_to_waypoint_callback(current->screen_param.plane_x, 
+                    current->screen_param.plane_y,
+                    &current->waypoint);
+                current = current->next;
+            }
+            info->state = NONE;
+            info->moving_dx = 0.0;
+            info->moving_dy = 0.0;
+            show_path(); // 重新显示路径
+            show_func();
+            break;
+        }
+    }
+}
+
+void points_display_handle_key_event(key_event_t event)
+{
+    points_display_info_t* info = &points_display_instance.info;
+    switch(info->state)
+    {
+        case NONE:
+            handle_none_state_key_event(event);
+            break;
+        case MOVING_POINT:
+            handle_moving_point_state_key_event(event);
+            break;
+        case MOVING_RELATIVELY:
+            handle_moving_relatively_state_key_event(event);
+            break;
+    }
+}
+
+void points_display_key_down_pressed(void)
+{
+    points_display_handle_key_event(KEY_DOWN);
 }
 
 void points_display_key_up_pressed(void)
 {
-    points_display_info_t* info = &points_display_instance.info;
-    if (!info->moving_point)
-        select_prev_point();
-    else
-        move_selected_point(0, 1);
+    points_display_handle_key_event(KEY_UP);
 }
 
 void points_display_key_left_pressed(void)
 {
-    points_display_info_t* info = &points_display_instance.info;
-    if(info->moving_point)
-        move_selected_point(-1, 0);
-    else
-        show_prev_func();
-
+    points_display_handle_key_event(KEY_LEFT);
 }
 
 void points_display_key_right_pressed(void)
 {
-    points_display_info_t* info = &points_display_instance.info;
-    if (info->moving_point)
-        move_selected_point(1, 0);
-    else
-        show_next_func();
+    points_display_handle_key_event(KEY_RIGHT);
 }
 
 void points_display_key_ok_pressed(void)
 {
-    points_display_info_t* info = &points_display_instance.info;
-    if(info->moving_point)
-    {
-        info->moving_point = 0;
-        show_func();
-    }
-        
-    else
-    {
-        info->funcs[info->active_func_idx].func();
-    }
+    points_display_handle_key_event(KEY_OK);
 }
