@@ -133,7 +133,7 @@ void control_state_de_thunder(void)
     {
         count = 0;
 
-        speed_loop.Target = 0.8f;
+        speed_loop.Target = 1.5f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         servo_set(125.0f, 55.0f,
@@ -171,7 +171,7 @@ void control_state_tra_thunder(void)
     {
         count = 0;
 
-        speed_loop.Target = 0.8f;
+        speed_loop.Target = 1.5f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
@@ -262,7 +262,14 @@ void control_state_thunder(void)
             yaw_thunder_flag = 0;
             yaw_accumulate = 0.0f;
             speed_loop.Actual = 0.0f;
-            current_state = STATE_ACCELERATE;
+            if (thunder_count < thnum->data_int)
+            {
+                current_state = STATE_ACCELERATE;
+            }
+            else if (thunder_count >= thnum->data_int)
+            {
+                current_state = STATE_FORWARD;
+            }
         }
     }
     else if (yaw_thunder_memory > 0)
@@ -309,7 +316,14 @@ void control_state_thunder(void)
             yaw_thunder_flag = 0;
             yaw_accumulate = 0.0f;
             speed_loop.Actual = 0.0f;
-            current_state = STATE_ACCELERATE;
+            if (thunder_count < thnum->data_int)
+            {
+                current_state = STATE_ACCELERATE;
+            }
+            else if (thunder_count >= thnum->data_int)
+            {
+                current_state = STATE_FORWARD;
+            }
         }
     }
 }
@@ -584,8 +598,8 @@ void control_state_de_stairs(void)
         speed_loop.Target = (float)stspeed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
-        servo_set(100.0f, 80.0f,
-                  100.0f, 80.0f);
+        servo_set(110.0f, 70.0f,
+                  110.0f, 70.0f);
 
         PID_Update_Lo(&yaw_loop);
     }
@@ -668,7 +682,14 @@ void control_state_find_jump(void)
     {
         count = 0;
 
-        speed_loop.Target = (float)stspeed->data_int / 100.0f;
+        if (jump_count == 0 || jump_count >= 3)
+        {
+            speed_loop.Target = (float)stspeed->data_int / 100.0f;
+        }
+        else
+        {
+            speed_loop.Target = 2.0f;
+        }
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
@@ -1140,7 +1161,7 @@ void control_state_uturn(void)
     servo_set(90.0f, 90.0f,
               90.0f, 90.0f);
 
-    turn_loop2.Target = -140.0f;
+    turn_loop2.Target = (float)rotusp->data_int;
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 

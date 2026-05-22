@@ -43,7 +43,8 @@ int jolt_end_cnt_thre = 30;
 int back_stairs_end_cnt_thre = 15;
 //////////////////////// ////////// //////////////////
 
-
+int on_single_side_road_cnt = 0;//进入单边桥之前的白色赛道的帧数
+int on_single_side_road_cnt_thre = 15;//进入单边桥之前的白色赛道的帧数阈值，超过这个值才认为进入了单边桥之前的白色赛道
 
 uint8_t road_start = NEAR_LINE;
 uint8_t road_end = FAR_LINE;
@@ -2386,8 +2387,8 @@ void search_white_range1()
 
                 uint8_t right = j - 1;
 
-                //if (!single_side_state && i > 60 && right - left < 40)
-                //    continue;//如果白条太短了，跳过不处理
+                if (!on_single_side_road && i > 60 && right - left < 60)
+                   continue;//如果白条太短了，跳过不处理
                 tnum++;
                 if (tnum >= white_num_MAX)break;
                 range* now_white = &white_range[i].area[tnum];
@@ -2523,7 +2524,7 @@ void find_road1()
 }
 void find_road_state()
 {
-    if (step == single_side)
+    if (step == single_side && on_single_side_road)
     {
         single_side_road_choose();
     }
@@ -2854,7 +2855,18 @@ void mend_far_single_side()
             }
         }
         if (white_count >= 800 && !on_single_side_road)
-            on_single_side_road = 1;
+        {
+            on_single_side_road_cnt++;
+            if (on_single_side_road_cnt > on_single_side_road_cnt_thre)
+            {
+                on_single_side_road_cnt = 0;
+                on_single_side_road = 1;
+            }
+        }
+        else {
+            on_single_side_road = 0;
+            on_single_side_road_cnt = 0;
+        }
     }
 }
 

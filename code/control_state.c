@@ -27,7 +27,7 @@ static void accelerate_to_forward(void)
 {
     if (testnum->data_int == 1)
     {
-        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > ((float)speed->data_int / 100.0f - 2.0f)))
+        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)thsp->data_int / 100.0f))
         {
             current_state = STATE_FORWARD;
         }
@@ -127,7 +127,7 @@ static void deaccelerate_within_1(void)
 
 static void deaccelerate_to_thunder(void)
 {
-    if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 2.0f))
+    if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 2.5f))
     {
         current_state = STATE_TRA_THUNDER;
     }
@@ -217,7 +217,7 @@ static void quit_single_side(void)
 static void decline_to_stairs(void)
 {
     if (current_state == STATE_DE_STAIRS
-      && speed_loop.Actual < ((float)stspeed->data_int / 100.0f)
+      && speed_loop.Actual < ((float)stspeed->data_int / 100.0f + 1.0f)
       && current_target)
     {
         current_state = STATE_TRA_STAIRS;
@@ -228,7 +228,7 @@ static void judge_time_to_jump(void)
 {
     if (current_state == STATE_FIND_JUMP && jump_lock == 0)
     {
-        if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && error <= 8)
+        if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f)
         {
             mid_update = 0;
             image_block = 0;
@@ -236,7 +236,7 @@ static void judge_time_to_jump(void)
             current_state = STATE_JUMP_UP;
             jump_lock = 1;
         }
-        else if (stair_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1 && error <= 8)
+        else if (stair_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f)
         {
             mid_update = 0;
             image_block = 0;
@@ -244,7 +244,7 @@ static void judge_time_to_jump(void)
             current_state = STATE_JUMP_UP;
             jump_lock = 1;
         }
-        else if (stair_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1 && error <= 8)
+        else if (stair_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f)
         {
             mid_update = 0;
             image_block = 0;

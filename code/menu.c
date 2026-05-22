@@ -10,7 +10,7 @@ volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *thnum, *tunum, *saveall, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
     *thre, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *stdis4, *stdis5, *stdis6, *stdis7, *jocnt, *saveim,
-    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *dis0, *dis1, *speedl, *balspeed, *thsp, *saveel;
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *dis0, *dis1, *speedl, *balspeed, *thsp, *rotusp, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
@@ -181,7 +181,8 @@ void create_2nd_menu(void)
     speedl = createMenu("speedl", 2, 19, MENU_TYPE_INT, NULL);
     balspeed = createMenu("balspeed", 2, 20, MENU_TYPE_INT, NULL);
     thsp = createMenu("thsp", 2, 21, MENU_TYPE_INT, NULL);
-    saveel = createMenu("save", 2, 22, MENU_TYPE_FUNCTION, menu_save);
+    rotusp = createMenu("rotusp", 2, 22, MENU_TYPE_INT, NULL);
+    saveel = createMenu("save", 2, 23, MENU_TYPE_FUNCTION, menu_save);
 
     speed->next = anloop1;
     anloop1->last = speed;
@@ -279,8 +280,10 @@ void create_2nd_menu(void)
     balspeed->last = speedl;
     balspeed->next = thsp;
     thsp->last = balspeed;
-    thsp->next = saveel;
-    saveel->last = thsp;
+    thsp->next = rotusp;
+    rotusp->last = thsp;
+    rotusp->next = saveel;
+    saveel->last = rotusp;
     saveel->next = change;
     change->last = saveel;
 
@@ -337,6 +340,7 @@ void create_2nd_menu(void)
     speedl->parent = Element;
     balspeed->parent = Element;
     thsp->parent = Element;
+    rotusp->parent = Element;
     saveel->parent = Element;
 }
 
