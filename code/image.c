@@ -35,9 +35,9 @@ bool front_stairs_end_flag = 0;
 bool back_stairs_end_flag = 0;
 bool jolt_end_flag = 0;
 int error = 0;
-int error_calc_near_line = 42;
-int error_calc_far_line = 40;
-uint8_t threshold = 120;    //阈值
+int error_calc_near_line = 52;
+int error_calc_far_line = 50;
+uint8_t threshold = 170;    //阈值
 bool on_single_side_road = 0;   // 是否进入单边桥之前的白色赛道
 int jolt_end_cnt_thre = 30;
 int back_stairs_end_cnt_thre = 15;
@@ -2186,7 +2186,7 @@ void THRE()
         my_map = &IMG[i][0];
         for (int j = 0; j < 188; j++)
         {
-            if (((uint16_t)*map + (uint16_t)gray_dis[i][j]) > threshold)
+            if ((uint16_t)*map > threshold) //+ (uint16_t)gray_dis[i][j])
                 (*my_map) = 1;
             else (*my_map) = 0;
             map++;
@@ -2386,8 +2386,8 @@ void search_white_range1()
 
                 uint8_t right = j - 1;
 
-                if(i > 60 && right - left < 80) 
-                    continue;//如果白条太短了，跳过不处理
+                //if (!single_side_state && i > 60 && right - left < 40)
+                //    continue;//如果白条太短了，跳过不处理
                 tnum++;
                 if (tnum >= white_num_MAX)break;
                 range* now_white = &white_range[i].area[tnum];
@@ -2789,7 +2789,7 @@ void calc_stair_distance()
     else {
         stair_distance = NEAR_LINE - road_end;
     }
-    if(stair_distance == 0)
+    if (stair_distance == 0)
     {
         stair_distance = 120;
     }
@@ -3013,7 +3013,7 @@ void image_main()
     switch (now_element)
     {
     case BACK_STAIRS:
-        if(follow_lock == 3)
+        if (follow_lock == 3)
         {
             // 防止最后一段error过大导致车子乱转
             if (error < -20) error = 0;
