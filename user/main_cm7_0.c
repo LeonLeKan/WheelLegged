@@ -21,6 +21,7 @@ void start_imu_auto_gyro_calibration(void);
 
 void remote_control(void);
 void calculate_route(void);
+void calculate_modify(void);
 
 uint8_t motion_mode1 = 0;
 uint8_t motion_mode2 = 0;
@@ -60,7 +61,7 @@ int main(void)
     create_1st_menu();
     create_2nd_menu();
     create_3rd_menu();
-    menu_load1();
+    menu_load();
 
     // 存点初始化
     save_manager_init(ins_to_control_menu);
@@ -97,6 +98,7 @@ int main(void)
     if (testnum->data_int == 2)
     {
         calculate_route();
+        calculate_modify();
         save_manager_load(testnum->data_int + road_idx[road_num]);
     }
     else if (testnum->data_int == 1 || testnum->data_int == 0)
@@ -295,7 +297,6 @@ void handle_channel(void)
     else if (last_ch4 != uart_receiver.channel[4])
     {
         // 特殊用途
-        current_state = STATE_THUNDER;
     }
 
     else if (last_ch5 != uart_receiver.channel[5])
@@ -353,6 +354,40 @@ void calculate_route(void)
         else
         {
             road_idx[i] = 0;
+        }
+    }
+}
+
+void calculate_modify(void)
+{
+    int temp = modiro->data_int;
+    uint8_t digits[5] = {0};
+    int count = 0;
+
+    if (temp == 0)
+    {
+        digits[0] = 0;
+        count = 1;
+    }
+    else
+    {
+        while (temp > 0 && count < 5)
+        {
+            digits[count] = (uint8_t)(temp % 10);
+            count++;
+            temp /= 10;
+        }
+    }
+
+    for (int i = 0; i < 5; i++)
+    {
+        if (i < count)
+        {
+            modify_idx[i] = digits[count - 1 - i];
+        }
+        else
+        {
+            modify_idx[i] = 0;
         }
     }
 }

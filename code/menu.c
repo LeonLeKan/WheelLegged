@@ -7,7 +7,7 @@
 
 volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
-MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *thnum, *tunum, *saveall, *currentMenu;
+MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *modiro, *thnum, *tunum, *saveall, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
     *thre, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *stdis4, *stdis5, *stdis6, *stdis7, *jocnt, *saveim,
     *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *dis0, *dis1, *speedl, *balspeed, *thsp, *rotusp, *saveel;
@@ -95,9 +95,10 @@ void create_1st_menu(void)
     Element = createMenu("Element", 1, 3, MENU_TYPE_NORMAL, NULL);
     testnum = createMenu("testnum", 1, 4, MENU_TYPE_INT, NULL);
     road2 = createMenu("road2", 1, 5, MENU_TYPE_INT, NULL);
-    thnum = createMenu("thnum", 1, 6, MENU_TYPE_INT, NULL);
-    tunum = createMenu("tunum", 1, 7, MENU_TYPE_INT, NULL);
-    saveall = createMenu("save", 1, 8, MENU_TYPE_FUNCTION, menu_save);
+    modiro = createMenu("modiro", 1, 6, MENU_TYPE_INT, NULL);
+    thnum = createMenu("thnum", 1, 7, MENU_TYPE_INT, NULL);
+    tunum = createMenu("tunum", 1, 8, MENU_TYPE_INT, NULL);
+    saveall = createMenu("save", 1, 9, MENU_TYPE_FUNCTION, menu_save);
 
     WheelLeg->child = Balance;
     Balance->parent = WheelLeg;
@@ -105,6 +106,7 @@ void create_1st_menu(void)
     Element->parent = WheelLeg;
     testnum->parent = WheelLeg;
     road2->parent = WheelLeg;
+    modiro->parent = WheelLeg;
     thnum->parent = WheelLeg;
     tunum->parent = WheelLeg;
     saveall->parent = WheelLeg;
@@ -117,8 +119,10 @@ void create_1st_menu(void)
     testnum->last = Element;
     testnum->next = road2;
     road2->last = testnum;
-    road2->next = thnum;
-    thnum->last = road2;
+    road2->next = modiro;
+    modiro->last = road2;
+    modiro->next = thnum;
+    thnum->last = modiro;
     thnum->next = tunum;
     tunum->last = thnum;
     tunum->next = saveall;
@@ -1060,6 +1064,10 @@ void menu_save(void)
     flash_union_buffer[index++].int32_type = road->data_int;
     node_count++;
 
+    MENU *modify_road = modiro;
+    flash_union_buffer[index++].int32_type = modify_road->data_int;
+    node_count++;
+
     MENU *thun_num = thnum;
     flash_union_buffer[index++].int32_type = thun_num->data_int;
     node_count++;
@@ -1075,7 +1083,7 @@ void menu_save(void)
     flash_write_page_from_buffer(0, MENU1_FLASH_PAGE, index);
 }
 
-void menu_load1(void)
+void menu_load(void)
 {
     flash_buffer_clear();
     flash_read_page_to_buffer(0, MENU1_FLASH_PAGE, FLASH_PAGE_LENGTH);
@@ -1211,6 +1219,13 @@ void menu_load1(void)
     if (fabs((float)road->data_int) >= 100000)
     {
         road->data_int = 0;
+    }
+
+    MENU *modify_road = modiro;
+    modify_road->data_int = (int)flash_union_buffer[idx++].int32_type;
+    if (fabs((float)modify_road->data_int) >= 100000)
+    {
+        modify_road->data_int = 0;
     }
 
     MENU *thun_num = thnum;

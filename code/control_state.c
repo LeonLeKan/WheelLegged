@@ -197,19 +197,40 @@ static void quit_single_side(void)
             switch_from_single_side_to_forward_count++;
             if (switch_from_single_side_to_forward_count >= 100)
             {
-                disturb_flag = 1;
                 single_lock = 0;
                 switch_from_single_side_to_forward_count = 0;
-                last_raw_yaw = 0.0f;
-                target_yaw = 0.0f;
-                ins_reset();
                 image_block = 0;
-                road_num++;
-                save_manager_load(testnum->data_int + road_idx[road_num]);
-                speed_loop.ErrorInt = 0.0f;
-                current_state = STATE_ACCELERATE;
-                disturb_flag = 0;
+                current_state = STATE_MODIFY;
             }
+        }
+    }
+    else if (current_state == STATE_MODIFY)
+    {
+        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 3.0f)||
+            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 3.0f) ||
+            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 3.0f))
+        {
+            disturb_flag = 1;
+            single_lock = 0;
+            last_raw_yaw = 0.0f;
+            target_yaw = 0.0f;
+            ins_reset();
+            road_num++;
+            save_manager_load(testnum->data_int + road_idx[road_num]);
+            speed_loop.ErrorInt = 0.0f;
+            current_state = STATE_ACCELERATE;
+            disturb_flag = 0;
+        }
+        {
+            disturb_flag = 1;
+            last_raw_yaw = 0.0f;
+            target_yaw = 0.0f;
+            ins_reset();
+            road_num++;
+            save_manager_load(testnum->data_int + road_idx[road_num]);
+            speed_loop.ErrorInt = 0.0f;
+            current_state = STATE_ACCELERATE;
+            disturb_flag = 0;
         }
     }
 }
@@ -257,24 +278,42 @@ static void judge_time_to_jump(void)
             current_state = STATE_FIND_JUMP;
             if (front_stairs_end_flag == 1)
             {
-                disturb_flag = 1;
-                jump_count = 0;
                 image_block = 0;
-                last_raw_yaw = 0.0f;
-                target_yaw = 0.0f;
-                ins_reset();
-                road_num++;
-                save_manager_load(testnum->data_int + road_idx[road_num]);
-                speed_loop.ErrorInt = 0.0f;
-                current_state = STATE_ACCELERATE;
-                disturb_flag = 0;
+                current_state = STATE_MODIFY;
             }
         }
     }
-    if (jump_lock == 1)
+    else if (current_state == STATE_MODIFY)
+    {
+        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 3.0f)||
+            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 3.0f) ||
+            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 3.0f))
+        {
+            disturb_flag = 1;
+            jump_count = 0;
+            last_raw_yaw = 0.0f;
+            target_yaw = 0.0f;
+            ins_reset();
+            road_num++;
+            save_manager_load(testnum->data_int + road_idx[road_num]);
+            speed_loop.ErrorInt = 0.0f;
+            current_state = STATE_ACCELERATE;
+            disturb_flag = 0;
+        }
+    }
+    if (jump_lock == 1 && jump_count < 3)
     {
         jump_lock_count++;
         if (jump_lock_count >= 100)
+        {
+            jump_lock = 0;
+            jump_lock_count = 0;
+        }
+    }
+    else if (jump_lock == 1 && jump_count >= 3)
+    {
+        jump_lock_count++;
+        if (jump_lock_count >= 1)
         {
             jump_lock = 0;
             jump_lock_count = 0;
@@ -316,12 +355,21 @@ static void quit_follow_stairs(void)
         }
         if (follow_lock == 4)
         {
+            image_block = 0;
+            current_state = STATE_MODIFY;
+        }
+    }
+    else if (current_state == STATE_MODIFY)
+    {
+        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 3.0f)||
+            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 3.0f) ||
+            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 3.0f))
+        {
             disturb_flag = 1;
             follow_speed_change = 0;
             last_raw_yaw = 0.0f;
             target_yaw = 0.0f;
             ins_reset();
-            image_block = 0;
             road_num++;
             save_manager_load(testnum->data_int + road_idx[road_num]);
             speed_loop.ErrorInt = 0.0f;
@@ -341,7 +389,7 @@ static void de_to_tra_jolt(void)
 
 static void quit_jolt(void)
 {
-    if (current_state == STATE_JOLT)
+    if (current_state == STATE_JOLT || current_state == STATE_JOLT_TRAP)
     {
         if (jolt_lock == 0)
         {
@@ -363,6 +411,16 @@ static void quit_jolt(void)
         }
         if (jolt_lock == 3)
         {
+            image_block = 0;
+            current_state = STATE_MODIFY;
+        }
+    }
+    else if (current_state == STATE_MODIFY)
+    {
+        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 3.0f)||
+            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 3.0f) ||
+            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 3.0f))
+        {
             disturb_flag = 1;
             angle_loop2.ErrorInt = 0.0f;
             speed_loop.ErrorInt = 0.0f;
@@ -370,7 +428,6 @@ static void quit_jolt(void)
             last_raw_yaw = 0.0f;
             target_yaw = 0.0f;
             ins_reset();
-            image_block = 0;
             road_num++;
             save_manager_load(testnum->data_int + road_idx[road_num]);
             current_state = STATE_ACCELERATE;
@@ -494,6 +551,9 @@ void control_state_update(void)
     case STATE_JOLT:
         control_state_jolt();
         break;
+    case STATE_JOLT_TRAP:
+        control_state_jolt_trap();
+        break;
     case STATE_TEST:
         control_state_test();
         break;
@@ -502,6 +562,9 @@ void control_state_update(void)
         break;
     case STATE_STOP:
         control_state_stop();
+        break;
+    case STATE_MODIFY:
+        control_state_modify();
         break;
     default:
         control_state_forward();

@@ -8,6 +8,7 @@
 
 waypoint_node_t *current_target = NULL;
 uint8_t road_idx[5];
+uint8_t modify_idx[5];
 uint8_t road_num = 0;
 uint8_t disturb_flag = 0;
 float last_raw_yaw = 0.0f;
@@ -73,7 +74,16 @@ void location_update_0(void)
 
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
-    if (fabs(dx) < XYMIN_BIA_0 && fabs(dy) < XYMIN_BIA_0)
+
+    if ((sqrt(dx * dx + dy * dy) < XY_JUDGE_BIA) &&
+        (sqrt(dx * dx + dy * dy) >= XYMIN_BIA_0))
+    {
+        if (fabs(yaw_loop.Actual - target_deg) >= ANGLE_JUDGE_BIA)
+        {
+            advance_to_next_waypoint();
+        }
+    }
+    if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_0)
     {
         if (current_target->id_startup == tunum->data_int)
         {
@@ -180,7 +190,15 @@ void location_update_2_0(void)
 
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
-    if (fabs(dx) < XYMIN_BIA_2 && fabs(dy) < XYMIN_BIA_2)
+    if ((sqrt(dx * dx + dy * dy) < XY_JUDGE_BIA) &&
+        (sqrt(dx * dx + dy * dy) >= XYMIN_BIA_2))
+    {
+        if (fabs(yaw_loop.Actual - target_deg) >= ANGLE_JUDGE_BIA)
+        {
+            advance_to_next_waypoint();
+        }
+    }
+    if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
         advance_to_next_waypoint();
     }
@@ -220,7 +238,15 @@ void location_update_2_1(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
-    if (fabs(dx) < XYMIN_BIA_2 && fabs(dy) < XYMIN_BIA_2)
+    if ((sqrt(dx * dx + dy * dy) < XY_JUDGE_BIA) &&
+        (sqrt(dx * dx + dy * dy) >= XYMIN_BIA_2))
+    {
+        if (fabs(yaw_loop.Actual - target_deg) >= ANGLE_JUDGE_BIA)
+        {
+            advance_to_next_waypoint();
+        }
+    }
+    if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
         advance_to_next_waypoint();
     }
@@ -263,7 +289,15 @@ void location_update_2_2(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
-    if (fabs(dx) < XYMIN_BIA_2 && fabs(dy) < XYMIN_BIA_2)
+    if ((sqrt(dx * dx + dy * dy) < XY_JUDGE_BIA) &&
+        (sqrt(dx * dx + dy * dy) >= XYMIN_BIA_2))
+    {
+        if (fabs(yaw_loop.Actual - target_deg) >= ANGLE_JUDGE_BIA)
+        {
+            advance_to_next_waypoint();
+        }
+    }
+    if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
         advance_to_next_waypoint();
     }
@@ -312,7 +346,15 @@ void location_update_2_3(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
-    if (fabs(dx) < XYMIN_BIA_2 && fabs(dy) < XYMIN_BIA_2)
+    if ((sqrt(dx * dx + dy * dy) < XY_JUDGE_BIA) &&
+        (sqrt(dx * dx + dy * dy) >= XYMIN_BIA_2))
+    {
+        if (fabs(yaw_loop.Actual - target_deg) >= ANGLE_JUDGE_BIA)
+        {
+            advance_to_next_waypoint();
+        }
+    }
+    if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
         advance_to_next_waypoint();
     }
@@ -360,7 +402,15 @@ void location_update_2_4(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
-    if (fabs(dx) < XYMIN_BIA_2 && fabs(dy) < XYMIN_BIA_2)
+    if ((sqrt(dx * dx + dy * dy) < XY_JUDGE_BIA) &&
+        (sqrt(dx * dx + dy * dy) >= XYMIN_BIA_2)) 
+    {
+        if (fabs(yaw_loop.Actual - target_deg) >= ANGLE_JUDGE_BIA)
+        {
+            advance_to_next_waypoint();
+        }
+    }
+    if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
         advance_to_next_waypoint();
     }

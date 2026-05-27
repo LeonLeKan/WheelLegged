@@ -11,6 +11,7 @@ extern volatile float roll_base;
 extern volatile float yaw_test_bias;
 extern volatile uint8_t jump_count;
 extern volatile float yaw_de_final;
+extern volatile uint32_t jolt_trap_count;
 
 void control_init(void);
 
@@ -34,10 +35,10 @@ void control_state_follow_stairs(void);
 void control_state_de_jolt(void);
 void control_state_tra_jolt(void);
 void control_state_jolt(void);
+void control_state_jolt_trap(void);
 void control_state_test(void);
 void control_state_uturn(void);
+void control_state_modify(void);
 void control_state_stop(void);
-
-void limit_min_output(int16 *output, int16 limit);
 
 #endif

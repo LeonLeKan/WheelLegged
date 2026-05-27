@@ -24,8 +24,10 @@ typedef enum {
     STATE_DE_JOLT,
     STATE_TRA_JOLT,
     STATE_JOLT,
+    STATE_JOLT_TRAP,
     STATE_TEST,
     STATE_UTURN,
+    STATE_MODIFY,
     STATE_STOP
 } control_state_t;
 

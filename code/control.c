@@ -12,6 +12,7 @@ volatile float roll_base = 0.0f;
 volatile float yaw_test_bias = 0.0f;
 volatile uint8_t jump_count = 0;
 volatile float yaw_de_final = 0.0f;
+volatile uint32_t jolt_trap_count = 0;
 
 void control_init(void)
 {
@@ -957,6 +958,139 @@ void control_state_tra_jolt(void)
     small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
 }
 
+// void control_state_jolt(void)
+// {
+//     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+//     aspid_update(askp->data_float, aski->data_float, askd->data_float);
+//     angle_loop2.Ki = 0.0f;
+//     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+//     joypid_update(joykp->data_float, joyki->data_float, joykd->data_float);
+//     tu2pid_update_j(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+//     jospid_update(joskp->data_float, joski->data_float, joskd->data_float);
+//     threshold = (uint8_t)thre->data_int;
+//     error_calc_far_line = (uint8_t)farl->data_int;
+//     error_calc_near_line = (uint8_t)nearl->data_int;
+
+//     static uint32_t count = 0;
+//     count++;
+
+//     // 对speed_loop.Out进行低通滤波
+//     static float filtered_speed_out = 0.0f;
+//     static const float speed_alpha = 0.1f;
+
+//     static uint8_t jolt_control_state = 0;
+//     static uint8_t jolt_control_state_count = 0;
+
+//     static uint8_t jolt_speed_change_flag = 0;
+//     static uint32_t jolt_speed_change_count = 0;
+
+//     if (jolt_control_state == 0)
+//     {
+//         jolt_control_state_count++;
+//     }
+//     if (jolt_control_state_count <= 200)
+//     {
+//         if (count >= 4)
+//         {
+//             count = 0;
+
+//             speed_loop.Target = (float)jospeed->data_int / 100.0f;
+//             speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+
+//             PID_Update_Lo(&speed_loop);
+
+//             filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
+
+//             yaw_loop.Target = 0.0f;
+//             yaw_loop.Actual = imu.output.euler[2];
+//             joy_loop.Actual = imu.output.euler[2];
+//             PID_Update_Lo(&joy_loop);
+//         }
+
+//         // 单边桥控制
+//         jos_loop.Target = roll_base;
+//         jos_loop.Actual = imu.output.euler[0];
+//         PID_Update_Lo(&jos_loop);
+
+//         // 对jos_loop.Out进行低通滤波
+//         static float filtered_jos_out = 0.0f;
+//         static const float jos_alpha = 0.1f;
+
+//         filtered_jos_out = jos_alpha * jos_loop.Out + (1.0f - jos_alpha) * filtered_jos_out;
+
+//         servo_set(90.0f - filtered_speed_out - filtered_jos_out, 90.0f + filtered_speed_out + filtered_jos_out,
+//                   90.0f - filtered_speed_out + filtered_jos_out, 90.0f + filtered_speed_out - filtered_jos_out);
+//     }
+
+//     else if (jolt_control_state_count > 200)
+//     {
+//         jolt_control_state = 1;
+//         if (count >= 4)
+//         {
+//             count = 0;
+
+//             speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+
+//             yaw_loop.Target = 0.0f;
+//             yaw_loop.Actual = imu.output.euler[2];
+//             joy_loop.Actual = imu.output.euler[2];
+//             PID_Update_Lo(&joy_loop);
+//         }
+
+//         // 单边桥控制
+//         jos_loop.Target = roll_base;
+//         jos_loop.Actual = imu.output.euler[0];
+//         PID_Update_Lo(&jos_loop);
+
+//         // 对jos_loop.Out进行低通滤波
+//         static float filtered_jos_out = 0.0f;
+//         static const float jos_alpha = 0.1f;
+
+//         filtered_jos_out = jos_alpha * jos_loop.Out + (1.0f - jos_alpha) * filtered_jos_out;
+
+//         if (jolt_speed_change_flag == 0)
+//         {
+//             servo_set(45.0f - filtered_jos_out, 135.0f + filtered_jos_out,
+//                       45.0f + filtered_jos_out, 135.0f - filtered_jos_out);
+//             jolt_speed_change_count++;
+//             if (jolt_speed_change_count >= 80)
+//             {
+//                 jolt_speed_change_count = 0;
+//                 jolt_speed_change_flag = 1;
+//             }
+//         }
+//         else if (jolt_speed_change_flag == 1)
+//         {
+//             servo_set(90.0f - filtered_jos_out, 90.0f + filtered_jos_out,
+//                       90.0f + filtered_jos_out, 90.0f - filtered_jos_out);
+//             jolt_speed_change_count++;
+//             if (jolt_speed_change_count >= 80)
+//             {
+//                 jolt_speed_change_count = 0;
+//                 jolt_speed_change_flag = 0;
+//             }
+//         }
+//     }
+
+//     turn_loop2.Target = -joy_loop.Out * speed_loop.Actual;
+//     turn_loop2.Actual = -imu.body.gyro[2];
+//     PID_Update_Lo(&turn_loop2);
+
+//     angle_loop2.Target = pzero->data_float;
+//     angle_loop2.Actual = imu.output.euler[1];
+//     PID_Update_Lo(&angle_loop2);
+
+//     aspeed_loop.Target = angle_loop2.Out;
+//     aspeed_loop.Actual = imu.output.gyro[1];
+//     PID_Update_Lo(&aspeed_loop);
+
+//     int16 duty1 = (int16)(aspeed_loop.Out - turn_loop2.Out);
+//     int16 duty2 = (int16)(-(aspeed_loop.Out + turn_loop2.Out));
+//     limit_min_output(&duty1, 100);
+//     limit_min_output(&duty2, 100);
+//     small_driver_set_duty((int16)(duty1), (int16)(duty2));
+// }
+
 void control_state_jolt(void)
 {
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
@@ -977,98 +1111,133 @@ void control_state_jolt(void)
     static float filtered_speed_out = 0.0f;
     static const float speed_alpha = 0.1f;
 
-    static uint8_t jolt_control_state = 0;
-    static uint8_t jolt_control_state_count = 0;
+    if (count >= 4)
+    {
+        count = 0;
+
+        speed_loop.Target = (float)jospeed->data_int / 100.0f;
+        speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+
+        PID_Update_Lo(&speed_loop);
+
+        filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
+
+        yaw_loop.Target = 0.0f;
+        yaw_loop.Actual = imu.output.euler[2];
+        joy_loop.Actual = imu.output.euler[2];
+        PID_Update_Lo(&joy_loop);
+    }
+
+    // 单边桥控制
+    jos_loop.Target = roll_base;
+    jos_loop.Actual = imu.output.euler[0];
+    PID_Update_Lo(&jos_loop);
+
+    // 对jos_loop.Out进行低通滤波
+    static float filtered_jos_out = 0.0f;
+    static const float jos_alpha = 0.1f;
+
+    filtered_jos_out = jos_alpha * jos_loop.Out + (1.0f - jos_alpha) * filtered_jos_out;
+
+    servo_set(90.0f - filtered_speed_out - filtered_jos_out, 90.0f + filtered_speed_out + filtered_jos_out,
+              90.0f - filtered_speed_out + filtered_jos_out, 90.0f + filtered_speed_out - filtered_jos_out);
+
+    if (speed_loop.Actual < 0.5f && speed_loop.Actual > -0.5f)
+    {
+        jolt_trap_count++;
+        if (jolt_trap_count >= 20)
+        {
+            jolt_trap_count = 0;
+            current_state = STATE_JOLT_TRAP;
+        }
+    }
+    else
+    {
+        jolt_trap_count = 0;
+    } 
+ 
+    turn_loop2.Target = -joy_loop.Out * speed_loop.Actual;
+    turn_loop2.Actual = -imu.body.gyro[2];
+    PID_Update_Lo(&turn_loop2);
+
+    angle_loop2.Target = pzero->data_float;
+    angle_loop2.Actual = imu.output.euler[1];
+    PID_Update_Lo(&angle_loop2);
+
+    aspeed_loop.Target = angle_loop2.Out;
+    aspeed_loop.Actual = imu.output.gyro[1];
+    PID_Update_Lo(&aspeed_loop);
+
+    small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+}
+
+void control_state_jolt_trap(void)
+{
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+    angle_loop2.Ki = 0.0f;
+    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+    joypid_update(joykp->data_float, joyki->data_float, joykd->data_float);
+    tu2pid_update_j(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    jospid_update(joskp->data_float, joski->data_float, joskd->data_float);
+    threshold = (uint8_t)thre->data_int;
+    error_calc_far_line = (uint8_t)farl->data_int;
+    error_calc_near_line = (uint8_t)nearl->data_int;
 
     static uint8_t jolt_speed_change_flag = 0;
     static uint32_t jolt_speed_change_count = 0;
 
-    if (jolt_control_state == 0)
+    static uint32_t count = 0;
+    count++;
+
+    if (count >= 4)
     {
-        jolt_control_state_count++;
-    }
-    if (jolt_control_state_count <= 200)
-    {
-        if (count >= 4)
-        {
-            count = 0;
+        count = 0;
 
-            speed_loop.Target = (float)jospeed->data_int / 100.0f;
-            speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+        speed_loop.Target = (float)jospeed->data_int / 100.0f;
+        speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
-            PID_Update_Lo(&speed_loop);
+        PID_Update_Lo(&speed_loop);
 
-            filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
-
-            yaw_loop.Target = 0.0f;
-            yaw_loop.Actual = imu.output.euler[2];
-            joy_loop.Actual = imu.output.euler[2];
-            PID_Update_Lo(&joy_loop);
-        }
-
-        // 单边桥控制
-        jos_loop.Target = roll_base;
-        jos_loop.Actual = imu.output.euler[0];
-        PID_Update_Lo(&jos_loop);
-
-        // 对jos_loop.Out进行低通滤波
-        static float filtered_jos_out = 0.0f;
-        static const float jos_alpha = 0.1f;
-
-        filtered_jos_out = jos_alpha * jos_loop.Out + (1.0f - jos_alpha) * filtered_jos_out;
-
-        servo_set(90.0f - filtered_speed_out - filtered_jos_out, 90.0f + filtered_speed_out + filtered_jos_out,
-                  90.0f - filtered_speed_out + filtered_jos_out, 90.0f + filtered_speed_out - filtered_jos_out);
+        yaw_loop.Target = 0.0f;
+        yaw_loop.Actual = imu.output.euler[2];
+        joy_loop.Actual = imu.output.euler[2];
+        PID_Update_Lo(&joy_loop);
     }
 
-    else if (jolt_control_state_count > 200)
+    if (speed_loop.Actual > (float)jospeed->data_int / 100.0f)
     {
-        jolt_control_state = 1;
-        if (count >= 4)
+        jolt_trap_count++;
+        if (jolt_trap_count >= 10)
         {
-            count = 0;
-
-            speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
-
-            yaw_loop.Target = 0.0f;
-            yaw_loop.Actual = imu.output.euler[2];
-            joy_loop.Actual = imu.output.euler[2];
-            PID_Update_Lo(&joy_loop);
+            jolt_trap_count = 0;
+            current_state = STATE_JOLT;
         }
+    }
+    else
+    {
+        jolt_trap_count = 0;
+    }
 
-        // 单边桥控制
-        jos_loop.Target = roll_base;
-        jos_loop.Actual = imu.output.euler[0];
-        PID_Update_Lo(&jos_loop);
-
-        // 对jos_loop.Out进行低通滤波
-        static float filtered_jos_out = 0.0f;
-        static const float jos_alpha = 0.1f;
-
-        filtered_jos_out = jos_alpha * jos_loop.Out + (1.0f - jos_alpha) * filtered_jos_out;
-
-        if (jolt_speed_change_flag == 0)
+    if (jolt_speed_change_flag == 0)
+    {
+        servo_set(45.0f, 135.0f,
+                  40.0f, 140.0f);
+        jolt_speed_change_count++;
+        if (jolt_speed_change_count >= 80)
         {
-            servo_set(45.0f - filtered_jos_out, 135.0f + filtered_jos_out,
-                      45.0f + filtered_jos_out, 135.0f - filtered_jos_out);
-            jolt_speed_change_count++;
-            if (jolt_speed_change_count >= 80)
-            {
-                jolt_speed_change_count = 0;
-                jolt_speed_change_flag = 1;
-            }
+            jolt_speed_change_count = 0;
+            jolt_speed_change_flag = 1;
         }
-        else if (jolt_speed_change_flag == 1)
-        {
-            servo_set(90.0f - filtered_jos_out, 90.0f + filtered_jos_out,
-                      90.0f + filtered_jos_out, 90.0f - filtered_jos_out);
-            jolt_speed_change_count++;
-            if (jolt_speed_change_count >= 80)
-            {
-                jolt_speed_change_count = 0;
-                jolt_speed_change_flag = 0;
-            }
-        }
+    }
+    else if (jolt_speed_change_flag == 1)
+    {
+        jolt_speed_change_flag = 0;
+        jolt_trap_count = 0;
+        angle_loop2.ErrorInt = 0.0f;
+        speed_loop.ErrorInt = 0.0f;
+        turn_loop2.ErrorInt = 0.0f;
+        current_state = STATE_JOLT;
     }
 
     turn_loop2.Target = -joy_loop.Out * speed_loop.Actual;
@@ -1083,11 +1252,7 @@ void control_state_jolt(void)
     aspeed_loop.Actual = imu.output.gyro[1];
     PID_Update_Lo(&aspeed_loop);
 
-    int16 duty1 = (int16)(aspeed_loop.Out - turn_loop2.Out);
-    int16 duty2 = (int16)(-(aspeed_loop.Out + turn_loop2.Out));
-    limit_min_output(&duty1, 100);
-    limit_min_output(&duty2, 100);
-    small_driver_set_duty((int16)(duty1), (int16)(duty2));
+    small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
 }
 
 void control_state_test(void)
@@ -1181,21 +1346,70 @@ void control_state_uturn(void)
     }
 }
 
+void control_state_modify(void)
+{
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+    yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
+    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+
+    static uint32_t count = 0;
+    count++;
+    if (count >= 4)
+    {
+        count = 0;
+
+        speed_loop.Target = (float)speed->data_int / 100.0f;
+        speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+
+        PID_Update_Lo(&speed_loop);
+
+        // 对speed_loop.Out进行低通滤波
+        static float filtered_speed_out = 0.0f;
+        static const float speed_alpha = 0.1f;
+
+        filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
+
+        servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
+                  90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
+
+        if (modify_idx[road_num] == 1)
+        {
+            yaw_loop.Target = 0.0f;
+            yaw_loop.Actual = imu.output.euler[2];
+        }
+        else if (modify_idx[road_num] == 2)
+        {
+            yaw_loop.Target = 180.0f;
+            yaw_loop.Actual = imu.output.euler[2];
+        }
+        else if (modify_idx[road_num] == 3)
+        {
+            yaw_loop.Target = -180.0f;
+            yaw_loop.Actual = imu.output.euler[2];
+        }
+        PID_Update_Lo(&yaw_loop);
+    }
+
+    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual;
+    turn_loop2.Actual = -imu.body.gyro[2];
+    PID_Update_Lo(&turn_loop2);
+
+    angle_loop2.Target = pzero->data_float;
+    angle_loop2.Actual = imu.output.euler[1];
+    PID_Update_Lo(&angle_loop2);
+
+    aspeed_loop.Target = angle_loop2.Out;
+    aspeed_loop.Actual = imu.output.gyro[1];
+    PID_Update_Lo(&aspeed_loop);
+
+    small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+}
+
 void control_state_stop(void)
 {
     para_zero();
     out_zero();
     small_driver_set_duty(0, 0);
-}
-
-void limit_min_output(int16 *output, int16 limit)
-{
-    if (*output > 0 && *output < limit)
-    {
-        *output = limit;
-    }
-    else if (*output < 0 && *output > -limit)
-    {
-        *output = -limit;
-    }
 }

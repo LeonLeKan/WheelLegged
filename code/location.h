@@ -12,9 +12,12 @@
 #define XYMIN_BIA_0 0.1f
 #define XYMIN_BIA_1 0.1f
 #define XYMIN_BIA_2 0.1f
+#define XY_JUDGE_BIA 0.3f
+#define ANGLE_JUDGE_BIA 90.0f
 
 extern waypoint_node_t *current_target;
 extern uint8_t road_idx[5];
+extern uint8_t modify_idx[5];
 extern uint8_t road_num;
 extern uint8_t disturb_flag;
 extern float last_raw_yaw;
