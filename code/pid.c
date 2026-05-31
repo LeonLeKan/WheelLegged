@@ -12,10 +12,31 @@ volatile PID_t yaw_loop;
 volatile PID_t jos_loop;
 volatile PID_t joy_loop;
 
+static float wrap_angle_error(float target, float actual)
+{
+    float error = target - actual;
+    if (error > 180.0f)
+    {
+        error -= 360.0f;
+    }
+    else if (error < -180.0f)
+    {
+        error += 360.0f;
+    }
+    return error;
+}
+
 void PID_Update_Lo(volatile PID_t *p)
 {
     p->Error1 = p->Error0;
-    p->Error0 = p->Target - p->Actual;
+    if (p == &yaw_loop || p == &joy_loop)
+    {
+        p->Error0 = wrap_angle_error(p->Target, p->Actual);
+    }
+    else
+    {
+        p->Error0 = p->Target - p->Actual;
+    }
 
     p->ErrorInt += p->Error0;
 
@@ -29,24 +50,6 @@ void PID_Update_Lo(volatile PID_t *p)
     }
 
     p->Out = p->Kp * p->Error0 + p->Ki * p->ErrorInt + p->Kd * (p->Error0 - p->Error1);
-
-    if (p->Out > p->OutMax)
-    {
-        p->Out = p->OutMax;
-    }
-    if (p->Out < p->OutMin)
-    {
-        p->Out = p->OutMin;
-    }
-}
-
-void PID_Update_In(volatile PID_t *p)
-{
-    p->Error1 = p->Error0;
-    p->Error0 = p->Target - p->Actual;
-    p->Error2 = p->Error1;
-
-    p->Out += p->Kp * (p->Error0 - p->Error1) + p->Ki * p->Error0 + p->Kd * (p->Error0 - 2 * p->Error1 + p->Error2);
 
     if (p->Out > p->OutMax)
     {

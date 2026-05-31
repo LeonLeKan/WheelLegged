@@ -31,11 +31,9 @@ void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
 
-    oscilloscope_data.data[0] = error;
-    oscilloscope_data.data[1] = on_single_side_road;
-    oscilloscope_data.data[2] = single_side_state;
+    oscilloscope_data.data[0] = imu.output.euler[2];
 
-    oscilloscope_data.channel_num = 3;
+    oscilloscope_data.channel_num = 1;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 

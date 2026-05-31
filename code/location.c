@@ -75,14 +75,6 @@ void location_update_0(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
-    if ((sqrt(dx * dx + dy * dy) < XY_JUDGE_BIA) &&
-        (sqrt(dx * dx + dy * dy) >= XYMIN_BIA_0))
-    {
-        if (fabs(yaw_loop.Actual - target_deg) >= ANGLE_JUDGE_BIA)
-        {
-            advance_to_next_waypoint();
-        }
-    }
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_0)
     {
         if (current_target->id_startup == tunum->data_int)
@@ -190,14 +182,7 @@ void location_update_2_0(void)
 
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
-    if ((sqrt(dx * dx + dy * dy) < XY_JUDGE_BIA) &&
-        (sqrt(dx * dx + dy * dy) >= XYMIN_BIA_2))
-    {
-        if (fabs(yaw_loop.Actual - target_deg) >= ANGLE_JUDGE_BIA)
-        {
-            advance_to_next_waypoint();
-        }
-    }
+
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
         advance_to_next_waypoint();
@@ -238,14 +223,6 @@ void location_update_2_1(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
-    if ((sqrt(dx * dx + dy * dy) < XY_JUDGE_BIA) &&
-        (sqrt(dx * dx + dy * dy) >= XYMIN_BIA_2))
-    {
-        if (fabs(yaw_loop.Actual - target_deg) >= ANGLE_JUDGE_BIA)
-        {
-            advance_to_next_waypoint();
-        }
-    }
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
         advance_to_next_waypoint();
@@ -289,14 +266,6 @@ void location_update_2_2(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
-    if ((sqrt(dx * dx + dy * dy) < XY_JUDGE_BIA) &&
-        (sqrt(dx * dx + dy * dy) >= XYMIN_BIA_2))
-    {
-        if (fabs(yaw_loop.Actual - target_deg) >= ANGLE_JUDGE_BIA)
-        {
-            advance_to_next_waypoint();
-        }
-    }
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
         advance_to_next_waypoint();
@@ -346,14 +315,6 @@ void location_update_2_3(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
-    if ((sqrt(dx * dx + dy * dy) < XY_JUDGE_BIA) &&
-        (sqrt(dx * dx + dy * dy) >= XYMIN_BIA_2))
-    {
-        if (fabs(yaw_loop.Actual - target_deg) >= ANGLE_JUDGE_BIA)
-        {
-            advance_to_next_waypoint();
-        }
-    }
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
         advance_to_next_waypoint();
@@ -402,14 +363,6 @@ void location_update_2_4(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
-    if ((sqrt(dx * dx + dy * dy) < XY_JUDGE_BIA) &&
-        (sqrt(dx * dx + dy * dy) >= XYMIN_BIA_2)) 
-    {
-        if (fabs(yaw_loop.Actual - target_deg) >= ANGLE_JUDGE_BIA)
-        {
-            advance_to_next_waypoint();
-        }
-    }
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
         advance_to_next_waypoint();

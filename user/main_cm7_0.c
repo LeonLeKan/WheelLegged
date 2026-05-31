@@ -314,7 +314,7 @@ void remote_control(void)
     if (1 == uart_receiver.finsh_flag)
     {
         speed_loop.Target = (uart_receiver.channel[1] - 808) / 200.0f;
-        yaw_test_bias = (uart_receiver.channel[0] - 777) * 1.5;
+        yaw_test_bias = (uart_receiver.channel[0] - 808) * 1.5;
         if (uart_receiver.channel[3] == 1792 && test_state == 0)
         {
             test_state = 1;
