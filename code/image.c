@@ -30,7 +30,7 @@ typedef struct {
 //////////////////////// 传给控制 ////////////////////
 // 1-单边桥 2-三级跳 3-下三级 4-颠簸路段
 element_t now_element;
-int stair_distance;     // 到下一级台阶的距离
+int stair_distance = 99;     // 到下一级台阶的距离
 bool front_stairs_end_flag = 0;
 bool back_stairs_end_flag = 0;
 bool jolt_end_flag = 0;

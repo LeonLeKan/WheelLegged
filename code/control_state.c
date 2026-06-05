@@ -16,7 +16,7 @@ volatile uint32_t jolt_lock_count = 0;
 volatile uint8_t speed_0_change = 0;
 volatile uint8_t speed_1_change = 0;    
 volatile uint8_t speed_2_change = 0;
-volatile uint8_t jump_lock = 0;
+volatile uint8_t jump_lock = 1;
 volatile uint32_t jump_lock_count = 0;
 volatile uint8_t follow_lock = 0;
 volatile uint32_t follow_lock_count_1 = 0;
@@ -331,7 +331,7 @@ static void quit_follow_stairs(void)
         if (follow_lock == 2)
         {
             follow_lock_count_2++;
-            if (follow_lock_count_2 >= 500)
+            if (follow_lock_count_2 >= 400)
             {
                 follow_lock = 3;
                 follow_lock_count_2 = 0;
