@@ -28,7 +28,6 @@ uint8_t motion_mode2 = 0;
 uint8_t motion_mode3 = 0;
 uint8_t motion_mode4 = 0;
 
-uint8_t cali_finish_flag = 0;
 uint8_t get_ready = 0;
 
 MahonyFilterParam mahony_filter_param = {
@@ -109,11 +108,10 @@ int main(void)
     // 设置曝光度
     mt9v03x_set_exposure_time(imexp->data_int);
 
-    if (gpio_get_level(DIP_3) == 0 && gpio_get_level(DIP_1) == 1 && gpio_get_level(DIP_2) == 1)
+    if (gpio_get_level(DIP_3) == 0 && gpio_get_level(DIP_1) == 1 && gpio_get_level(DIP_2) == 1 && gpio_get_level(DIP_4) == 1)
     {
         imu_skip_initial_estimation();
         start_imu_auto_gyro_calibration();
-        cali_finish_flag = 1;
     }
     else if (gpio_get_level(DIP_3) == 1 && gpio_get_level(DIP_1) == 1 && gpio_get_level(DIP_2) == 1)
     {
@@ -129,7 +127,7 @@ int main(void)
         motion_mode3 = gpio_get_level(DIP_3);
         motion_mode4 = gpio_get_level(DIP_4);
 
-        if (motion_mode1 == 1 && motion_mode2 == 1)
+        if (motion_mode1 == 1 && motion_mode2 == 1 && (motion_mode3 + motion_mode4 != 0))
         {
             current_state = STATE_IDLE;
             imu_state_show();
@@ -146,11 +144,18 @@ int main(void)
             if (motion_mode4 == 0)
             {
                 wifi_send_data();
+            }
+        }
+
+        else if (motion_mode1 == 1 && motion_mode2 == 1 && motion_mode3 == 0 && motion_mode4 == 0)
+        {
+            while (true)
+            {
                 wifi_send_image();
             }
         }
 
-        else if (motion_mode1 == 0 && motion_mode2 == 1 && motion_mode3 == 1 && cali_finish_flag == 0)
+        else if (motion_mode1 == 0 && motion_mode2 == 1 && motion_mode3 == 1)
         {
             system_delay_ms(1000);
             ips200_clear();
