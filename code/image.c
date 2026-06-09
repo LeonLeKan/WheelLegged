@@ -30,7 +30,7 @@ typedef struct {
 //////////////////////// 传给控制 ////////////////////
 // 1-单边桥 2-三级跳 3-下三级 4-颠簸路段
 element_t now_element;
-int stair_distance = 99;     // 到下一级台阶的距离
+int stair_distance;     // 到下一级台阶的距离
 bool front_stairs_end_flag = 0;
 bool back_stairs_end_flag = 0;
 bool jolt_end_flag = 0;
@@ -39,12 +39,13 @@ int error_calc_near_line = 52;
 int error_calc_far_line = 50;
 uint8_t threshold = 170;    //阈值
 bool on_single_side_road = 0;   // 是否进入单边桥之前的白色赛道
+int on_single_side_road_cnt = 0;
 int jolt_end_cnt_thre = 30;
 int back_stairs_end_cnt_thre = 15;
+uint8_t middle = 84;    // 中线校准（有些摄像头会整体向左右偏，所以真正的正中间不一定是94）
 //////////////////////// ////////// //////////////////
 
-int on_single_side_road_cnt = 0;//进入单边桥之前的白色赛道的帧数
-int on_single_side_road_cnt_thre = 15;//进入单边桥之前的白色赛道的帧数阈值，超过这个值才认为进入了单边桥之前的白色赛道
+
 
 uint8_t road_start = NEAR_LINE;
 uint8_t road_end = FAR_LINE;
@@ -55,6 +56,7 @@ uint8_t j_continue[CAMERA_H];
 uint8_t IMG[CAMERA_H][CAMERA_W];//二值化后图像数组
 uint8_t boundaries[CAMERA_H][CAMERA_W];
 uint8_t left_line[CAMERA_H], right_line[CAMERA_H];//赛道的左右边界
+uint8_t old_left_line[CAMERA_H], old_right_line[CAMERA_H];
 uint8_t mid_line[CAMERA_H];
 float left_line_datas[2] = { 0 };//左边线的斜率和截距
 float right_line_datas[2] = { 0 };//右边线的斜率和截距
@@ -1408,7 +1410,7 @@ uint8_t last_one_right_single_check(void)
             break;
         }
         if ((right_line[right_x - 6] - right_line[right_x - 9]) > -4 && right_line[right_x] > right_line[right_x - 6] &&
-            (right_line[right_x - 6] - right_line[right_x - 9]) < 4 && right_line[right_x] > 94 && right_line[right_x - 5] > 74 &&
+            (right_line[right_x - 6] - right_line[right_x - 9]) < 4 && right_line[right_x] > middle && right_line[right_x - 5] > 74 &&
             (right_line[right_x] - left_line[right_x] - right_line[right_x - 8] + left_line[right_x - 8]) > 13 && right_line[right_x] - right_line[right_x - 6] > 7
             && (right_line[right_x] - left_line[right_x] - right_line[right_x - 8] + left_line[right_x - 8]) < 60)
         {
@@ -1433,7 +1435,7 @@ uint8_t last_one_left_single_check(void)
     while (left_x = get_line_f2_forward_y(left_line, left_x, top_road + 5, 7, 5))
     {
         if ((left_line[left_x - 6] - left_line[left_x - 9]) > -4 &&
-            (left_line[left_x - 6] - left_line[left_x - 9]) < 4 && left_line[left_x] < 94 && left_line[left_x - 5] < 114 &&
+            (left_line[left_x - 6] - left_line[left_x - 9]) < 4 && left_line[left_x] < middle && left_line[left_x - 5] < 114 &&
             (right_line[left_x] - left_line[left_x] - right_line[left_x - 8] + left_line[left_x - 8]) > 13 && left_line[left_x - 6] - left_line[left_x] > 7
             && (right_line[left_x] - left_line[left_x] - right_line[left_x - 8] + left_line[left_x - 8]) < 60)
         {
@@ -1921,6 +1923,7 @@ void get_line(uint8_t* line, uint8_t start, uint8_t end, float k, float b)
     int16_t line_now[NEAR_LINE + 1];
     for (int i = start; i >= end; i--) {
         line_now[i] = (int16_t)(b + k * i);
+        if (i > NEAR_LINE || i < 0) continue;
         if (line_now[i] < LEFT_SIDE) {
             line_now[i] = LEFT_SIDE;
         }
@@ -2387,8 +2390,8 @@ void search_white_range1()
 
                 uint8_t right = j - 1;
 
-                if (!on_single_side_road && i > 60 && right - left < 60)
-                   continue;//如果白条太短了，跳过不处理
+                if (!on_single_side_road && i > 60 && right - left < 40)
+                    continue;//如果白条太短了，跳过不处理
                 tnum++;
                 if (tnum >= white_num_MAX)break;
                 range* now_white = &white_range[i].area[tnum];
@@ -2403,7 +2406,7 @@ void search_white_range1()
             }
         }
         white_range[i].num = tnum;
-        if (!found_road_start && longest >= 50)
+        if (!found_road_start && longest >= 30)
         {
             found_road_start = 1;
             road_start = i;
@@ -2524,7 +2527,7 @@ void find_road1()
 }
 void find_road_state()
 {
-    if (step == single_side && on_single_side_road)
+    if (step == single_side)
     {
         single_side_road_choose();
     }
@@ -2738,7 +2741,7 @@ void define_mid_255()
     {
         for (int i = NEAR_LINE; i > top_road + 5; i--)
         {
-            mid_line[i] = 94;
+            mid_line[i] = middle;
         }
     }
 }
@@ -2813,7 +2816,7 @@ void mend_stairs(uint8_t* line)
         else {
             for (int i = NEAR_LINE; i >= road_start; i--)
             {
-                line[i] = 94;
+                line[i] = middle;
             }
         }
     }
@@ -2828,7 +2831,7 @@ void mend_stairs(uint8_t* line)
         else {
             for (int i = road_end; i >= FAR_LINE; i--)
             {
-                line[i] = 94;
+                line[i] = middle;
             }
         }
     }
@@ -2842,6 +2845,7 @@ void mend_far_single_side()
     {
         least_square_get_line(left_line, road_start - 5, 5, input, NEAR_LINE, road_start - 5);
         least_square_get_line(right_line, road_start - 5, 5, input, NEAR_LINE, road_start - 5);
+        on_single_side_road_cnt = 0;
         on_single_side_road = 0;
     }
     else {
@@ -2854,20 +2858,95 @@ void mend_far_single_side()
                     white_count++;
             }
         }
-        if (white_count >= 800 && !on_single_side_road)
+        if (white_count >= 800)
         {
             on_single_side_road_cnt++;
-            if (on_single_side_road_cnt > on_single_side_road_cnt_thre)
+            if (on_single_side_road_cnt > 10)
             {
-                on_single_side_road_cnt = 0;
                 on_single_side_road = 1;
             }
         }
-        else {
-            on_single_side_road = 0;
-            on_single_side_road_cnt = 0;
+    }
+}
+
+uint8_t judge_line_right(uint8_t start)
+{
+    for (int i= start; i >= start - 10; i--)
+    {
+        if (abs(right_line[i] - middle < 10))
+            return 0;
+    }
+
+    uint8_t end = get_line_f2_forward_y(right_line, start - 2, FAR_LINE, 5, 5);
+    if (start - end < 10) return 0;
+    float input[2];
+    least_square(right_line, start, end - start, input);
+    float k = input[0];
+    if (k < 0 || k > 0.8) return 0;
+    return end;
+}
+uint8_t judge_line_left(uint8_t start)
+{
+    for (int i = start; i >= start - 10; i--)
+    {
+        if (abs(middle - left_line[i] < 10))
+            return 0;
+    }
+    uint8_t end = get_line_f2_forward_y(left_line, start - 2, FAR_LINE, 5, 5);
+    if (start - end < 10) return 0;
+    float input[2];
+    least_square(left_line, start, end - start, input);
+    float k = input[0];
+    if (k > 0 || k < -0.8) return 0;
+    return end;
+}
+
+
+void find_correct_line_right()
+{
+    uint8_t correct_start = 0, end = 0;
+    for (int i = NEAR_LINE; i >= FAR_LINE + 20; i--)
+    {
+        if (right_line[i] == 255) continue;
+        end = judge_line_right(i);
+        if (end)
+        {
+            correct_start = i;
+            break;
         }
     }
+    if (!correct_start) return;
+    correct_start -= 2;
+#if ONBOARD
+#else
+    printf("%d %d\n", correct_start, end);
+#endif
+    float input[2];
+    least_square_get_line(right_line, correct_start, end - correct_start, input, end, FAR_LINE);
+    least_square_get_line(right_line, correct_start, end - correct_start, input, NEAR_LINE, correct_start);
+}
+
+void find_correct_line_left()
+{
+    uint8_t correct_start = 0, end = 0;
+    for (int i = NEAR_LINE; i >= FAR_LINE + 20; i--)
+    {
+        if (left_line[i] == 255) continue;
+        end = judge_line_left(i);
+        if (end)
+        {
+            correct_start = i;
+            break;
+        }
+    }
+#if ONBOARD
+#else
+    printf("%d %d\n", correct_start, end);
+#endif
+    if (!correct_start) return;
+    float input[2];
+    least_square_get_line(left_line, correct_start, end - correct_start, input, end, FAR_LINE);
+    least_square_get_line(left_line, correct_start, end - correct_start, input, NEAR_LINE, correct_start);
 }
 
 void front_stairs_end_check()
@@ -2945,6 +3024,25 @@ void jolt_end_check()
     }
 }
 
+int calc_error(int* missed)
+{
+    int sum = 0;
+    int total = 0;
+    int miss_cnt = 0;
+    for (int i = error_calc_near_line; i >= error_calc_far_line; i--)
+    {
+        if (mid_line[i] != MISS)
+        {
+            sum += mid_line[i];
+            total++;
+        }
+        else miss_cnt++;
+    }
+    if (total == 0) total = 1;
+    if (missed) *missed = miss_cnt;
+    return sum / total - middle;
+}
+
 ////////////////////////////////////////////
 //功能：图像处理主程序
 //输入：
@@ -2955,7 +3053,7 @@ void image_main()
 {
 #if ONBOARD
 #else 
-    now_element = FRONT_STAIRS;
+    now_element = SINGLE_SIDE;
 #endif
     // mid_update = 0;
     datas_init();
@@ -2967,6 +3065,13 @@ void image_main()
     /*到此处为止，我们已经得到了属于赛道的结构体数组my_road[CAMERA_H]*/
 
     ordinary_two_line();
+
+    // 保存旧的双边线
+    for (int i = NEAR_LINE; i >= FAR_LINE; i--)
+    {
+        old_left_line[i] = left_line[i];
+        old_right_line[i] = right_line[i];
+    }
 
     get_mid_line();
 #if ONBOARD
@@ -2987,7 +3092,9 @@ void image_main()
         if (!on_single_side_road)
             mend_far_single_side();
         else
+        {
             general_judgement();
+        }
         break;
 
     case FRONT_STAIRS:
@@ -3009,19 +3116,10 @@ void image_main()
 
     get_mid_line();
 
-    define_mid_255();
-    int sum = 0;
-    int total = 0;
-    for (int i = error_calc_near_line; i >= error_calc_far_line; i--)
-    {
-        if (mid_line[i] != MISS)
-        {
-            sum += mid_line[i];
-            total++;
-        }
-    }
-    if (total == 0) total = 1;
-    error = sum / total - 94;
+    int missed = 0;
+    error = calc_error(&missed);
+    //define_mid_255();
+    
     switch (now_element)
     {
     case BACK_STAIRS:
@@ -3036,14 +3134,34 @@ void image_main()
             }
         }
         break;
+    case SINGLE_SIDE:
+        if (on_single_side_road && (error > 10 || error < -10 || missed))
+        {
+#if ONBOARD
+#else
+            printf("corrected\n");
+#endif
+            // 恢复旧的双边线
+            for (int i = NEAR_LINE; i >= FAR_LINE; i--)
+            {
+                left_line[i] = old_left_line[i];
+                right_line[i] = old_right_line[i];
+            }
+            find_correct_line_left();
+            find_correct_line_right();
+            get_mid_line();
+            error = calc_error(&missed);
+        }
+        if (on_single_side_road)
+        {
+            if (error > 10 || error < -10) error = 0;
+            if (error < -5) error = -5;
+            if (error > 5) error = 5;
+        }
     }
     if (error < -50) error = 0;
     if (error > 50) error = 0;
-    if (single_side_state)
-    {
-        // if (error < -5) error = -5;
-        // if (error > 5) error = 5;
-    }
+    
 
     mid_update = 1;
     //print_f();
