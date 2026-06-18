@@ -321,7 +321,7 @@ static void quit_follow_stairs(void)
         if (follow_lock == 1)
         {
             follow_lock_count_1++;
-            if (follow_lock_count_1 >= 100)
+            if (follow_lock_count_1 >= 250)
             {
                 follow_lock = 2;
                 follow_lock_count_1 = 0;

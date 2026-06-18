@@ -320,11 +320,6 @@ void location_update_2_3(void)
         advance_to_next_waypoint();
     }
 
-    if (current_target && !current_target->next) 
-    {
-        current_state = STATE_TRA_FOLLOW;
-    }
-
     if (!current_target) 
     {
         ins_stop();
