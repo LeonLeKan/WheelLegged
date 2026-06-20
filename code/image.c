@@ -2452,7 +2452,7 @@ void search_white_range1()
 
     // 可调参数：在NEAR_LINE和FAR_LINE处预计的赛道宽度
     // 用于判断road_start和road_end
-    uint8_t w_near_line = 80, w_far_line = 10;
+    uint8_t w_near_line = 90, w_far_line = 15;
     // 根据两个参数计算相应的k
     float k_width = ((w_near_line - w_far_line) * 1.0) / ((NEAR_LINE - FAR_LINE) * 1.0);
 
@@ -2499,7 +2499,7 @@ void search_white_range1()
             found_road_start = 1;
             road_start = i;
         }
-        else if (!found_road_end && found_road_start && longest < expected_w * 0.4)
+        else if (!found_road_end && found_road_start && longest < expected_w * 0.6)
         {
             found_road_end = 1;
             road_end = i;
@@ -3104,7 +3104,7 @@ void mend_far_jolt()
         if (white_count >= 800)
         {
             on_jolt_cnt++;
-            if (on_single_side_road_cnt > 10)
+            if (on_jolt_cnt >= 10)
             {
                 on_jolt = 1;
             }

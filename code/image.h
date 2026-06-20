@@ -85,6 +85,7 @@ extern int error_calc_far_line;
 extern uint8_t threshold; //ãÐÖµ
 extern uint8_t single_side_state;
 extern uint8_t mid_update;
+extern int jolt_distance;
 extern int jolt_end_judge_cnt;
 extern int jolt_end_cnt_thre;
 extern uint8_t middle;

@@ -71,7 +71,7 @@ static void deaccelerate_within_0(void)
         }
         if(current_target->id_startup == tunum->data_int)
         {
-            if (dis_1 < dis1->data_float)
+            if (dis_1 < dis2->data_float)
             {
                 speed_0_change = 2;
             }
@@ -109,7 +109,7 @@ static void deaccelerate_within_1(void)
         }
         if(current_target->id_startup == tunum->data_int)
         {
-            if (dis_1 < dis1->data_float)
+            if (dis_1 < dis2->data_float)
             {
                 speed_1_change = 2;
             }
@@ -127,7 +127,7 @@ static void deaccelerate_within_1(void)
 
 static void deaccelerate_to_thunder(void)
 {
-    if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 2.5f))
+    if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 3.0f))
     {
         current_state = STATE_TRA_THUNDER;
     }
@@ -367,11 +367,56 @@ static void quit_follow_stairs(void)
     }
 }
 
-static void de_to_tra_jolt(void)
+static void de_to_jolt_image(void)
 {
     if (current_state == STATE_DE_JOLT && speed_loop.Actual <= (float)jospeed->data_int / 100.0f + 1.0f)
     {
-        current_state = STATE_TRA_JOLT;
+        current_state = STATE_JOLT_IMAGE;
+    }
+}
+
+static void quit_jolt_image(void)
+{
+    if (modify_idx[road_num] == 1)
+    {
+        if (((current_state == STATE_JOLT_IMAGE) && (fabs(error) <= 2)
+          && (fabs(imu.output.euler[2] - 0.0f) < 2.0f)) || (jolt_distance <= 50))
+        {
+            current_state = STATE_JOLT;
+        }
+    }
+    else if (modify_idx[road_num] == 2)
+    {
+        if (current_state == STATE_JOLT_IMAGE)
+        {
+            if (((fabs(error) <= 2) && (fabs(imu.output.euler[2] - 180.0f) < 2.0f))
+               || (jolt_distance <= 50))
+            {
+                current_state = STATE_JOLT;
+            }
+        }
+    }
+    else if (modify_idx[road_num] == 2)
+    {
+        if (current_state == STATE_JOLT_IMAGE)
+        {
+            if (((fabs(error) <= 2) && (fabs(imu.output.euler[2] - 180.0f) < 2.0f))
+               || (jolt_distance <= 50))
+            {
+                current_state = STATE_JOLT;
+            }
+        }
+    }
+    else if (modify_idx[road_num] == 3)
+    {
+        if (current_state == STATE_JOLT_IMAGE)
+        {
+            if (((fabs(error) <= 2) && (fabs(imu.output.euler[2] + 180.0f) < 2.0f))
+               || (jolt_distance <= 50))
+            {
+                current_state = STATE_JOLT;
+            }
+        }
     }
 }
 
@@ -470,7 +515,8 @@ void control_state_switch(void)
     else if (testnum->data_int == 2 && (road_idx[road_num] == 4 || road_idx[road_num] == 6))
     {
         deaccelerate_within_2();
-        de_to_tra_jolt();
+        de_to_jolt_image();
+        quit_jolt_image();
         quit_jolt();
     }
 }
@@ -533,8 +579,8 @@ void control_state_update(void)
     case STATE_DE_JOLT:
         control_state_de_jolt();
         break;
-    case STATE_TRA_JOLT:
-        control_state_tra_jolt();
+    case STATE_JOLT_IMAGE:
+        control_state_jolt_image();
         break;
     case STATE_JOLT:
         control_state_jolt();

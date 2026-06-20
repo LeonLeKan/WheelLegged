@@ -331,7 +331,6 @@ void location_update_2_3(void)
 
 void location_update_2_4(void)
 {
-    static uint8_t de_jolt_flag = 0;
     waypoint_list_t *list = save_manager_get_active_save();
     
     if (!current_target)
@@ -363,21 +362,14 @@ void location_update_2_4(void)
         advance_to_next_waypoint();
     }
 
-    if (current_target && !current_target->next && de_jolt_flag == 0) 
-    {
-        current_state = STATE_DE_JOLT;
-        joy_loop.Target = joangle->data_float;
-        de_jolt_flag = 1;
-    }
-
-    else if (!current_target) 
+    if (!current_target) 
     {
         ins_stop();
-        de_jolt_flag = 0;
         roll_base = rollba->data_float;
         jolt_end_cnt_thre = jocnt->data_int;
         now_element = JOLT;
         image_block = 1;
-        current_state = STATE_JOLT;
+        joy_loop.Target = joangle->data_float;
+        current_state = STATE_DE_JOLT;
     }
 }
