@@ -37,10 +37,16 @@ bool jolt_end_flag = 0;
 int error = 0;
 int error_calc_near_line = 52;
 int error_calc_far_line = 50;
-uint8_t threshold = 170;    //阈值
+uint8_t threshold = 140;    //阈值
 bool on_single_side_road = 0;   // 是否进入单边桥之前的白色赛道
 int on_single_side_road_cnt = 0;
+
+int on_jolt_cnt = 0;
+bool on_jolt = 0;
+int jolt_distance = 0;
+
 int jolt_end_cnt_thre = 30;
+
 int back_stairs_end_cnt_thre = 15;
 uint8_t middle = 84;    // 中线校准（有些摄像头会整体向左右偏，所以真正的正中间不一定是94）
 //////////////////////// ////////// //////////////////
@@ -1917,6 +1923,80 @@ void least_square(uint8_t* line, uint8_t outset, uint8_t limit, float input[])
         input[1] = b;
     }
 }
+
+// 带拟合度的最小二乘法来算中线斜率来补线
+void least_square_with_R(uint8_t* line, uint8_t outset, uint8_t limit, float input[])
+{
+    float k = 0.0f; // slope
+    float b = 0.0f; // intercept
+    float R = 0.0f; // correlation coefficient
+
+    /* use float accumulators to avoid overflow and to compute R correctly */
+    float Sum_xy = 0.0f;
+    float Sum_xx = 0.0f; /* sum of x^2 */
+    float Sum_yy = 0.0f; /* sum of y^2 */
+    float average_x = 0.0f;
+    float average_y = 0.0f;
+
+    if (limit < 3)
+    {
+        input[0] = 0.0f;
+        /* keep previous behavior: return the value at outset as intercept */
+        input[1] = (float)line[outset];
+        input[2] = 0.0f;
+        return;
+    }
+
+    /* safer iteration: iterate exactly `limit` points starting at `outset` and going down */
+    int i = (int)outset;
+    for (uint8_t cnt = 0; cnt < limit; ++cnt, --i)
+    {
+        /* guard against negative index just in case */
+        if (i < 0) break;
+        float x = (float)i;
+        float y = (float)line[i];
+        Sum_xy += x * y;
+        Sum_xx += x * x;
+        Sum_yy += y * y;
+        average_x += x;
+        average_y += y;
+    }
+
+    float n = (float)limit;
+    average_x /= n;
+    average_y /= n;
+
+    float S_xy = Sum_xy - n * average_x * average_y;
+    float S_xx = Sum_xx - n * average_x * average_x;
+    float S_yy = Sum_yy - n * average_y * average_y;
+
+    /* avoid division by zero and negative sqrt argument */
+    if (S_xx == 0.0f)
+    {
+        k = 0.0f;
+        b = average_y;
+        R = 0.0f;
+    }
+    else
+    {
+        k = S_xy / S_xx;
+        b = average_y - k * average_x;
+        if (S_xx > 0.0f && S_yy > 0.0f)
+        {
+            R = S_xy / sqrtf(S_xx * S_yy);
+        }
+        else
+        {
+            R = 0.0f;
+        }
+    }
+
+    input[0] = k;
+    input[1] = b;
+    input[2] = R;
+}
+
+
 //画线
 void get_line(uint8_t* line, uint8_t start, uint8_t end, float k, float b)
 {
@@ -2369,6 +2449,13 @@ void search_white_range1()
     uint8_t* map = NULL;
     bool found_road_start = 0;
     bool found_road_end = 0;
+
+    // 可调参数：在NEAR_LINE和FAR_LINE处预计的赛道宽度
+    // 用于判断road_start和road_end
+    uint8_t w_near_line = 80, w_far_line = 10;
+    // 根据两个参数计算相应的k
+    float k_width = ((w_near_line - w_far_line) * 1.0) / ((NEAR_LINE - FAR_LINE) * 1.0);
+
     for (i = istart; i >= iend; i--)
     {
         map = &IMG[i][LEFT_SIDE];//指针行走加快访问速度
@@ -2406,12 +2493,13 @@ void search_white_range1()
             }
         }
         white_range[i].num = tnum;
-        if (!found_road_start && longest >= 30)
+        int expected_w = k_width * i + w_far_line;
+        if (!found_road_start && longest >= expected_w)
         {
             found_road_start = 1;
             road_start = i;
         }
-        else if (!found_road_end && found_road_start && longest < 30)
+        else if (!found_road_end && found_road_start && longest < expected_w * 0.4)
         {
             found_road_end = 1;
             road_end = i;
@@ -2799,6 +2887,50 @@ void calc_stair_distance()
     }
 }
 
+
+
+
+bool judge_least_square(float input[], bool l_or_r)
+{
+    float k = input[0], R = input[2];
+    if (fabs(R) < 0.85) return false;
+    if (!l_or_r)
+    {
+        // 左边线
+        if (k > 1 || k < -1.3) return false;
+        else return true;
+    }
+    else
+    {
+        // 右边线
+        if (k < -1 || k > 1.3) return false;
+        else return true;
+    }
+}
+
+uint8_t find_least_square_start(uint8_t* line, uint8_t start, uint8_t end, uint8_t limit, bool l_or_r)
+{
+    for (int i = start; i >= end + limit; i--)
+    {
+        uint8_t change_y = get_line_change(line, i, i - limit, 6);
+        if (change_y == 0)
+        {
+            // 找到连续线段，判断k
+            float input[3];
+            least_square_with_R(line, i, limit, input);
+            if (judge_least_square(input, l_or_r))
+            {
+                return i;
+            }
+        }
+    }
+    return 0;
+}
+
+
+
+
+
 // 三级台阶补线
 void mend_stairs(uint8_t* line)
 {
@@ -2843,8 +2975,10 @@ void mend_far_single_side()
     float input[2];
     if (NEAR_LINE - road_start >= 2 && road_start - road_end >= 10)
     {
-        least_square_get_line(left_line, road_start - 5, 5, input, NEAR_LINE, road_start - 5);
-        least_square_get_line(right_line, road_start - 5, 5, input, NEAR_LINE, road_start - 5);
+        uint8_t lstart = find_least_square_start(left_line, road_start, road_end, 5, 0);
+        uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 5, 1);
+        if (lstart) least_square_get_line(left_line, lstart, 6, input, NEAR_LINE, lstart);
+        if (rstart) least_square_get_line(right_line, rstart, 6, input, NEAR_LINE, rstart);
         on_single_side_road_cnt = 0;
         on_single_side_road = 0;
     }
@@ -2867,86 +3001,6 @@ void mend_far_single_side()
             }
         }
     }
-}
-
-uint8_t judge_line_right(uint8_t start)
-{
-    for (int i= start; i >= start - 10; i--)
-    {
-        if (abs(right_line[i] - middle < 10))
-            return 0;
-    }
-
-    uint8_t end = get_line_f2_forward_y(right_line, start - 2, FAR_LINE, 5, 5);
-    if (start - end < 10) return 0;
-    float input[2];
-    least_square(right_line, start, end - start, input);
-    float k = input[0];
-    if (k < 0 || k > 0.8) return 0;
-    return end;
-}
-uint8_t judge_line_left(uint8_t start)
-{
-    for (int i = start; i >= start - 10; i--)
-    {
-        if (abs(middle - left_line[i] < 10))
-            return 0;
-    }
-    uint8_t end = get_line_f2_forward_y(left_line, start - 2, FAR_LINE, 5, 5);
-    if (start - end < 10) return 0;
-    float input[2];
-    least_square(left_line, start, end - start, input);
-    float k = input[0];
-    if (k > 0 || k < -0.8) return 0;
-    return end;
-}
-
-
-void find_correct_line_right()
-{
-    uint8_t correct_start = 0, end = 0;
-    for (int i = NEAR_LINE; i >= FAR_LINE + 20; i--)
-    {
-        if (right_line[i] == 255) continue;
-        end = judge_line_right(i);
-        if (end)
-        {
-            correct_start = i;
-            break;
-        }
-    }
-    if (!correct_start) return;
-    correct_start -= 2;
-#if ONBOARD
-#else
-    printf("%d %d\n", correct_start, end);
-#endif
-    float input[2];
-    least_square_get_line(right_line, correct_start, end - correct_start, input, end, FAR_LINE);
-    least_square_get_line(right_line, correct_start, end - correct_start, input, NEAR_LINE, correct_start);
-}
-
-void find_correct_line_left()
-{
-    uint8_t correct_start = 0, end = 0;
-    for (int i = NEAR_LINE; i >= FAR_LINE + 20; i--)
-    {
-        if (left_line[i] == 255) continue;
-        end = judge_line_left(i);
-        if (end)
-        {
-            correct_start = i;
-            break;
-        }
-    }
-#if ONBOARD
-#else
-    printf("%d %d\n", correct_start, end);
-#endif
-    if (!correct_start) return;
-    float input[2];
-    least_square_get_line(left_line, correct_start, end - correct_start, input, end, FAR_LINE);
-    least_square_get_line(left_line, correct_start, end - correct_start, input, NEAR_LINE, correct_start);
 }
 
 void front_stairs_end_check()
@@ -3024,6 +3078,44 @@ void jolt_end_check()
     }
 }
 
+void mend_far_jolt()
+{
+    float input[2];
+    if (NEAR_LINE - road_start >= 2 && road_start - road_end >= 10)
+    {
+        uint8_t lstart= find_least_square_start(left_line, road_start, road_end, 5, 0);
+        uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 5, 1);
+        if(lstart) least_square_get_line(left_line, lstart, 6, input, NEAR_LINE, lstart);
+        if(rstart) least_square_get_line(right_line, rstart, 6, input, NEAR_LINE, rstart);
+        on_jolt_cnt = 0;
+        on_jolt = 0;
+        jolt_distance = NEAR_LINE - road_start;
+    }
+    else {
+        int white_count = 0;
+        for (int i = NEAR_LINE; i >= NEAR_LINE - 20; i--)
+        {
+            for (int j = 64; j <= 124; j++)
+            {
+                if (IMG[i][j])
+                    white_count++;
+            }
+        }
+        if (white_count >= 800)
+        {
+            on_jolt_cnt++;
+            if (on_single_side_road_cnt > 10)
+            {
+                on_jolt = 1;
+            }
+        }
+        else {
+			// 面前一片黑，还没有看见颠簸路段，认为颠簸路段距离为120
+            jolt_distance = 120;
+        }
+    }
+}
+
 int calc_error(int* missed)
 {
     int sum = 0;
@@ -3053,7 +3145,7 @@ void image_main()
 {
 #if ONBOARD
 #else 
-    now_element = SINGLE_SIDE;
+    now_element = JOLT;
 #endif
     // mid_update = 0;
     datas_init();
@@ -3110,7 +3202,8 @@ void image_main()
         back_stairs_end_check();
         break;
     case JOLT:
-        jolt_end_check();
+        if(!on_jolt) mend_far_jolt();
+        else jolt_end_check();
         break;
     }
 
@@ -3135,23 +3228,6 @@ void image_main()
         }
         break;
     case SINGLE_SIDE:
-        if (on_single_side_road && (error > 10 || error < -10 || missed))
-        {
-#if ONBOARD
-#else
-            printf("corrected\n");
-#endif
-            // 恢复旧的双边线
-            for (int i = NEAR_LINE; i >= FAR_LINE; i--)
-            {
-                left_line[i] = old_left_line[i];
-                right_line[i] = old_right_line[i];
-            }
-            find_correct_line_left();
-            find_correct_line_right();
-            get_mid_line();
-            error = calc_error(&missed);
-        }
         if (on_single_side_road)
         {
             if (error > 10 || error < -10) error = 0;
@@ -3167,7 +3243,7 @@ void image_main()
     //print_f();
 #if ONBOARD
 #else
-    printf("dis: %d, start: %d, end: %d, error: %d\n", stair_distance, road_start, road_end, error);
+    printf("dis: %d, start: %d, end: %d, error: %d\n", jolt_distance, road_start, road_end, error);
     for (int i = 0; i < CAMERA_W; i++)
     {
         IMG[error_calc_near_line][i] = purple;
