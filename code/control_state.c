@@ -379,17 +379,9 @@ static void quit_jolt_image(void)
 {
     if (modify_idx[road_num] == 1)
     {
-        if (((current_state == STATE_JOLT_IMAGE) && (fabs(error) <= 2)
-          && (fabs(imu.output.euler[2] - 0.0f) < 2.0f)) || (jolt_distance <= 50))
-        {
-            current_state = STATE_JOLT;
-        }
-    }
-    else if (modify_idx[road_num] == 2)
-    {
         if (current_state == STATE_JOLT_IMAGE)
         {
-            if (((fabs(error) <= 2) && (fabs(imu.output.euler[2] - 180.0f) < 2.0f))
+            if (((fabs(error) <= 2) && (fabs(imu.output.euler[2] - 0.0f) < 2.0f))
                || (jolt_distance <= 50))
             {
                 current_state = STATE_JOLT;

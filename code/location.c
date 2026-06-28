@@ -75,12 +75,11 @@ void location_update_0(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
-    if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_0)
+    if (current_state != STATE_UTURN && sqrt(dx * dx + dy * dy) < XYMIN_BIA_0)
     {
         if (current_target->id_startup == tunum->data_int)
         {
             current_state = STATE_UTURN;
-            advance_to_next_waypoint();
         }
         else
         {
@@ -128,12 +127,11 @@ void location_update_1(void)
         current_state = STATE_DE_THUNDER;
     }
 
-    if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_1)
+    if (current_state != STATE_UTURN && sqrt(dx * dx + dy * dy) < XYMIN_BIA_1)
     {
         if (current_target->id_startup == tunum->data_int)
         {
             current_state = STATE_UTURN;
-            advance_to_next_waypoint();
         }
         else if (thunder_count < thnum->data_int)
         {

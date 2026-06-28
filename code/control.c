@@ -1217,6 +1217,10 @@ void control_state_uturn(void)
 
     if (fabs(fabs(imu.output.euler[2]) - 180.0f) <= 5.0f)
     {
+        if (current_target && current_target->id_startup == tunum->data_int)
+        {
+            advance_to_next_waypoint();
+        }
         current_state = STATE_FORWARD;
     }
 }
