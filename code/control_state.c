@@ -32,9 +32,16 @@ static void accelerate_to_forward(void)
             current_state = STATE_FORWARD;
         }
     }
-    else if (testnum->data_int == 0 || testnum->data_int == 2)
+    else if (testnum->data_int == 0)
     {
         if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed->data_int / 100.0f))
+        {
+            current_state = STATE_FORWARD;
+        }
+    }
+    else if (testnum->data_int == 2)
+    {
+        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed->data_int / 100.0f - 1.0f))
         {
             current_state = STATE_FORWARD;
         }
@@ -127,7 +134,7 @@ static void deaccelerate_within_1(void)
 
 static void deaccelerate_to_thunder(void)
 {
-    if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 3.0f))
+    if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 2.0f))
     {
         current_state = STATE_TRA_THUNDER;
     }
@@ -321,7 +328,7 @@ static void quit_follow_stairs(void)
         if (follow_lock == 1)
         {
             follow_lock_count_1++;
-            if (follow_lock_count_1 >= 250)
+            if (follow_lock_count_1 >= 150)
             {
                 follow_lock = 2;
                 follow_lock_count_1 = 0;
@@ -331,7 +338,7 @@ static void quit_follow_stairs(void)
         if (follow_lock == 2)
         {
             follow_lock_count_2++;
-            if (follow_lock_count_2 >= 400)
+            if (follow_lock_count_2 >= 300)
             {
                 follow_lock = 3;
                 follow_lock_count_2 = 0;

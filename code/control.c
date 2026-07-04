@@ -134,11 +134,11 @@ void control_state_de_thunder(void)
     {
         count = 0;
 
-        speed_loop.Target = 1.5f;
+        speed_loop.Target = 1.2f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
-        servo_set(125.0f, 55.0f,
-                  125.0f, 55.0f);
+        servo_set(130.0f, 50.0f,
+                  130.0f, 50.0f);
 
         PID_Update_Lo(&yaw_loop);
     }
@@ -172,7 +172,7 @@ void control_state_tra_thunder(void)
     {
         count = 0;
 
-        speed_loop.Target = 1.5f;
+        speed_loop.Target = 1.2f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
@@ -1217,10 +1217,6 @@ void control_state_uturn(void)
 
     if (fabs(fabs(imu.output.euler[2]) - 180.0f) <= 5.0f)
     {
-        if (current_target && current_target->id_startup == tunum->data_int)
-        {
-            advance_to_next_waypoint();
-        }
         current_state = STATE_FORWARD;
     }
 }

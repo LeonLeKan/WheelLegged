@@ -75,11 +75,12 @@ void location_update_0(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
-    if (current_state != STATE_UTURN && sqrt(dx * dx + dy * dy) < XYMIN_BIA_0)
+    if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_0)
     {
         if (current_target->id_startup == tunum->data_int)
         {
             current_state = STATE_UTURN;
+            advance_to_next_waypoint();
         }
         else
         {
@@ -121,17 +122,21 @@ void location_update_1(void)
 
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
-    if (sqrt(dx * dx + dy * dy) < xythun->data_float && sqrt(dx * dx + dy * dy) >= XYMIN_BIA_1 &&
-        current_state != STATE_TRA_THUNDER && thunder_count < thnum->data_int)
+    if (current_state != STATE_ACCELERATE)
     {
-        current_state = STATE_DE_THUNDER;
+        if (sqrt(dx * dx + dy * dy) < xythun->data_float && sqrt(dx * dx + dy * dy) >= XYMIN_BIA_1 &&
+            current_state != STATE_TRA_THUNDER && thunder_count < thnum->data_int)
+        {
+            current_state = STATE_DE_THUNDER;
+        }
     }
 
-    if (current_state != STATE_UTURN && sqrt(dx * dx + dy * dy) < XYMIN_BIA_1)
+    if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_1)
     {
         if (current_target->id_startup == tunum->data_int)
         {
             current_state = STATE_UTURN;
+            advance_to_next_waypoint();
         }
         else if (thunder_count < thnum->data_int)
         {
