@@ -14,6 +14,8 @@ uint8_t disturb_flag = 0;
 float last_raw_yaw = 0.0f;
 float target_yaw = 0.0f;
 uint8_t thunder_count = 0;
+uint8_t thunder_direction_flag = 0;
+double thunder_final_angle = 0.0f;
 
 static double direction_calculate(double x_target, double y_target, double x_now, double y_now)
 {
@@ -125,7 +127,9 @@ void location_update_1(void)
     if (current_state != STATE_ACCELERATE)
     {
         if (sqrt(dx * dx + dy * dy) < xythun->data_float && sqrt(dx * dx + dy * dy) >= XYMIN_BIA_1 &&
-            current_state != STATE_TRA_THUNDER && thunder_count < thnum->data_int)
+            current_state != STATE_TRA_THUNDER &&
+            current_state != STATE_THUNDER &&
+            thunder_count < thnum->data_int)
         {
             current_state = STATE_DE_THUNDER;
         }
@@ -141,9 +145,18 @@ void location_update_1(void)
         else if (thunder_count < thnum->data_int)
         {
             thunder_count++;
-            advance_to_next_waypoint();
             yaw_thunder_memory = yaw_loop.Actual;
+            thunder_final_angle = atan2((current_target->next->waypoint.y - current_target->waypoint.y), (current_target->next->waypoint.x - current_target->waypoint.x)) * RAD_TO_DEG;
+            if (yaw_thunder_memory >= thunder_final_angle)
+            {
+                thunder_direction_flag = 1;
+            }
+            else if (yaw_thunder_memory < thunder_final_angle)
+            {
+                thunder_direction_flag = 2;
+            }
             current_state = STATE_THUNDER;
+            advance_to_next_waypoint();
         }
         else
         {

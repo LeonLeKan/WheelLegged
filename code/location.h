@@ -21,6 +21,8 @@ extern uint8_t disturb_flag;
 extern float last_raw_yaw;
 extern float target_yaw;
 extern uint8_t thunder_count;
+extern uint8_t thunder_direction_flag;
+extern double thunder_final_angle;
 
 void location_update_0(void);
 void location_update_1(void);
