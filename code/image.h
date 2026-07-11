@@ -82,13 +82,19 @@ extern bool jolt_end_flag;
 extern int error;
 extern int error_calc_near_line;
 extern int error_calc_far_line;
-extern uint8_t threshold; //阈值
-extern uint8_t single_side_state;
 extern uint8_t mid_update;
-extern int jolt_distance;
 extern int jolt_end_judge_cnt;
 extern int jolt_end_cnt_thre;
+extern int jolt_distance;
 extern uint8_t middle;
+
+extern uint8_t single_side_state;
+
+extern float k_gray_dis;
+extern uint8_t WHITE_GAP;
+extern uint8_t MIN_THRE, MAX_THRE;
+extern uint8_t enable_dis_shadow;     //是否启用去除影子策略
+
 //////////////////////// ////////// //////////////////
 
 extern uint8_t IMG[CAMERA_H][CAMERA_W];//二值化后图像数组
@@ -113,7 +119,7 @@ typedef struct {
 void head_clear(void);
 void THRE(void);
 int find_f(int a);
-void search_white_range1(void);//获取白条子
+void search_white_range(void);//获取白条子
 void find_all_connect(void);
 uint8_t find_continue(uint8_t i_start, uint8_t j_start);
 void ordinary_two_line(void);
@@ -122,30 +128,10 @@ void get_mid_line(void);
 void image_main(void);
 //==================================================其他函数======================================================
 uint8_t mid(uint8_t i);
-void print_f(void);//打印数值的函数
 void datas_init(void);
 road_range search_white_range_begin(uint8_t line, uint8_t col);
 uint8_t is_connect_continue(road_range* new_white, road_range* pre_line);
 uint8_t is_connect(road_range* new_white, road* pre_line, uint8_t continue_id);
-
-//====================================================判断状态函数====================================================
-
-void state_judge(void);
-void straight_judge(uint8_t start, uint8_t end);
-void single_side_bridge_judge2(uint8_t start);
-void single_side_bridge_judge(uint8_t start, uint8_t end);
-
-//===================================================各元素状态机=================================================
-
-void general_judgement(void);
-void single_side_bridge_state_machine(void);
-void straight(void);
-
-//====================================================选道====================================================
-void renew_road(void);                                                                //按中间选道
-void single_side_road_choose(void);                                                   //单边桥选两边
-void single_side_bridge_two_line(uint8_t* road_continue);
-void find_road_state(void);
 
 //====================================================一些找点的函数====================================================
 
@@ -164,8 +150,6 @@ uint8_t get_white_num_less_y(uint8_t start, uint8_t end, uint8_t white_num);
 uint8_t get_white_num_most_y(uint8_t start, uint8_t end);
 uint8_t get_straight_line(uint8_t* line, uint8_t start, uint8_t end, uint8_t change);
 int8_t get_line_monotony(uint8_t* line, uint8_t start, uint8_t end, uint8_t change);
-uint8_t last_one_left_single_check(void);
-uint8_t last_one_right_single_check(void);
 
 //====================================================一些有关补线的函数======================================================
 
