@@ -826,7 +826,6 @@ void show_menu(void)
 
         for (int i = 0; i < strlen(pstr); i++)
         {
-            printf("%s", pstr);
             highlight = (edit_mode && i == edit_pos) ? 0 : 1;
             ips200_show_char(168 + i * 8, 240, pstr[i]);
             if (highlight == 0)

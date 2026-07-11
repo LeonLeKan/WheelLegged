@@ -588,7 +588,7 @@ void control_state_single_side(void)
         PID_Update_Lo(&turn_loop1);
     }
 
-    if (fabs(imu.output.euler[0] - roll_base) <= 5.0f)
+    if (fabs(imu.output.euler[0] - roll_base) <= 3.0f)
     {
         // µ¥±ßÇÅ¿ØÖÆ
         single_loop.Target = roll_base;
