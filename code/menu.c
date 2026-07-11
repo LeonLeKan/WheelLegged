@@ -9,7 +9,7 @@ volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
 MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *modiro, *thnum, *tunum, *saveall, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
-    *thre, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *stdis4, *stdis5, *stdis6, *stdis7, *jocnt, *saveim,
+    *esha, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *kgray, *whiga, *minth, *maxth, *jocnt, *saveim,
     *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *dis0, *dis1, *speedl, *balspeed, *thsp, *rotusp, *dis2, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
@@ -150,17 +150,17 @@ void create_2nd_menu(void)
     pzero = createMenu("pzero", 2, 13, MENU_TYPE_FLOAT, NULL);
     pinit = createMenu("pinit", 2, 14, MENU_TYPE_FLOAT, NULL);
 
-    thre = createMenu("thre", 2, 1, MENU_TYPE_INT, NULL);
+    esha = createMenu("esha", 2, 1, MENU_TYPE_INT, NULL);
     imexp = createMenu("imexp", 2, 2, MENU_TYPE_INT, NULL);
     farl = createMenu("farl", 2, 3, MENU_TYPE_INT, NULL);
     nearl = createMenu("nearl", 2, 4, MENU_TYPE_INT, NULL);
     stdis1 = createMenu("stdis1", 2, 5, MENU_TYPE_INT, NULL);
     stdis2 = createMenu("stdis2", 2, 6, MENU_TYPE_INT, NULL);
     stdis3 = createMenu("stdis3", 2, 7, MENU_TYPE_INT, NULL);
-    stdis4 = createMenu("stdis4", 2, 8, MENU_TYPE_INT, NULL);
-    stdis5 = createMenu("stdis5", 2, 9, MENU_TYPE_INT, NULL);
-    stdis6 = createMenu("stdis6", 2, 10, MENU_TYPE_INT, NULL);
-    stdis7 = createMenu("stdis7", 2, 11, MENU_TYPE_INT, NULL);
+    kgray = createMenu("kgray", 2, 8, MENU_TYPE_INT, NULL);
+    whiga = createMenu("whiga", 2, 9, MENU_TYPE_INT, NULL);
+    minth = createMenu("minth", 2, 10, MENU_TYPE_INT, NULL);
+    maxth = createMenu("maxth", 2, 11, MENU_TYPE_INT, NULL);
     jocnt = createMenu("jocnt", 2, 12, MENU_TYPE_INT, NULL);
     saveim = createMenu("save", 2, 13, MENU_TYPE_FUNCTION, menu_save);
 
@@ -218,8 +218,8 @@ void create_2nd_menu(void)
     pinit->next = speed;
     speed->last = pinit;
 
-    thre->next = imexp;
-    imexp->last = thre;
+    esha->next = imexp;
+    imexp->last = esha;
     imexp->next = farl;
     farl->last = imexp;
     farl->next = nearl;
@@ -230,20 +230,20 @@ void create_2nd_menu(void)
     stdis2->last = stdis1;
     stdis2->next = stdis3;
     stdis3->last = stdis2;
-    stdis3->next = stdis4;
-    stdis4->last = stdis3;
-    stdis4->next = stdis5;
-    stdis5->last = stdis4;
-    stdis5->next = stdis6;
-    stdis6->last = stdis5;
-    stdis6->next = stdis7;
-    stdis7->last = stdis6;
-    stdis7->next = jocnt;
-    jocnt->last = stdis7;
+    stdis3->next = kgray;
+    kgray->last = stdis3;
+    kgray->next = whiga;
+    whiga->last = kgray;
+    whiga->next = minth;
+    minth->last = whiga;
+    minth->next = maxth;
+    maxth->last = minth;
+    maxth->next = jocnt;
+    jocnt->last = maxth;
     jocnt->next = saveim;
     saveim->last = jocnt;
-    saveim->next = thre;
-    thre->last = saveim;
+    saveim->next = esha;
+    esha->last = saveim;
 
     change->next = snspeed;
     snspeed->last = change;
@@ -310,18 +310,20 @@ void create_2nd_menu(void)
     pzero->parent = Balance;
     pinit->parent = Balance;
 
-    Image->child = thre;
-    thre->parent = Image;
+    Image->child = esha;
+    esha->parent = Image;
     imexp->parent = Image;
     farl->parent = Image;
     nearl->parent = Image;
     stdis1->parent = Image;
     stdis2->parent = Image;
     stdis3->parent = Image;
-    stdis4->parent = Image;
-    stdis5->parent = Image;
-    stdis6->parent = Image;
-    stdis7->parent = Image;
+    kgray->parent = Image;
+    whiga->parent = Image;
+    minth->parent = Image;
+    maxth->parent = Image;
+    jocnt->parent = Image;
+    saveim->parent = Image;
     jocnt->parent = Image;
     saveim->parent = Image;
 

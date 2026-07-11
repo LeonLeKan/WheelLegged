@@ -466,9 +466,6 @@ void control_state_decline_front_single_side(void)
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
-    threshold = (uint8_t)thre->data_int;
-    error_calc_far_line = (uint8_t)farl->data_int;
-    error_calc_near_line = (uint8_t)nearl->data_int;
 
     static uint32_t count = 0;
     count++;
@@ -509,9 +506,6 @@ void control_state_stand_front_single_side(void)
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
-    threshold = (uint8_t)thre->data_int;
-    error_calc_far_line = (uint8_t)farl->data_int;
-    error_calc_near_line = (uint8_t)nearl->data_int;
 
     static uint32_t count = 0;
     count++;
@@ -561,9 +555,6 @@ void control_state_single_side(void)
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     snpid_update(snkp->data_float, snki->data_float, snkd->data_float);
-    threshold = (uint8_t)thre->data_int;
-    error_calc_far_line = (uint8_t)farl->data_int;
-    error_calc_near_line = (uint8_t)nearl->data_int;
 
     static uint32_t count = 0;
     count++;
@@ -716,9 +707,6 @@ void control_state_find_jump(void)
     sppid_update(10.0f, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
-    threshold = (uint8_t)thre->data_int;
-    error_calc_far_line = (uint8_t)farl->data_int;
-    error_calc_near_line = (uint8_t)nearl->data_int;
 
     static uint32_t count = 0;
     count++;
@@ -864,9 +852,6 @@ void control_state_follow_stairs(void)
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
-    threshold = (uint8_t)thre->data_int;
-    error_calc_far_line = (uint8_t)farl->data_int;
-    error_calc_near_line = (uint8_t)nearl->data_int;
 
     static uint32_t count = 0;
     count++;
@@ -922,9 +907,6 @@ void control_state_de_jolt(void)
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
-    threshold = (uint8_t)thre->data_int;
-    error_calc_far_line = (uint8_t)farl->data_int;
-    error_calc_near_line = (uint8_t)nearl->data_int;
 
     static uint32_t count = 0;
     count++;
@@ -965,9 +947,6 @@ void control_state_jolt_image(void)
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
-    threshold = (uint8_t)thre->data_int;
-    error_calc_far_line = (uint8_t)farl->data_int;
-    error_calc_near_line = (uint8_t)nearl->data_int;
 
     static uint32_t count = 0;
     count++;
@@ -1018,9 +997,6 @@ void control_state_jolt(void)
     joypid_update(joykp->data_float, joyki->data_float, joykd->data_float);
     tu2pid_update_j(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     jospid_update(joskp->data_float, joski->data_float, joskd->data_float);
-    threshold = (uint8_t)thre->data_int;
-    error_calc_far_line = (uint8_t)farl->data_int;
-    error_calc_near_line = (uint8_t)nearl->data_int;
 
     static uint32_t count = 0;
     count++;
@@ -1098,9 +1074,6 @@ void control_state_jolt_trap(void)
     joypid_update(joykp->data_float, joyki->data_float, joykd->data_float);
     tu2pid_update_j(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     jospid_update(joskp->data_float, joski->data_float, joskd->data_float);
-    threshold = (uint8_t)thre->data_int;
-    error_calc_far_line = (uint8_t)farl->data_int;
-    error_calc_near_line = (uint8_t)nearl->data_int;
 
     static uint8_t jolt_speed_change_flag = 0;
     static uint32_t jolt_speed_change_count = 0;

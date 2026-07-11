@@ -89,9 +89,13 @@ int main(void)
     // 菜单里读取陀螺仪固定偏置
     imu_set_gyro_bias(rollbias->data_float, pitchbias->data_float, yawbias->data_float);
 
-    threshold = (uint8_t)thre->data_int;
     error_calc_far_line = (uint8_t)farl->data_int;
     error_calc_near_line = (uint8_t)nearl->data_int;
+    enable_dis_shadow = (uint8_t)esha->data_int;
+    k_gray_dis = (float)kgray->data_int / 10.0f;
+    WHITE_GAP = (uint8_t)whiga->data_int;
+    MIN_THRE = (uint8_t)minth->data_int;
+    MAX_THRE = (uint8_t)maxth->data_int;
 
     // 判断科目几，以及科目三的路径
     if (testnum->data_int == 2)
