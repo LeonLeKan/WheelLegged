@@ -151,7 +151,66 @@ int main(void)
         {
             while (true)
             {
-                wifi_send_image();
+                char pstr[12];
+                motion_mode2 = gpio_get_level(DIP_2);
+                for (int i = 0; i < strlen(pstr); i++)
+                {
+                    ips200_show_char(168 + i * 8, 240, pstr[i]);
+                }
+                if (motion_mode1 == 1 && motion_mode2 == 1 && motion_mode3 == 0 && motion_mode4 == 0)
+                {
+                    wifi_send_image_orin();
+                    if (gpio_get_level(BUTTON_OK) == 0)
+                    {
+                        system_delay_ms(10);
+                        ips200_clear();
+                        if (gpio_get_level(BUTTON_OK) == 0)
+                        {
+                            menu_save();
+                            ips200_show_string(168, 16, "EXE:YES");
+                        }
+                    }
+                    else if (gpio_get_level(BUTTON_DN) == 0)
+                    {
+                        system_delay_ms(10);
+                        ips200_clear();
+                        if (gpio_get_level(BUTTON_DN) == 0)
+                        {
+                            imexp->data_int -= 1;
+                            if (imexp->data_int < 0)
+                            {
+                                imexp->data_int = 0;
+                            }
+                            sprintf(pstr, "%+09d", imexp->data_int);
+                            for (int i = 0; i < strlen(pstr); i++)
+                            {
+                                ips200_show_char(168 + i * 8, 240, pstr[i]);
+                            }
+                        }
+                    }
+                    else if (gpio_get_level(BUTTON_UP) == 0)
+                    {
+                        system_delay_ms(10);
+                        ips200_clear();
+                        if (gpio_get_level(BUTTON_UP) == 0)
+                        {
+                            imexp->data_int += 1;
+                            if (imexp->data_int > 400)
+                            {
+                                imexp->data_int = 400;
+                            }
+                            sprintf(pstr, "%+09d", imexp->data_int);
+                            for (int i = 0; i < strlen(pstr); i++)
+                            {
+                                ips200_show_char(168 + i * 8, 240, pstr[i]);
+                            }
+                        }
+                    }
+                }
+                else if (motion_mode1 == 1 && motion_mode2 == 0 && motion_mode3 == 0 && motion_mode4 == 0)
+                {
+                    wifi_send_image_thre();
+                }
             }
         }
 

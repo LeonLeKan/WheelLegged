@@ -16,6 +16,7 @@
 
 void wifi_init(void);
 void wifi_send_data(void);
-void wifi_send_image(void);
+void wifi_send_image_orin(void);
+void wifi_send_image_thre(void);
 
 #endif

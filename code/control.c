@@ -588,10 +588,17 @@ void control_state_single_side(void)
         PID_Update_Lo(&turn_loop1);
     }
 
-    // 单边桥控制
-    single_loop.Target = roll_base;
-    single_loop.Actual = imu.output.euler[0];
-    PID_Update_Lo(&single_loop);
+    if (fabs(imu.output.euler[0] - roll_base) <= 5.0f)
+    {
+        // 单边桥控制
+        single_loop.Target = roll_base;
+        single_loop.Actual = imu.output.euler[0];
+        PID_Update_Lo(&single_loop);
+    }
+    else
+    {
+        single_loop.Out = 0.0f;
+    }
 
     // 对single_loop.Out进行低通滤波
     static float filtered_single_out = 0.0f;

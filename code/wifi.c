@@ -33,18 +33,39 @@ void wifi_send_data(void)
 
     oscilloscope_data.data[0] = motor_value.receive_left_speed_data;
     oscilloscope_data.data[1] = motor_value.receive_right_speed_data;
+    oscilloscope_data.data[2] = imu.output.euler[0];
 
-    oscilloscope_data.channel_num = 2;
+    oscilloscope_data.channel_num = 3;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 
-void wifi_send_image(void)
+void wifi_send_image_orin(void)
 {
     if (mt9v03x_finish_flag)
     {
         mt9v03x_finish_flag = 0;
 
         memcpy(image_copy[0], mt9v03x_image[0], MT9V03X_IMAGE_SIZE);
+
+        seekfree_assistant_camera_send();
+    }
+}
+
+void wifi_send_image_thre(void)
+{
+    if (mt9v03x_finish_flag)
+    {
+        mt9v03x_finish_flag = 0;
+
+        THRE();
+
+        for (int i = 0; i < CAMERA_H; i++)
+        {
+            for (int j = 0; j < CAMERA_W; j++)
+            {
+                image_copy[i][j] = IMG[i][j] ? 255 : 0;
+            }
+        }
 
         seekfree_assistant_camera_send();
     }
