@@ -1734,7 +1734,7 @@ void mend_single_side()
     }
     if (judge_lmr == 1)
     {
-        for (int i = right_bp_up_H; i >= right_bp_up_H - 20; i--)
+        for (int i = right_bp_up_H; i >= right_bp_up_H - 60; i--)
         {
             if (right_line[i - 4] - right_line[i] > 10)
             {
@@ -1745,7 +1745,7 @@ void mend_single_side()
     }
     if (judge_lmr == -1)
     {
-        for (int i = left_bp_up_H; i >= left_bp_up_H - 20; i--)
+        for (int i = left_bp_up_H; i >= left_bp_up_H - 60; i--)
         {
             if (left_line[i] - left_line[i - 4] > 10)
             {
@@ -1815,7 +1815,28 @@ void mend_single_side()
         if(count < 300)
 			single_side_state = 0;
     }
-    //printf("lmr: %d\n", judge_lmr);
+#if ONBOARD
+#else 
+    if (judge_lmr == 0)
+    {
+        IMG[left_bp_down_H][left_line[left_bp_down_H]] = purple;
+	    IMG[right_bp_down_H][right_line[right_bp_down_H]] = purple;
+		printf("left_bp_down: %d, right_bp_down: %d, ", left_bp_down_H, right_bp_down_H);
+    }
+    else if (judge_lmr == -1)
+    {
+		IMG[left_bp_up_H][left_line[left_bp_up_H]] = purple;
+		IMG[right_bp_down_H][right_line[right_bp_down_H]] = purple;
+		printf("left_bp_up: %d, right_bp_down: %d, ", left_bp_up_H, right_bp_down_H);
+    }
+    else if (judge_lmr == 1)
+    {
+		IMG[left_bp_down_H][left_line[left_bp_down_H]] = purple;
+		IMG[right_bp_up_H][right_line[right_bp_up_H]] = purple;
+		printf("left_bp_down: %d, right_bp_up: %d, ", left_bp_down_H, right_bp_up_H);
+    }
+    printf("state: %d, lmr: %d\n", single_side_state, judge_lmr);
+#endif
 }
 
 void front_stairs_end_check()
@@ -1981,7 +2002,7 @@ void image_main()
     {
         for (int j = left_line[i] + 1; j < right_line[i]; j++)
         {
-            IMG[i][j] = purple;
+            IMG[i][j] = gray;
         }
     }
 #endif 
@@ -2056,8 +2077,8 @@ void image_main()
     for (int i = NEAR_LINE; i >= FAR_LINE; i--)
         if (mid_line[i] != MISS)
         {
-            IMG[i][left_line[i]] = blue;
-            IMG[i][right_line[i]] = green;
+            //IMG[i][left_line[i]] = blue;
+            //IMG[i][right_line[i]] = green;
             IMG[i][mid_line[i]] = red;
         }
 #endif
