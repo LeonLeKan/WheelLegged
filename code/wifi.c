@@ -33,9 +33,8 @@ void wifi_send_data(void)
 
     oscilloscope_data.data[0] = motor_value.receive_left_speed_data;
     oscilloscope_data.data[1] = motor_value.receive_right_speed_data;
-    oscilloscope_data.data[2] = imu.output.euler[0];
 
-    oscilloscope_data.channel_num = 3;
+    oscilloscope_data.channel_num = 2;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 

@@ -1639,15 +1639,15 @@ void mend_stairs()
     {
         uint8_t lstart = find_least_square_start(left_line, road_start, road_end, 5, 0, false);
         uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 5, 1, false);
-        if (lstart) least_square_get_line(left_line, lstart, 5, input, NEAR_LINE, lstart);
-        if (rstart) least_square_get_line(right_line, rstart, 5, input, NEAR_LINE, rstart);
+        if (lstart) least_square_get_line(left_line, lstart - 3, 5, input, NEAR_LINE, lstart);
+        if (rstart) least_square_get_line(right_line, rstart - 3, 5, input, NEAR_LINE, rstart);
     }
     if (road_end - FAR_LINE >= 20)
     {
         uint8_t lstart = find_least_square_start(left_line, road_start, road_end, 5, 0, true);
         uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 5, 1, true);
-        if (lstart) least_square_get_line(left_line, lstart, 5, input, lstart, FAR_LINE);
-        if (rstart) least_square_get_line(right_line, rstart, 5, input, rstart, FAR_LINE);
+        if (lstart) least_square_get_line(left_line, lstart + 3, 5, input, lstart, FAR_LINE);
+        if (rstart) least_square_get_line(right_line, rstart + 3, 5, input, rstart, FAR_LINE);
     }
 }
 
@@ -2015,12 +2015,10 @@ void image_main()
     case FRONT_STAIRS:
         calc_stair_distance();
         mend_stairs();
-        mend_stairs();
         front_stairs_end_check();
         break;
     case BACK_STAIRS:
         calc_stair_distance();
-        mend_stairs();
         mend_stairs();
         back_stairs_end_check();
         break;

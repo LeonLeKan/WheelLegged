@@ -13,6 +13,7 @@
 #include "pid.h"
 #include "location.h"
 #include "wifi.h"
+#include "font.h"
 
 void gpio_init_all(void);
 void imu_state_show(void);
@@ -29,6 +30,7 @@ uint8_t motion_mode3 = 0;
 uint8_t motion_mode4 = 0;
 
 uint8_t get_ready = 0;
+uint8_t test_2_save = 0;
 
 MahonyFilterParam mahony_filter_param = {
     .Kp = 0.7f,
@@ -155,61 +157,10 @@ int main(void)
         {
             while (true)
             {
-                char pstr[12];
                 motion_mode2 = gpio_get_level(DIP_2);
-                for (int i = 0; i < strlen(pstr); i++)
-                {
-                    ips200_show_char(168 + i * 8, 240, pstr[i]);
-                }
                 if (motion_mode1 == 1 && motion_mode2 == 1 && motion_mode3 == 0 && motion_mode4 == 0)
                 {
                     wifi_send_image_orin();
-                    if (gpio_get_level(BUTTON_OK) == 0)
-                    {
-                        system_delay_ms(10);
-                        ips200_clear();
-                        if (gpio_get_level(BUTTON_OK) == 0)
-                        {
-                            menu_save();
-                            ips200_show_string(168, 16, "EXE:YES");
-                        }
-                    }
-                    else if (gpio_get_level(BUTTON_DN) == 0)
-                    {
-                        system_delay_ms(10);
-                        ips200_clear();
-                        if (gpio_get_level(BUTTON_DN) == 0)
-                        {
-                            imexp->data_int -= 1;
-                            if (imexp->data_int < 0)
-                            {
-                                imexp->data_int = 0;
-                            }
-                            sprintf(pstr, "%+09d", imexp->data_int);
-                            for (int i = 0; i < strlen(pstr); i++)
-                            {
-                                ips200_show_char(168 + i * 8, 240, pstr[i]);
-                            }
-                        }
-                    }
-                    else if (gpio_get_level(BUTTON_UP) == 0)
-                    {
-                        system_delay_ms(10);
-                        ips200_clear();
-                        if (gpio_get_level(BUTTON_UP) == 0)
-                        {
-                            imexp->data_int += 1;
-                            if (imexp->data_int > 400)
-                            {
-                                imexp->data_int = 400;
-                            }
-                            sprintf(pstr, "%+09d", imexp->data_int);
-                            for (int i = 0; i < strlen(pstr); i++)
-                            {
-                                ips200_show_char(168 + i * 8, 240, pstr[i]);
-                            }
-                        }
-                    }
                 }
                 else if (motion_mode1 == 1 && motion_mode2 == 0 && motion_mode3 == 0 && motion_mode4 == 0)
                 {
@@ -250,6 +201,29 @@ int main(void)
                             mt9v03x_finish_flag = 0;
                         }
 
+                        if (testnum->data_int == 2 && test_state == 1)
+                        {
+                            if (test_2_save == 0)
+                            {
+                                ips200_show_rgb565_image(0, 120, (const uint16 *)gImage_0, 116, 100, 150, 120, 0);
+                            }
+                            else if (test_2_save == 1)
+                            {
+                                ips200_show_rgb565_image(0, 120, (const uint16 *)gImage_1, 118, 105, 150, 120, 0);
+                            }
+                            else if (test_2_save == 2)
+                            {
+                                ips200_show_rgb565_image(0, 120, (const uint16 *)gImage_2, 118, 109, 150, 120, 0);
+                            }
+                            else if (test_2_save == 3)
+                            {
+                                ips200_show_rgb565_image(0, 120, (const uint16 *)gImage_3, 96, 105, 150, 120, 0);
+                            }
+                            else if (test_2_save == 4)
+                            {
+                                ips200_show_rgb565_image(0, 120, (const uint16 *)gImage_4, 106, 109, 150, 120, 0);
+                            }
+                        }
                         if (motion_mode4 == 0)
                         {
                             wifi_send_data();
@@ -336,11 +310,16 @@ void imu_state_show(void)
 
 void handle_channel(void)
 {
-    static uint16 last_ch2 = 0, last_ch4 = 0, last_ch5 = 0;
+    static uint16 last_ch2 = 0, last_ch3 = 0, last_ch4 = 0, last_ch5 = 0;
 
     if (last_ch2 == 0)
     {
         last_ch2 = uart_receiver.channel[2];
+        return;
+    }
+    if (last_ch3 == 0)
+    {
+        last_ch3 = uart_receiver.channel[3];
         return;
     }
     if (last_ch4 == 0)
@@ -362,9 +341,29 @@ void handle_channel(void)
         ins_add_current(&waypoints, waypoints.tail, point);
     }
 
+    else if ((uart_receiver.channel[3] == 1792 && last_ch3 != 1792) ||
+             (uart_receiver.channel[3] == 192  && last_ch3 != 192))
+    {
+        // 科目三确认更换存档
+        if (testnum->data_int == 2)
+        {
+            ins_reset();
+            yaw_loop.Target = imu.output.euler[2];
+            save_manager_load(testnum->data_int + test_2_save);
+        }
+    }
+
     else if (last_ch4 != uart_receiver.channel[4])
     {
-        // 特殊用途
+        // 科目三更换存档
+        if (testnum->data_int == 2)
+        {
+            test_2_save += 1;
+            if (test_2_save > 4)
+            {
+                test_2_save = 0;
+            }
+        }
     }
 
     else if (last_ch5 != uart_receiver.channel[5])
@@ -372,7 +371,9 @@ void handle_channel(void)
         // 保存到Flash，存入当前激活的存档
         waypoint_list_save_to_flash(&waypoints, INS_FLASH_START_PAGE + save_manager_instance.active_save_idx);
     }
+
     last_ch2 = uart_receiver.channel[2];
+    last_ch3 = uart_receiver.channel[3];
     last_ch4 = uart_receiver.channel[4];
     last_ch5 = uart_receiver.channel[5];
 }
@@ -381,9 +382,9 @@ void remote_control(void)
 {
     if (1 == uart_receiver.finsh_flag)
     {
-        speed_loop.Target = (uart_receiver.channel[1] - 808) / 200.0f;
-        yaw_test_bias = (uart_receiver.channel[0] - 808) * 1.5;
-        if (uart_receiver.channel[3] == 1792 && test_state == 0)
+        speed_loop.Target = (uart_receiver.channel[1] - 832) / 200.0f;
+        yaw_test_bias = (uart_receiver.channel[0] - 832) * 1.5;
+        if ((uart_receiver.channel[3] == 1792 || uart_receiver.channel[3] == 992 || uart_receiver.channel[3] == 192) && test_state == 0)
         {
             test_state = 1;
         }

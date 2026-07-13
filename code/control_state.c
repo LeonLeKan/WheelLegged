@@ -27,7 +27,7 @@ static void accelerate_to_forward(void)
 {
     if (testnum->data_int == 1)
     {
-        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)thsp->data_int / 100.0f))
+        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)thsp->data_int / 100.0f - 1.0f))
         {
             current_state = STATE_FORWARD;
         }
@@ -374,48 +374,11 @@ static void quit_follow_stairs(void)
     }
 }
 
-static void de_to_jolt_image(void)
+static void de_to_jolt(void)
 {
     if (current_state == STATE_DE_JOLT && speed_loop.Actual <= (float)jospeed->data_int / 100.0f + 1.0f)
     {
-        current_state = STATE_JOLT_IMAGE;
-    }
-}
-
-static void quit_jolt_image(void)
-{
-    if (modify_idx[road_num] == 1)
-    {
-        if (current_state == STATE_JOLT_IMAGE)
-        {
-            if (((fabs(error) <= 2) && (fabs(imu.output.euler[2] - 0.0f) < 2.0f))
-               || (jolt_distance <= 50))
-            {
-                current_state = STATE_JOLT;
-            }
-        }
-    }
-    else if (modify_idx[road_num] == 2)
-    {
-        if (current_state == STATE_JOLT_IMAGE)
-        {
-            if (((fabs(error) <= 2) && (fabs(imu.output.euler[2] - 180.0f) < 2.0f))
-               || (jolt_distance <= 50))
-            {
-                current_state = STATE_JOLT;
-            }
-        }
-    }
-    else if (modify_idx[road_num] == 3)
-    {
-        if (current_state == STATE_JOLT_IMAGE)
-        {
-            if (((fabs(error) <= 2) && (fabs(imu.output.euler[2] + 180.0f) < 2.0f))
-               || (jolt_distance <= 50))
-            {
-                current_state = STATE_JOLT;
-            }
-        }
+        current_state = STATE_JOLT;
     }
 }
 
@@ -514,8 +477,7 @@ void control_state_switch(void)
     else if (testnum->data_int == 2 && (road_idx[road_num] == 4 || road_idx[road_num] == 6))
     {
         deaccelerate_within_2();
-        de_to_jolt_image();
-        quit_jolt_image();
+        de_to_jolt();
         quit_jolt();
     }
 }
@@ -577,9 +539,6 @@ void control_state_update(void)
         break;
     case STATE_DE_JOLT:
         control_state_de_jolt();
-        break;
-    case STATE_JOLT_IMAGE:
-        control_state_jolt_image();
         break;
     case STATE_JOLT:
         control_state_jolt();
