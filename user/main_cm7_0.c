@@ -181,7 +181,7 @@ int main(void)
                 if (gpio_get_level(BUTTON_OK) == 0 && get_ready == 0)
                 {
                     get_ready = 1;
-                    system_delay_ms(2000);
+                    system_delay_ms(1000);
                     if (test_state == 1)
                     {
                         current_state = STATE_TEST;

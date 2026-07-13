@@ -145,15 +145,25 @@ void location_update_1(void)
         else if (thunder_count < thnum->data_int)
         {
             thunder_count++;
-            yaw_thunder_memory = yaw_loop.Actual;
+            yaw_thunder_memory = imu.output.euler[2];
             thunder_final_angle = atan2((current_target->next->waypoint.y - current_target->waypoint.y), (current_target->next->waypoint.x - current_target->waypoint.x)) * RAD_TO_DEG;
-            if (yaw_thunder_memory >= thunder_final_angle)
+            if ((yaw_thunder_memory >= thunder_final_angle) &&
+                 !((yaw_thunder_memory >= thunder_final_angle) && (thunder_final_angle >= 0.0f)))
             {
                 thunder_direction_flag = 1;
             }
-            else if (yaw_thunder_memory < thunder_final_angle)
+            else if ((yaw_thunder_memory < thunder_final_angle) &&
+                 !((yaw_thunder_memory < thunder_final_angle) && (thunder_final_angle < 0.0f))) 
             {
                 thunder_direction_flag = 2;
+            }
+            else if ((yaw_thunder_memory >= thunder_final_angle) && (thunder_final_angle >= 0.0f))
+            {
+                thunder_direction_flag = 4;
+            }
+            else if ((yaw_thunder_memory < thunder_final_angle) && (thunder_final_angle < 0.0f))
+            {
+                thunder_direction_flag = 3;
             }
             current_state = STATE_THUNDER;
             advance_to_next_waypoint();

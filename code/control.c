@@ -363,6 +363,142 @@ void control_state_thunder(void)
             }
         }
     }
+    else if (thunder_direction_flag == 3)
+    {
+        turn_loop2.Target = rospeed->data_int;
+        turn_loop2.Actual = -imu.body.gyro[2];
+        PID_Update_Lo(&turn_loop2);
+
+        angle_loop2.Target = pzero->data_float;
+        angle_loop2.Actual = imu.output.euler[1];
+        PID_Update_Lo(&angle_loop2);
+
+        aspeed_loop.Target = angle_loop2.Out;
+        aspeed_loop.Actual = imu.output.gyro[1];
+        PID_Update_Lo(&aspeed_loop);
+
+        small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+
+        if (thunder_process == 0)
+        {
+            thunder_process = 1;
+        }
+
+        else if (thunder_process == 1)
+        {
+            thunder_process = 2;
+        }
+
+        else if (thunder_process == 2)
+        {
+            yaw_thunder_now = imu.output.euler[2];
+            if (yaw_thunder_flag == 0)
+            {
+                yaw_thunder_last = thunder_final_angle;
+                yaw_thunder_flag = 1;
+            }
+
+            yaw_thunder_diff = yaw_thunder_now - yaw_thunder_last;
+            if (yaw_thunder_diff > 180.0f)
+            {
+                yaw_thunder_diff -= 360.0f;
+            }
+            else if (yaw_thunder_diff < -180.0f)
+            {
+                yaw_thunder_diff += 360.0f;
+            }
+
+            yaw_accumulate += yaw_thunder_diff;
+            yaw_thunder_last = yaw_thunder_now;
+
+            if (yaw_accumulate <= -710.0f)
+            {
+                yaw_thunder_now = 0.0f;
+                yaw_thunder_last = 0.0f;
+                yaw_thunder_diff = 0.0f;
+                yaw_thunder_flag = 0;
+                yaw_accumulate = 0.0f;
+                speed_loop.Actual = 0.0f;
+                thunder_process = 0;
+                if (thunder_count < thnum->data_int)
+                {
+                    current_state = STATE_ACCELERATE;
+                }
+                else if (thunder_count >= thnum->data_int)
+                {
+                    current_state = STATE_FORWARD;
+                }
+            }
+        }
+    }
+    else if (thunder_direction_flag == 4)
+    {
+        turn_loop2.Target = -rospeed->data_int;
+        turn_loop2.Actual = -imu.body.gyro[2];
+        PID_Update_Lo(&turn_loop2);
+
+        angle_loop2.Target = pzero->data_float;
+        angle_loop2.Actual = imu.output.euler[1];
+        PID_Update_Lo(&angle_loop2);
+
+        aspeed_loop.Target = angle_loop2.Out;
+        aspeed_loop.Actual = imu.output.gyro[1];
+        PID_Update_Lo(&aspeed_loop);
+
+        small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+
+        if (thunder_process == 0)
+        {
+            thunder_process = 1;
+        }
+
+        else if (thunder_process == 1)
+        {
+            thunder_process = 2;
+        }
+
+        else if (thunder_process == 2)
+        {
+            yaw_thunder_now = imu.output.euler[2];
+            if (yaw_thunder_flag == 0)
+            {
+                yaw_thunder_last = thunder_final_angle;
+                yaw_thunder_flag = 1;
+            }
+
+            yaw_thunder_diff = yaw_thunder_now - yaw_thunder_last;
+            if (yaw_thunder_diff > 180.0f)
+            {
+                yaw_thunder_diff -= 360.0f;
+            }
+            else if (yaw_thunder_diff < -180.0f)
+            {
+                yaw_thunder_diff += 360.0f;
+            }
+
+            yaw_accumulate += yaw_thunder_diff;
+            yaw_thunder_last = yaw_thunder_now;
+
+            if (yaw_accumulate >= 710.0f)
+            {
+                yaw_thunder_now = 0.0f;
+                yaw_thunder_last = 0.0f;
+                yaw_thunder_diff = 0.0f;
+                yaw_thunder_flag = 0;
+                yaw_accumulate = 0.0f;
+                speed_loop.Actual = 0.0f;
+                thunder_process = 0;
+                if (thunder_count < thnum->data_int)
+                {
+                    current_state = STATE_ACCELERATE;
+                }
+                else if (thunder_count >= thnum->data_int)
+                {
+                    current_state = STATE_FORWARD;
+                }
+            }
+        }
+    }
 }
 
 void control_state_forward(void)
