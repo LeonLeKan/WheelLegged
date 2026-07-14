@@ -960,7 +960,7 @@ void search_white_range()
         }
         white_range[i].num = tnum;
         int expected_w = get_expected_road_width(i, 80, 10);
-        if (!found_road_start && longest >= expected_w)
+        if (!found_road_start && longest >= 0.6 * expected_w)
         {
             found_road_start = 1;
             road_start = i;
@@ -1377,20 +1377,20 @@ void calc_stair_distance()
     }
 }
 
-bool judge_least_square(float input[], bool l_or_r)
+bool judge_least_square(float input[], bool l_or_r, float min_R, float k1, float k2)
 {
     float k = input[0], R = input[2];
-    if (fabs(R) < 0.85) return false;
+    if (fabs(R) < min_R) return false;
     if (!l_or_r)
     {
         // 左边线
-        if (k > 1 || k < -1.3) return false;
+        if (k > k1 || k < -k2) return false;
         else return true;
     }
     else
     {
         // 右边线
-        if (k < -1 || k > 1.3) return false;
+        if (k < -k1 || k > k2) return false;
         else return true;
     }
 }
@@ -1398,7 +1398,7 @@ bool judge_least_square(float input[], bool l_or_r)
 
 // 通过最小二乘法拟合，寻找最适合补线的起始点
 // start - 寻找起始行 end - 寻找终止行 limit - 最小拟合点数 l_or_r - 0左1右 reverse - 是否反向搜索
-uint8_t find_least_square_start(uint8_t* line, uint8_t start, uint8_t end, uint8_t limit, bool l_or_r, bool reverse)
+uint8_t find_least_square_start(uint8_t* line, uint8_t start, uint8_t end, uint8_t limit, bool l_or_r, bool reverse, float min_R, float k1, float k2)
 {
     for (int i = reverse ? end + limit : start; reverse ? (i <= start) : (i >= end + limit); reverse ? i++ : i--)
     {
@@ -1410,7 +1410,7 @@ uint8_t find_least_square_start(uint8_t* line, uint8_t start, uint8_t end, uint8
             // 找到连续线段，判断k
             float input[3];
             least_square_with_R(line, i, limit, input);
-            if (judge_least_square(input, l_or_r))
+            if (judge_least_square(input, l_or_r, min_R, k1, k2))
             {
                 return i;
             }
@@ -1426,8 +1426,8 @@ void mend_stairs()
     float input[2];
     if (NEAR_LINE - road_start >= 20)
     {
-        uint8_t lstart = find_least_square_start(left_line, road_start, road_end, 10, 0, false);
-        uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 10, 1, false);
+        uint8_t lstart = find_least_square_start(left_line, road_start, road_end, 10, 0, false, 0.85, 0.8, 1);
+        uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 10, 1, false, 0.85, 0.8, 1);
         if (lstart && rstart)
         {
             least_square_get_line(left_line, lstart - 2, 8, input, NEAR_LINE, lstart);
@@ -1445,8 +1445,8 @@ void mend_stairs()
     }
     if (road_end - FAR_LINE >= 20)
     {
-        uint8_t lstart = find_least_square_start(left_line, road_start, road_end, 10, 0, true);
-        uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 10, 1, true);
+        uint8_t lstart = find_least_square_start(left_line, road_start, road_end, 10, 0, true, 0.85, 0.2, 1);
+        uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 10, 1, true, 0.85, 0.2, 1);
         if (lstart && rstart)
         {
             least_square_get_line(left_line, lstart, 6, input, lstart, FAR_LINE);
@@ -1470,8 +1470,8 @@ void mend_single_side()
     float input[2];
     if (NEAR_LINE - road_start >= 20 && road_start - road_end >= 10)
     {
-        uint8_t lstart = find_least_square_start(left_line, road_start, road_end, 5, 0, false);
-        uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 5, 1, false);
+        uint8_t lstart = find_least_square_start(left_line, road_start, road_end, 5, 0, false, 0.85, 1, 1.3);
+        uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 5, 1, false, 0.85, 1, 1.3);
         if (lstart) least_square_get_line(left_line, lstart, 6, input, NEAR_LINE, lstart);
         if (rstart) least_square_get_line(right_line, rstart, 6, input, NEAR_LINE, rstart);
     }
@@ -1754,7 +1754,7 @@ void image_main()
 {
 #if ONBOARD
 #else 
-    now_element = JOLT;
+    now_element = BACK_STAIRS;
 #endif
     datas_init();
 
