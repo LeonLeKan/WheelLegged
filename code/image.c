@@ -8,6 +8,7 @@ uint8_t* fullBuffer = &mt9v03x_image[0][0];
 #if ONBOARD
 #else
 uint8_t follow_lock;    // 调试用
+uint8_t jolt_lock = 2;
 #endif
 
 int f[10 * CAMERA_H];//考察连通域联通性
@@ -1721,8 +1722,11 @@ void back_stairs_end_check()
 
 void jolt_end_check()
 {
-    int white_count = calc_white(NEAR_LINE, NEAR_LINE - 20, 64, 124);
-    jolt_end_flag = element_end_judge(&jolt_end_judge, white_count < 400);
+    if (jolt_lock == 2)
+    {
+        int white_count = calc_white(NEAR_LINE, NEAR_LINE - 20, 64, 124);
+        jolt_end_flag = element_end_judge(&jolt_end_judge, white_count < 400);
+    }
 }
 
 
