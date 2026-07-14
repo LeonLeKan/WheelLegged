@@ -223,6 +223,18 @@ int main(void)
                             {
                                 ips200_show_rgb565_image(0, 120, (const uint16 *)gImage_4, 106, 109, 150, 120, 0);
                             }
+                            else if (test_2_save == 5)
+                            {
+                                ips200_show_rgb565_image(0, 120, (const uint16 *)gImage_5, 100, 105, 150, 120, 0);
+                            }
+                            else if (test_2_save == 6)
+                            {
+                                ips200_show_rgb565_image(0, 120, (const uint16 *)gImage_6, 94, 105, 150, 120, 0);
+                            }
+                            else if (test_2_save == 7)
+                            {
+                                ips200_show_rgb565_image(0, 120, (const uint16 *)gImage_7, 110, 119, 150, 120, 0);
+                            }
                         }
                         if (motion_mode4 == 0)
                         {
@@ -359,7 +371,7 @@ void handle_channel(void)
         if (testnum->data_int == 2)
         {
             test_2_save += 1;
-            if (test_2_save > 4)
+            if (test_2_save > 7)
             {
                 test_2_save = 0;
             }

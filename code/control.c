@@ -916,13 +916,13 @@ void control_state_jump_up(void)
                   160.0f, 20.0f);
     }
 
-    else if (count >= 17 && count < 40)
+    else if (count >= 17 && count < 45)
     {
-        servo_set(110.0f, 70.0f,
-                  70.0f, 110.0f);
+        servo_set(120.0f, 60.0f,
+                  60.0f, 120.0f);
     }
 
-    else if (count >= 40)
+    else if (count >= 45)
     {
         count = 0;
         image_block = 1;

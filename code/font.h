@@ -8,5 +8,8 @@ extern const unsigned char gImage_1[24780];
 extern const unsigned char gImage_2[25724];
 extern const unsigned char gImage_3[20160];
 extern const unsigned char gImage_4[23108];
+extern const unsigned char gImage_5[21000];
+extern const unsigned char gImage_6[19740];
+extern const unsigned char gImage_7[26180];
 
 #endif 
