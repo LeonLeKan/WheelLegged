@@ -351,7 +351,7 @@ void location_update_2_3(void)
         ins_stop();
         now_element = BACK_STAIRS;
         image_block = 1;
-        current_state = STATE_FOLLOW_STAIRS;
+        current_state = STATE_DE_FOLLOW;
     }
 }
 

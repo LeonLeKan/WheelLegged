@@ -31,9 +31,10 @@ void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
 
-    oscilloscope_data.data[0] = current_state;
+    oscilloscope_data.data[0] = yaw_loop.Actual;
+    oscilloscope_data.data[1] = yaw_loop.Target;
 
-    oscilloscope_data.channel_num = 1;
+    oscilloscope_data.channel_num = 2;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 
@@ -55,7 +56,7 @@ void wifi_send_image_thre(void)
     {
         mt9v03x_finish_flag = 0;
 
-        THRE();
+        image_main();
 
         for (int i = 0; i < CAMERA_H; i++)
         {

@@ -35,7 +35,6 @@ typedef struct {
 // 1-单边桥 2-三级跳 3-下三级 4-颠簸路段
 element_t now_element;
 int stair_distance;     // 到下一级台阶的距离
-bool front_stairs_end_flag = 0;
 bool back_stairs_end_flag = 0;
 int error = 0;
 int error_calc_near_line = 52;
@@ -97,6 +96,9 @@ uint8_t enable_dis_shadow = 1;     //是否启用去除影子策略
 int jolt_end_cnt_thre = 20;
 bool jolt_end_flag = 0;
 end_judge_t jolt_end_judge = { 20, 3, 0, 0 };
+int front_stairs_end_cnt_thre = 40;
+bool front_stairs_end_flag = 0;
+end_judge_t front_stairs_end_judge = { 40, 3, 0, 0 };
 
 int back_stairs_end_judge_cnt = 0;
 
@@ -1352,6 +1354,43 @@ void get_mid_line(void)
 
 }
 
+static int calc_white(uint8_t near, uint8_t far, uint8_t left, uint8_t right)
+{
+    int white_count = 0;
+    for (int i = near; i >= far; i--)
+    {
+        for (int j = left; j <= right; j++)
+        {
+            if (IMG[i][j])
+                white_count++;
+        }
+    }
+    return white_count;
+}
+
+static bool element_end_judge(end_judge_t* judge, bool now)
+{
+    if (now)
+    {
+        judge->end_cnt++;
+        if (judge->end_cnt > judge->thre)
+        {
+            judge->not_end_cnt = 0;
+            return true;
+        }
+    }
+    else
+    {
+        judge->not_end_cnt++;
+        if (judge->not_end_cnt > judge->thre)
+        {
+            judge->end_cnt = 0;
+            judge->not_end_cnt = 0;
+        }
+    }
+    return false;
+}
+
 //数值初始化
 void datas_init()
 {
@@ -1359,6 +1398,7 @@ void datas_init()
     road_end = FAR_LINE;
 
     jolt_end_judge.thre = jolt_end_cnt_thre;
+    front_stairs_end_judge.thre = front_stairs_end_cnt_thre;
 }
 
 
@@ -1426,12 +1466,12 @@ void mend_stairs()
     float input[2];
     if (NEAR_LINE - road_start >= 20)
     {
-        uint8_t lstart = find_least_square_start(left_line, road_start, road_end, 10, 0, false, 0.85, 0.8, 1);
-        uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 10, 1, false, 0.85, 0.8, 1);
+        uint8_t lstart = find_least_square_start(left_line, road_start, road_end, 8, 0, false, 0.85, 1, 1.3);
+        uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 8, 1, false, 0.85, 1, 1.3);
         if (lstart && rstart)
         {
-            least_square_get_line(left_line, lstart - 2, 8, input, NEAR_LINE, lstart);
-            least_square_get_line(right_line, rstart - 2, 8, input, NEAR_LINE, rstart);
+            least_square_get_line(left_line, lstart - 2, 6, input, NEAR_LINE, lstart);
+            least_square_get_line(right_line, rstart - 2, 6, input, NEAR_LINE, rstart);
         }
         else
         {
@@ -1651,53 +1691,10 @@ void mend_single_side()
 #endif
 }
 
-static int calc_white(uint8_t near, uint8_t far, uint8_t left, uint8_t right)
-{
-    int white_count = 0;
-    for (int i = near; i >= far; i--)
-    {
-        for (int j = left; j <= right; j++)
-        {
-            if (IMG[i][j])
-                white_count++;
-        }
-    }
-    return white_count;
-}
-
-static bool element_end_judge(end_judge_t* judge, bool now)
-{
-    if (now)
-    {
-        judge->end_cnt++;
-        if (judge->end_cnt > judge->thre)
-        {
-            judge->not_end_cnt = 0;
-            return true;
-        }
-    }
-    else
-    {
-        judge->not_end_cnt++;
-        if (judge->not_end_cnt > judge->thre)
-        {
-            judge->end_cnt = 0;
-            judge->not_end_cnt = 0;
-        }
-    }
-    return false;
-}
-
 void front_stairs_end_check()
 {
-    int white_count = calc_white(NEAR_LINE, NEAR_LINE - 20, 64, 124);
-    if (white_count < 400)
-    {
-        front_stairs_end_flag = 1;
-    }
-    else {
-        front_stairs_end_flag = 0;
-    }
+    int white_count = calc_white(NEAR_LINE, NEAR_LINE - 20, middle - 30, middle + 30);
+    front_stairs_end_flag = element_end_judge(&front_stairs_end_judge, white_count < 200);
 }
 
 void back_stairs_end_check()
@@ -1837,12 +1834,11 @@ void image_main()
     if (error > 50) error = 0;
 
 
-    mid_update = 1;
-#if ONBOARD
-#else
+// #if ONBOARD
+// #else
     //printf("dis: %d, start: %d, end: %d, error: %d\n", jolt_distance, road_start, road_end, error);
     //printf("single_side_state: %d\n", single_side_state);
-    printf("jolt_end: %d\n", jolt_end_flag);
+    // printf("jolt_end: %d\n", jolt_end_flag);
     for (int i = 0; i < CAMERA_W; i++)
     {
         IMG[error_calc_near_line][i] = purple;
@@ -1855,5 +1851,7 @@ void image_main()
             IMG[i][right_line[i]] = green;
             IMG[i][mid_line[i]] = red;
         }
-#endif
+
+    // #endif
+    mid_update = 1;
 }

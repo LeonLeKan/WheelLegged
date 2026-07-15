@@ -316,8 +316,20 @@ static void judge_time_to_jump(void)
     }
 }
 
+static void de_to_tra_follow(void)
+{
+    if (current_state == STATE_DE_FOLLOW && speed_loop.Actual <= 2.0f)
+    {
+        current_state = STATE_TRA_FOLLOW;
+    }
+}
+
 static void quit_follow_stairs(void)
 {
+    if (current_state == STATE_TRA_FOLLOW && stair_distance <= 50)
+    {
+        current_state = STATE_FOLLOW_STAIRS;
+    }
     if (current_state == STATE_FOLLOW_STAIRS)
     {
         if (follow_lock == 0)
@@ -471,6 +483,7 @@ void control_state_switch(void)
     else if (testnum->data_int == 2 && road_idx[road_num] == 3)
     {
         deaccelerate_within_2();
+        de_to_tra_follow();
         quit_follow_stairs();
     }
 
@@ -530,6 +543,9 @@ void control_state_update(void)
         break;
     case STATE_JUMP_UP:
         control_state_jump_up();
+        break;
+    case STATE_DE_FOLLOW:
+        control_state_de_follow();
         break;
     case STATE_TRA_FOLLOW:
         control_state_tra_follow();
