@@ -93,9 +93,9 @@ int all_connect_num = 0;
 uint8_t enable_dis_shadow = 1;     //是否启用去除影子策略
 
 //////////////////////// 颠簸路段 //////////////////////
-int jolt_end_cnt_thre = 20;
+int jolt_end_cnt_thre = 30;
 bool jolt_end_flag = 0;
-end_judge_t jolt_end_judge = { 20, 3, 0, 0 };
+end_judge_t jolt_end_judge = { 30, 0, 0, 0 };
 int front_stairs_end_cnt_thre = 40;
 bool front_stairs_end_flag = 0;
 end_judge_t front_stairs_end_judge = { 40, 3, 0, 0 };
@@ -1737,7 +1737,7 @@ void jolt_end_check()
 {
     if (jolt_lock == 2)
     {
-        int white_count = calc_white(NEAR_LINE, NEAR_LINE - 20, 64, 124);
+        int white_count = calc_white(NEAR_LINE, NEAR_LINE - 50, middle - 30, middle + 30);
         jolt_end_flag = element_end_judge(&jolt_end_judge, white_count < 400);
     }
 }
