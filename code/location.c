@@ -9,6 +9,7 @@
 waypoint_node_t *current_target = NULL;
 uint8_t road_idx[5];
 uint8_t modify_idx[5];
+uint8_t uturn_3_idx[2];
 uint8_t road_num = 0;
 uint8_t disturb_flag = 0;
 float last_raw_yaw = 0.0f;
@@ -214,6 +215,12 @@ void location_update_2_0(void)
         advance_to_next_waypoint();
     }
 
+    if (current_target->id_startup == tunum->data_int)
+        {
+            current_state = STATE_UTURN;
+            advance_to_next_waypoint();
+        }
+
     if (!current_target) 
     {
         yaw_de_final = imu.output.euler[2];
@@ -251,7 +258,15 @@ void location_update_2_1(void)
 
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
-        advance_to_next_waypoint();
+        if (road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
+        {
+            current_state = STATE_UTURN;
+            advance_to_next_waypoint();
+        }
+        else
+        {
+            advance_to_next_waypoint();
+        }
     }
 
     if (!current_target) 
@@ -294,7 +309,15 @@ void location_update_2_2(void)
 
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
-        advance_to_next_waypoint();
+        if (road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
+        {
+            current_state = STATE_UTURN;
+            advance_to_next_waypoint();
+        }
+        else
+        {
+            advance_to_next_waypoint();
+        }
     }
 
     if (current_target && !current_target->next && de_stairs_flag == 0) 
@@ -343,7 +366,15 @@ void location_update_2_3(void)
 
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
-        advance_to_next_waypoint();
+        if (road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
+        {
+            current_state = STATE_UTURN;
+            advance_to_next_waypoint();
+        }
+        else
+        {
+            advance_to_next_waypoint();
+        }
     }
 
     if (!current_target) 
@@ -385,7 +416,15 @@ void location_update_2_4(void)
 
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
-        advance_to_next_waypoint();
+        if (road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
+        {
+            current_state = STATE_UTURN;
+            advance_to_next_waypoint();
+        }
+        else
+        {
+            advance_to_next_waypoint();
+        }
     }
 
     if (!current_target) 

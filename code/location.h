@@ -16,6 +16,7 @@
 extern waypoint_node_t *current_target;
 extern uint8_t road_idx[5];
 extern uint8_t modify_idx[5];
+extern uint8_t uturn_3_idx[2];
 extern uint8_t road_num;
 extern uint8_t disturb_flag;
 extern float last_raw_yaw;

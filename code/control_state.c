@@ -142,11 +142,30 @@ static void deaccelerate_to_thunder(void)
 
 static void deaccelerate_within_2(void)
 {
-    if (current_state == STATE_FORWARD && (fabs(imu.output.euler[2]) > 45.0f && fabs(imu.output.euler[2]) < 135.0f))
+    if (current_target && current_target->next)
     {
-        speed_2_change = 1;
+        double x_within_now = imu.output.position_x;
+        double y_within_now = imu.output.position_y;
+        double x_within_tgt = current_target->waypoint.x;
+        double y_within_tgt = current_target->waypoint.y;
+        double x_within_tgt_next = current_target->next->waypoint.x;
+        double y_within_tgt_next = current_target->next->waypoint.y;
+
+        double dis_0 = sqrt((x_within_tgt - x_within_tgt_next) * (x_within_tgt - x_within_tgt_next) + (y_within_tgt - y_within_tgt_next) * (y_within_tgt - y_within_tgt_next));
+        double dis_1 = sqrt((x_within_now - x_within_tgt) * (x_within_now - x_within_tgt) + (y_within_now - y_within_tgt) * (y_within_now - y_within_tgt));
+        if(road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
+        {
+            if (dis_1 < 1.0f)
+            {
+                speed_2_change = 1;
+            }
+        }
+        else
+        {
+            speed_2_change = 0;
+        }
     }
-    else
+    else if (current_target && !current_target->next)
     {
         speed_2_change = 0;
     }
@@ -242,7 +261,7 @@ static void decline_to_stairs(void)
 
 static void judge_time_to_jump(void)
 {
-    if (current_state == STATE_FIND_JUMP && jump_lock == 0)
+    if ((current_state == STATE_FIND_JUMP || current_state == STATE_MAINTAIN_JUMP) && jump_lock == 0)
     {
         if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f)
         {
@@ -270,7 +289,7 @@ static void judge_time_to_jump(void)
         }
         else if (jump_count >= 3)
         {
-            current_state = STATE_FIND_JUMP;
+            current_state = STATE_MAINTAIN_JUMP;
             if (front_stairs_end_flag == 1)
             {
                 image_block = 0;
@@ -308,7 +327,7 @@ static void judge_time_to_jump(void)
     else if (jump_lock == 1 && jump_count >= 3)
     {
         jump_lock_count++;
-        if (jump_lock_count >= 1)
+        if (jump_lock_count >= 60)
         {
             jump_lock = 0;
             jump_lock_count = 0;
@@ -340,7 +359,7 @@ static void quit_follow_stairs(void)
         if (follow_lock == 1)
         {
             follow_lock_count_1++;
-            if (follow_lock_count_1 >= 150)
+            if (follow_lock_count_1 >= 200)
             {
                 follow_lock = 2;
                 follow_lock_count_1 = 0;
@@ -540,6 +559,9 @@ void control_state_update(void)
         break;
     case STATE_FIND_JUMP:
         control_state_find_jump();
+        break;
+    case STATE_MAINTAIN_JUMP:
+        control_state_maintain_jump();
         break;
     case STATE_JUMP_UP:
         control_state_jump_up();

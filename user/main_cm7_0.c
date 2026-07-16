@@ -23,6 +23,7 @@ void start_imu_auto_gyro_calibration(void);
 void remote_control(void);
 void calculate_route(void);
 void calculate_modify(void);
+void calculate_uturn_3(void);
 
 uint8_t motion_mode1 = 0;
 uint8_t motion_mode2 = 0;
@@ -104,6 +105,7 @@ int main(void)
     {
         calculate_route();
         calculate_modify();
+        calculate_uturn_3();
         save_manager_load(testnum->data_int + road_idx[road_num]);
     }
     else if (testnum->data_int == 1 || testnum->data_int == 0)
@@ -469,6 +471,40 @@ void calculate_modify(void)
         else
         {
             modify_idx[i] = 0;
+        }
+    }
+}
+
+void calculate_uturn_3(void)
+{
+    int temp = uturn3->data_int;
+    uint8_t digits[2] = {0};
+    int count = 0;
+
+    if (temp == 0)
+    {
+        digits[0] = 0;
+        count = 1;
+    }
+    else
+    {
+        while (temp > 0 && count < 2)
+        {
+            digits[count] = (uint8_t)(temp % 10);
+            count++;
+            temp /= 10;
+        }
+    }
+
+    for (int i = 0; i < 2; i++)
+    {
+        if (i < count)
+        {
+            uturn_3_idx[i] = digits[count - 1 - i];
+        }
+        else
+        {
+            uturn_3_idx[i] = 0;
         }
     }
 }

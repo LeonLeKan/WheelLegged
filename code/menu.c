@@ -7,7 +7,7 @@
 
 volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
-MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *modiro, *thnum, *tunum, *saveall, *currentMenu;
+MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *modiro, *thnum, *tunum, *uturn3, *saveall, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
     *esha, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *kgray, *whiga, *minth, *maxth, *jocnt, *saveim,
     *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *dis0, *dis1, *speedl, *balspeed, *thsp, *rotusp, *dis2, *saveel;
@@ -98,7 +98,8 @@ void create_1st_menu(void)
     modiro = createMenu("modiro", 1, 6, MENU_TYPE_INT, NULL);
     thnum = createMenu("thnum", 1, 7, MENU_TYPE_INT, NULL);
     tunum = createMenu("tunum", 1, 8, MENU_TYPE_INT, NULL);
-    saveall = createMenu("save", 1, 9, MENU_TYPE_FUNCTION, menu_save);
+    uturn3 = createMenu("uturn3", 1, 9, MENU_TYPE_INT, NULL);
+    saveall = createMenu("save", 1, 10, MENU_TYPE_FUNCTION, menu_save);
 
     WheelLeg->child = Balance;
     Balance->parent = WheelLeg;
@@ -109,6 +110,7 @@ void create_1st_menu(void)
     modiro->parent = WheelLeg;
     thnum->parent = WheelLeg;
     tunum->parent = WheelLeg;
+    uturn3->parent = WheelLeg;
     saveall->parent = WheelLeg;
 
     Balance->next = Image;
@@ -125,8 +127,10 @@ void create_1st_menu(void)
     thnum->last = modiro;
     thnum->next = tunum;
     tunum->last = thnum;
-    tunum->next = saveall;
-    saveall->last = tunum;
+    tunum->next = uturn3;
+    uturn3->last = tunum;
+    uturn3->next = saveall;
+    saveall->last = uturn3;
     saveall->next = Balance;
     Balance->last = saveall;
 
@@ -1081,6 +1085,10 @@ void menu_save(void)
     flash_union_buffer[index++].int32_type = turn_num->data_int;
     node_count++;
 
+    MENU *uturn_3 = uturn3;
+    flash_union_buffer[index++].int32_type = uturn_3->data_int;
+    node_count++;
+
     flash_union_buffer[0].float_type = menu_magic;
     flash_union_buffer[1].uint32_type = node_count;
 
@@ -1245,6 +1253,13 @@ void menu_load(void)
     if (fabs((float)turn_num->data_int) >= 100000)
     {
         turn_num->data_int = 0;
+    }
+
+    MENU *uturn_3 = uturn3;
+    uturn_3->data_int = (int)flash_union_buffer[idx++].int32_type;
+    if (fabs((float)uturn_3->data_int) >= 100000)
+    {
+        uturn_3->data_int = 0;
     }
 }
 

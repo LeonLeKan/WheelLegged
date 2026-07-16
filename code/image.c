@@ -96,9 +96,9 @@ uint8_t enable_dis_shadow = 1;     //是否启用去除影子策略
 int jolt_end_cnt_thre = 30;
 bool jolt_end_flag = 0;
 end_judge_t jolt_end_judge = { 30, 0, 0, 0 };
-int front_stairs_end_cnt_thre = 40;
+int front_stairs_end_cnt_thre = 10;
 bool front_stairs_end_flag = 0;
-end_judge_t front_stairs_end_judge = { 40, 3, 0, 0 };
+end_judge_t front_stairs_end_judge = { 10, 0, 0, 0 };
 
 int back_stairs_end_judge_cnt = 0;
 
