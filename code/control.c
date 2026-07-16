@@ -1306,8 +1306,8 @@ void control_state_jolt_trap(void)
 
     if (jolt_speed_change_flag == 0)
     {
-        servo_set(55.0f, 125.0f,
-                  45.0f, 135.0f);
+        servo_set(45.0f, 135.0f,
+                  40.0f, 140.0f);
         jolt_speed_change_count++;
         if (jolt_speed_change_count >= 80)
         {
