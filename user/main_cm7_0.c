@@ -173,7 +173,7 @@ int main(void)
 
         else if (motion_mode1 == 0 && motion_mode2 == 1 && motion_mode3 == 1)
         {
-            system_delay_ms(1000);
+            system_delay_ms(500);
             ips200_clear();
             while (true)
             {
@@ -187,11 +187,26 @@ int main(void)
                     if (test_state == 1)
                     {
                         current_state = STATE_TEST;
+                        imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+                        imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
                         ins_reset();
                     }
                     else if (test_state == 0)
                     {
-                        current_state = STATE_ACCELERATE;
+                        if (testnum->data_int == 2)
+                        {
+                            current_state = STATE_ACCELERATE;
+                        }
+                        else if (testnum->data_int == 1)
+                        {
+                            current_state = STATE_FORWARD;
+                        }
+                        else if (testnum->data_int == 0)
+                        {
+                            imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+                            imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
+                            current_state = STATE_FORWARD;
+                        }
                         ins_reset();
                     }
                     while (true)

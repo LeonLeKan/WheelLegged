@@ -31,9 +31,11 @@ void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
 
-    oscilloscope_data.data[0] = speed_loop.Target;
+    oscilloscope_data.data[0] =  imu.rot_comp.param.yaw_compensate_cw;
+    oscilloscope_data.data[1] =  imu.rot_comp.param.yaw_compensate_ccw;
+    oscilloscope_data.data[2] = current_state;
 
-    oscilloscope_data.channel_num = 1;
+    oscilloscope_data.channel_num = 3;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 

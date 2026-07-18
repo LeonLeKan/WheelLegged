@@ -50,9 +50,19 @@ static void accelerate_to_forward(void)
 
 static void deaccelerate_to_stop(void)
 {
-    if (current_state == STATE_DEACCELERATE && (speed_loop.Actual < 1.0f))
+    if (testnum->data_int == 0 || testnum->data_int == 1)
     {
-        current_state = STATE_STOP;
+        if (current_state == STATE_DEACCELERATE && (speed_loop2.Actual < 1.0f))
+        {
+            current_state = STATE_STOP;
+        }
+    }
+    else if (testnum->data_int == 2)
+    {
+        if (current_state == STATE_DEACCELERATE && (speed_loop.Actual < 1.0f))
+        {
+            current_state = STATE_STOP;
+        }
     }
 }
 
@@ -155,7 +165,7 @@ static void deaccelerate_within_1(void)
 
 static void deaccelerate_to_thunder(void)
 {
-    if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 2.0f))
+    if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 1.0f))
     {
         current_state = STATE_TRA_THUNDER;
     }
@@ -235,7 +245,7 @@ static void quit_single_side(void)
                 single_lock_count = 0;
             }
         }
-        if (single_lock == 2 && single_side_state == 0)
+        if (single_lock == 2 && single_side_end_judge.end_flag == 1)
         {
             single_lock = 3;
         }
@@ -311,7 +321,7 @@ static void judge_time_to_jump(void)
         else if (jump_count >= 3)
         {
             current_state = STATE_MAINTAIN_JUMP;
-            if (front_stairs_end_flag == 1)
+            if (front_stairs_end_judge.end_flag == 1)
             {
                 image_block = 0;
                 current_state = STATE_MODIFY;
@@ -396,7 +406,7 @@ static void quit_follow_stairs(void)
                 follow_lock_count_2 = 0;
             }
         }
-        if (follow_lock == 3 && back_stairs_end_flag == 1)
+        if (follow_lock == 3 && back_stairs_end_judge.end_flag == 1)
         {
             follow_lock = 4;
         }
@@ -452,7 +462,7 @@ static void quit_jolt(void)
                 jolt_lock_count = 0;
             }
         }
-        if (jolt_lock == 2 && jolt_end_flag == 1)
+        if (jolt_lock == 2 && jolt_end_judge.end_flag == 1)
         {
             jolt_lock = 3;
         }
