@@ -10,7 +10,7 @@ volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *modiro, *thnum, *tunum, *uturn3, *saveall, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
     *esha, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *kgray, *whiga, *minth, *maxth, *jocnt, *saveim,
-    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *dis0, *dis1, *speedl, *balspeed, *thsp, *rotusp, *dis2, *saveel;
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *tunext, *dis1, *speedl, *balspeed, *thsp, *rotusp, *dis2, *curnext, *tunesp, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
@@ -184,14 +184,16 @@ void create_2nd_menu(void)
     joangle = createMenu("joangle", 2, 14, MENU_TYPE_FLOAT, NULL);
     jolock = createMenu("jolock", 2, 15, MENU_TYPE_INT, NULL);
     xythun = createMenu("xythun", 2, 16, MENU_TYPE_FLOAT, NULL);
-    dis0 = createMenu("dis0", 2, 17, MENU_TYPE_FLOAT, NULL);
+    tunext = createMenu("tunext", 2, 17, MENU_TYPE_INT, NULL);
     dis1 = createMenu("dis1", 2, 18, MENU_TYPE_FLOAT, NULL);
     speedl = createMenu("speedl", 2, 19, MENU_TYPE_INT, NULL);
     balspeed = createMenu("balspeed", 2, 20, MENU_TYPE_INT, NULL);
     thsp = createMenu("thsp", 2, 21, MENU_TYPE_INT, NULL);
     rotusp = createMenu("rotusp", 2, 22, MENU_TYPE_INT, NULL);
     dis2 = createMenu("dis2", 2, 23, MENU_TYPE_FLOAT, NULL);
-    saveel = createMenu("save", 2, 24, MENU_TYPE_FUNCTION, menu_save);
+    curnext = createMenu("curnext", 2, 24, MENU_TYPE_INT, NULL);
+    tunesp = createMenu("tunesp", 2, 25, MENU_TYPE_INT, NULL);
+    saveel = createMenu("save", 2, 26, MENU_TYPE_FUNCTION, menu_save);
 
     speed->next = anloop1;
     anloop1->last = speed;
@@ -279,10 +281,10 @@ void create_2nd_menu(void)
     jolock->last = joangle;
     jolock->next = xythun;
     xythun->last = jolock;
-    xythun->next = dis0;
-    dis0->last = xythun;
-    dis0->next = dis1;
-    dis1->last = dis0;
+    xythun->next = tunext;
+    tunext->last = xythun;
+    tunext->next = dis1;
+    dis1->last = tunext;
     dis1->next = speedl;
     speedl->last = dis1;
     speedl->next = balspeed;
@@ -293,8 +295,12 @@ void create_2nd_menu(void)
     rotusp->last = thsp;
     rotusp->next = dis2;
     dis2->last = rotusp;
-    dis2->next = saveel;
-    saveel->last = dis2;
+    dis2->next = curnext;
+    curnext->last = dis2;
+    curnext->next = tunesp;
+    tunesp->last = curnext;
+    tunesp->next = saveel;
+    saveel->last = tunesp;
     saveel->next = change;
     change->last = saveel;
 
@@ -348,13 +354,15 @@ void create_2nd_menu(void)
     joangle->parent = Element;
     jolock->parent = Element;
     xythun->parent = Element;
-    dis0->parent = Element;
+    tunext->parent = Element;
     dis1->parent = Element;
     speedl->parent = Element;
     balspeed->parent = Element;
     thsp->parent = Element;
     rotusp->parent = Element;
     dis2->parent = Element;
+    curnext->parent = Element;
+    tunesp->parent = Element;
     saveel->parent = Element;
 }
 

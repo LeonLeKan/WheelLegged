@@ -272,7 +272,7 @@ void control_state_thunder(void)
             yaw_accumulate += yaw_thunder_diff;
             yaw_thunder_last = yaw_thunder_now;
 
-            if (yaw_accumulate <= -710.0f)
+            if (yaw_accumulate <= -700.0f)
             {
                 yaw_thunder_now = 0.0f;
                 yaw_thunder_last = 0.0f;
@@ -343,7 +343,7 @@ void control_state_thunder(void)
             yaw_accumulate += yaw_thunder_diff;
             yaw_thunder_last = yaw_thunder_now;
 
-            if (yaw_accumulate >= 710.0f)
+            if (yaw_accumulate >= 700.0f)
             {
                 yaw_thunder_now = 0.0f;
                 yaw_thunder_last = 0.0f;
@@ -411,7 +411,7 @@ void control_state_thunder(void)
             yaw_accumulate += yaw_thunder_diff;
             yaw_thunder_last = yaw_thunder_now;
 
-            if (yaw_accumulate <= -710.0f)
+            if (yaw_accumulate <= -700.0f)
             {
                 yaw_thunder_now = 0.0f;
                 yaw_thunder_last = 0.0f;
@@ -479,7 +479,7 @@ void control_state_thunder(void)
             yaw_accumulate += yaw_thunder_diff;
             yaw_thunder_last = yaw_thunder_now;
 
-            if (yaw_accumulate >= 710.0f)
+            if (yaw_accumulate >= 700.0f)
             {
                 yaw_thunder_now = 0.0f;
                 yaw_thunder_last = 0.0f;
@@ -529,22 +529,26 @@ void control_state_forward(void)
             {
                 speed_loop.Target = 2.0f;
             }
+            else if (speed_0_change == 3)
+            {
+                speed_loop.Target = (float)tunesp->data_int / 100.0f;
+            }
         }
         else if (testnum->data_int == 1)
         {
             if (thunder_count >= thnum->data_int)
             {
-                if (speed_1_change == 1)
-                {
-                    speed_loop.Target = (float)speedl->data_int / 100.0f;
-                }
-                else if (speed_1_change == 0)
+                if (speed_1_change == 0)
                 {
                     speed_loop.Target = (float)speed->data_int / 100.0f;
                 }
                 else if (speed_1_change == 2)
                 {
                     speed_loop.Target = 2.0f;
+                }
+                else if (speed_1_change == 3)
+                {
+                    speed_loop.Target = (float)tunesp->data_int / 100.0f;
                 }
             }
             else if (thunder_count < thnum->data_int)

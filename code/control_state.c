@@ -69,21 +69,41 @@ static void deaccelerate_within_0(void)
 
         double dis_0 = sqrt((x_within_tgt - x_within_tgt_next) * (x_within_tgt - x_within_tgt_next) + (y_within_tgt - y_within_tgt_next) * (y_within_tgt - y_within_tgt_next));
         double dis_1 = sqrt((x_within_now - x_within_tgt) * (x_within_now - x_within_tgt) + (y_within_now - y_within_tgt) * (y_within_now - y_within_tgt));
-        if (current_target->id_startup != tunum->data_int && dis_0 < dis0->data_float)
+        if (current_target->id_startup < tunum->data_int)
         {
-            if (dis_1 < dis1->data_float)
-            {
-                speed_0_change = 1;
-            }
+            speed_0_change = 0;
         }
-        if(current_target->id_startup == tunum->data_int)
+        else if (current_target->id_startup == tunum->data_int)
         {
             if (dis_1 < dis2->data_float)
             {
                 speed_0_change = 2;
             }
+            else
+            {
+                speed_0_change = 0;
+            }
         }
-        if(current_target->id_startup != tunum->data_int && dis_0 >= dis0->data_float)
+        else if (current_target->id_startup > tunum->data_int && current_target->id_startup < tunext->data_int)
+        {
+            speed_0_change = 3;
+        }
+        else if (current_target->id_startup == tunext->data_int)
+        {
+            if (dis_1 < dis1->data_float)
+            {
+                speed_0_change = 1;
+            }
+            else
+            {
+                speed_0_change = 3;
+            }
+        }
+        else if (current_target->id_startup > tunext->data_int && current_target->id_startup <= curnext->data_int)
+        {
+            speed_0_change = 1;
+        }
+        else if (current_target->id_startup > curnext->data_int)
         {
             speed_0_change = 0;
         }
@@ -107,21 +127,22 @@ static void deaccelerate_within_1(void)
 
         double dis_0 = sqrt((x_within_tgt - x_within_tgt_next) * (x_within_tgt - x_within_tgt_next) + (y_within_tgt - y_within_tgt_next) * (y_within_tgt - y_within_tgt_next));
         double dis_1 = sqrt((x_within_now - x_within_tgt) * (x_within_now - x_within_tgt) + (y_within_now - y_within_tgt) * (y_within_now - y_within_tgt));
-        if (current_target->id_startup != tunum->data_int && dis_0 < dis0->data_float)
+        if (current_target->id_startup < tunum->data_int)
         {
-            if (dis_1 < dis1->data_float)
-            {
-                speed_1_change = 1;
-            }
+            speed_1_change = 3;
         }
-        if(current_target->id_startup == tunum->data_int)
+        else if (current_target->id_startup == tunum->data_int)
         {
             if (dis_1 < dis2->data_float)
             {
                 speed_1_change = 2;
             }
+            else
+            {
+                speed_1_change = 3;
+            }
         }
-        if(current_target->id_startup != tunum->data_int && dis_0 >= dis0->data_float)
+        else if(current_target->id_startup > tunum->data_int)
         {
             speed_1_change = 0;
         }
