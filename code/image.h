@@ -72,12 +72,20 @@ typedef enum {
     JOLT
 }element_t;
 
+typedef struct {
+    int thre, tolerance;
+    int end_cnt, not_end_cnt;
+	bool end_flag;
+}end_judge_t;
+
 //////////////////////// 传给控制 ////////////////////
 // 1-单边桥 2-三级跳 3-下三级 4-颠簸路段
 extern element_t now_element;
-extern int stair_distance;     // 到下一级台阶的距离
-extern bool front_stairs_end_flag;
-extern bool back_stairs_end_flag;
+
+extern float k_gray_dis;
+extern uint8_t WHITE_GAP;
+extern uint8_t MIN_THRE, MAX_THRE;
+extern uint8_t enable_dis_shadow;     //是否启用去除影子策略
 
 extern int error;
 extern int error_calc_near_line;
@@ -85,16 +93,20 @@ extern int error_calc_far_line;
 extern uint8_t middle;
 extern uint8_t mid_update;
 
-extern bool jolt_end_flag;
-extern int jolt_end_judge_cnt;
-extern int jolt_end_cnt_thre;
+// 上台阶
+extern int stair_distance;     // 到下一级台阶的距离
+extern int stair_distance_side; // 用左边线还是右边线微调距离，0-左边线 1-右边线 2-不进行距离微调
+extern end_judge_t front_stairs_end_judge;
 
+// 下台阶
+extern end_judge_t back_stairs_end_judge;
+
+// 颠簸路段
+extern end_judge_t jolt_end_judge;
+
+// 单边桥
 extern uint8_t single_side_state;
-
-extern float k_gray_dis;
-extern uint8_t WHITE_GAP;
-extern uint8_t MIN_THRE, MAX_THRE;
-extern uint8_t enable_dis_shadow;     //是否启用去除影子策略
+extern end_judge_t single_side_end_judge;
 
 //////////////////////// ////////// //////////////////
 
@@ -152,5 +164,4 @@ void least_square_get_line(uint8_t* line, uint8_t outset, uint8_t limit, float i
 void get_line_b(uint8_t* line, uint8_t x, float input[]);
 void get_line_b_and_k(uint8_t* line, uint8_t start, uint8_t end, float input[]);
 void get_line(uint8_t* line, uint8_t start, uint8_t end, float k, float b);
-void define_mid_255(void);
 #endif //
