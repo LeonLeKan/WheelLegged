@@ -975,12 +975,178 @@ void control_state_maintain_jump(void)
     small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
 }
 
+void control_state_simple_find(void)
+{
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+    sppid_update(10.0f, spki->data_float, spkd->data_float);
+    tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
+    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+
+    static uint32_t count = 0;
+    count++;
+    if (count >= 4)
+    {
+        count = 0;
+
+        speed_loop.Target = (float)speed->data_int / 100.0f;
+        speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+
+        PID_Update_Lo(&speed_loop);
+
+        // 对speed_loop.Out进行低通滤波
+        static float filtered_speed_out = 0.0f;
+        static const float speed_alpha = 0.1f;
+
+        filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
+
+        servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
+                  90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
+
+        turn_loop1.Target = 0.0f;
+        turn_loop1.Actual = (float)error;
+        PID_Update_Lo(&turn_loop1);
+    }
+
+    turn_loop2.Target = -turn_loop1.Out * speed_loop.Actual;
+    turn_loop2.Actual = -imu.body.gyro[2];
+    PID_Update_Lo(&turn_loop2);
+
+    angle_loop2.Target = pzero->data_float;
+    angle_loop2.Actual = imu.output.euler[1];
+    PID_Update_Lo(&angle_loop2);
+
+    aspeed_loop.Target = angle_loop2.Out;
+    aspeed_loop.Actual = imu.output.gyro[1];
+    PID_Update_Lo(&aspeed_loop);
+
+    small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+}
+
+void control_state_simple_jump(void)
+{
+    static uint8_t simple_jump_count = 0;
+    static uint8_t simple_jump_flag = 1;
+
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+    yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
+    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+
+    if (simple_jump_flag == 1 && simple_jump_count <= 2)
+    {
+        static uint32_t count = 0;
+        count++;
+        if (count < 17)
+        {
+            servo_set(20.0f, 160.0f,
+                      160.0f, 20.0f);
+        }
+
+        else if (count >= 17 && count < 45)
+        {
+            servo_set(120.0f, 60.0f,
+                      60.0f, 120.0f);
+        }
+
+        else if (count >= 45)
+        {
+            count = 0;
+            servo_set(90.0f, 90.0f,
+                      90.0f, 90.0f);
+            angle_loop2.ErrorInt = 0.0f;
+            speed_loop.ErrorInt = 0.0f;
+            turn_loop2.ErrorInt = 0.0f;
+            simple_jump_count += 1;
+            simple_jump_flag = 0;
+        }
+
+        angle_loop2.Target = pzero->data_float;
+        angle_loop2.Actual = imu.output.euler[1];
+        PID_Update_Lo(&angle_loop2);
+
+        aspeed_loop.Target = angle_loop2.Out;
+        aspeed_loop.Actual = imu.output.gyro[1];
+        PID_Update_Lo(&aspeed_loop);
+
+        small_driver_set_duty((int16)(aspeed_loop.Out), (int16)(-(aspeed_loop.Out)));
+    }
+
+    else if (simple_jump_flag == 0)
+    {
+        static uint32_t count1 = 0;
+        static uint32_t count2 = 0;
+        count1++;
+        count2++;
+        if (count2 >= 30 && simple_jump_count <= 2)
+        {
+            count2 = 0;
+            simple_jump_flag = 1;
+        }
+        else if (simple_jump_count >= 3)
+        {
+            count2 = 0;
+            if (front_stairs_end_judge.end_flag == 1)
+            {
+                image_block = 0;
+                current_state = STATE_MODIFY;
+            }
+        }
+        if (count1 >= 4)
+        {
+            count1 = 0;
+
+            speed_loop.Target = (float)speed->data_int / 100.0f;
+            speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+
+            PID_Update_Lo(&speed_loop);
+
+            // 对speed_loop.Out进行低通滤波
+            static float filtered_speed_out = 0.0f;
+            static const float speed_alpha = 0.1f;
+
+            filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
+
+            servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
+                    90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
+
+            if (modify_idx[road_num] == 1)
+            {
+                yaw_loop.Target = 0.0f;
+                yaw_loop.Actual = imu.output.euler[2];
+            }
+            else if (modify_idx[road_num] == 2)
+            {
+                yaw_loop.Target = 180.0f;
+                yaw_loop.Actual = imu.output.euler[2];
+            }
+            else if (modify_idx[road_num] == 3)
+            {
+                yaw_loop.Target = -180.0f;
+                yaw_loop.Actual = imu.output.euler[2];
+            }
+            PID_Update_Lo(&yaw_loop);
+        }
+
+        turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual;
+        turn_loop2.Actual = -imu.body.gyro[2];
+        PID_Update_Lo(&turn_loop2);
+
+        angle_loop2.Target = pzero->data_float;
+        angle_loop2.Actual = imu.output.euler[1];
+        PID_Update_Lo(&angle_loop2);
+
+        aspeed_loop.Target = angle_loop2.Out;
+        aspeed_loop.Actual = imu.output.gyro[1];
+        PID_Update_Lo(&aspeed_loop);
+
+        small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+    }
+}
+
 void control_state_jump_up(void)
 {
-    angle_loop2.Ki = 0.0f;
-    speed_loop.Ki = 0.0f;
-    turn_loop2.Ki = 0.0f;
-
     static uint32_t count = 0;
     count++;
 

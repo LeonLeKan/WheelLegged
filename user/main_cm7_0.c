@@ -195,10 +195,14 @@ int main(void)
                     {
                         if (testnum->data_int == 2)
                         {
+                            imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+                            imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
                             current_state = STATE_ACCELERATE;
                         }
                         else if (testnum->data_int == 1)
                         {
+                            imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+                            imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
                             current_state = STATE_FORWARD;
                         }
                         else if (testnum->data_int == 0)

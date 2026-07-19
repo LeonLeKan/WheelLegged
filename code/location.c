@@ -172,10 +172,10 @@ void location_update_1(void)
             {
                 thunder_direction_flag = 3;
             }
-            current_state = STATE_THUNDER;
-            advance_to_next_waypoint();
             imu.rot_comp.param.yaw_compensate_cw = cwtucop1->data_float;
             imu.rot_comp.param.yaw_compensate_ccw = ccwtucop1->data_float;
+            current_state = STATE_THUNDER;
+            advance_to_next_waypoint();
         }
         else
         {
@@ -337,20 +337,34 @@ void location_update_2_2(void)
         }
     }
 
-    if (current_target && !current_target->next && de_stairs_flag == 0) 
+    if (jump->data_int == 1)
     {
-        current_state = STATE_DE_STAIRS;
-        de_stairs_flag = 1;
-    }
+        if (current_target && !current_target->next && de_stairs_flag == 0) 
+        {
+            current_state = STATE_DE_STAIRS;
+            de_stairs_flag = 1;
+        }
 
-    if (!current_target) 
+        if (!current_target) 
+        {
+            ins_stop();
+            de_stairs_flag = 0;
+            front_stairs_end_judge.thre = frcnt->data_int;
+            now_element = FRONT_STAIRS;
+            image_block = 1;
+            current_state = STATE_FIND_JUMP;
+        }
+    }
+    else if (jump->data_int == 2)
     {
-        ins_stop();
-        de_stairs_flag = 0;
-        front_stairs_end_judge.thre = frcnt->data_int;
-        now_element = FRONT_STAIRS;
-        image_block = 1;
-        current_state = STATE_FIND_JUMP;
+        if (!current_target) 
+        {
+            ins_stop();
+            front_stairs_end_judge.thre = frcnt->data_int;
+            now_element = FRONT_STAIRS;
+            image_block = 1;
+            current_state = STATE_SIMPLE_FIND;
+        }
     }
 }
 
