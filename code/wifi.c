@@ -31,9 +31,9 @@ void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
 
-    oscilloscope_data.data[0] =  imu.rot_comp.param.yaw_compensate_cw;
-    oscilloscope_data.data[1] =  imu.rot_comp.param.yaw_compensate_ccw;
-    oscilloscope_data.data[2] = current_state;
+    oscilloscope_data.data[0] =  front_stairs_end_judge.end_cnt;
+    oscilloscope_data.data[1] =  front_stairs_end_judge.end_flag;
+    oscilloscope_data.data[2] =  white_count;
 
     oscilloscope_data.channel_num = 3;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
@@ -56,7 +56,7 @@ void wifi_send_image_thre(void)
     if (mt9v03x_finish_flag)
     {
         mt9v03x_finish_flag = 0;
-
+        now_element = SINGLE_SIDE;
         image_main();
 
         for (int i = 0; i < CAMERA_H; i++)

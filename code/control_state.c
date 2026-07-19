@@ -263,9 +263,9 @@ static void quit_single_side(void)
     }
     else if (current_state == STATE_MODIFY)
     {
-        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 2.0f)   ||
-            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 2.0f) ||
-            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 2.0f))
+        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 0.5f)   ||
+            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 0.5f) ||
+            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 0.5f))
         {
             disturb_flag = 1;
             last_raw_yaw = 0.0f;
@@ -330,9 +330,9 @@ static void judge_time_to_jump(void)
     }
     else if (current_state == STATE_MODIFY)
     {
-        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 2.0f)   ||
-            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 2.0f) ||
-            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 2.0f))
+        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 0.5f)   ||
+            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 0.5f) ||
+            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 0.5f))
         {
             disturb_flag = 1;
             jump_count = 0;
@@ -384,7 +384,7 @@ static void de_to_tra_follow(void)
 
 static void quit_follow_stairs(void)
 {
-    if (current_state == STATE_TRA_FOLLOW && stair_distance <= 50)
+    if ((current_state == STATE_TRA_FOLLOW || current_state == STATE_DE_FOLLOW) && stair_distance <= 50)
     {
         current_state = STATE_FOLLOW_STAIRS;
     }
@@ -426,9 +426,9 @@ static void quit_follow_stairs(void)
     }
     else if (current_state == STATE_MODIFY)
     {
-        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 2.0f)   ||
-            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 2.0f) ||
-            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 2.0f))
+        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 0.5f)   ||
+            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 0.5f) ||
+            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 0.5f))
         {
             disturb_flag = 1;
             follow_speed_change = 0;
@@ -482,9 +482,9 @@ static void quit_jolt(void)
     }
     else if (current_state == STATE_MODIFY)
     {
-        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 2.0f)   ||
-            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 2.0f) ||
-            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 2.0f))
+        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 0.5f)   ||
+            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 0.5f) ||
+            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 0.5f))
         {
             disturb_flag = 1;
             angle_loop2.ErrorInt = 0.0f;

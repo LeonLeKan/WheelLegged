@@ -93,6 +93,8 @@ extern int error_calc_far_line;
 extern uint8_t middle;
 extern uint8_t mid_update;
 
+extern int white_count;
+
 // 上台阶
 extern int stair_distance;     // 到下一级台阶的距离
 extern int stair_distance_side; // 用左边线还是右边线微调距离，0-左边线 1-右边线 2-不进行距离微调

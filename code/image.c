@@ -82,9 +82,11 @@ int error_calc_far_line = 50;
 uint8_t mid_update = 0;
 uint8_t middle = 84;    // 中线校准（有些摄像头会整体向左右偏，所以真正的正中间不一定是94）
 
+int white_count = 0;    // 白色像素点数量
+
 // 上台阶
 int stair_distance;     // 到下一级台阶的距离
-int stair_distance_side = 0; // 用左边线还是右边线微调距离，0-左边线 1-右边线 2-不进行距离微调
+int stair_distance_side = 1; // 用左边线还是右边线微调距离，0-左边线 1-右边线 2-不进行距离微调
 end_judge_t front_stairs_end_judge = { 40, 3, 0, 0 };
 
 // 下台阶
@@ -1365,16 +1367,16 @@ void get_mid_line(void)
 
 static int calc_white(uint8_t near, uint8_t far, uint8_t left, uint8_t right)
 {
-    int white_count = 0;
+    int ret = 0;
     for (int i = near; i >= far; i--)
     {
         for (int j = left; j <= right; j++)
         {
             if (IMG[i][j])
-                white_count++;
+                ret++;
         }
     }
-    return white_count;
+    return ret;
 }
 
 static void element_end_judge(end_judge_t* judge, bool now)
@@ -1386,12 +1388,13 @@ static void element_end_judge(end_judge_t* judge, bool now)
         {
             judge->not_end_cnt = 0;
             judge->end_flag = true;
+            return;
         }
     }
     else
     {
         judge->not_end_cnt++;
-        if (judge->not_end_cnt > judge->thre)
+        if (judge->not_end_cnt > judge->tolerance)
         {
             judge->end_cnt = 0;
             judge->not_end_cnt = 0;
@@ -1643,14 +1646,14 @@ void mend_single_side()
     {
         if (road_start - left_bp_down_H > 10) least_square_get_line(left_line, left_bp_down_H + 10, 10, input, left_bp_down_H, FAR_LINE);
         if (road_start - right_bp_down_H > 10) least_square_get_line(right_line, right_bp_down_H + 10, 10, input, right_bp_down_H, FAR_LINE);
-        if (NEAR_LINE - right_bp_down_H >= 20 && NEAR_LINE - right_bp_down_H <= 50)
-        {
-            single_side_state = 1;
-        }
-        if (NEAR_LINE - left_bp_down_H >= 20 && NEAR_LINE - left_bp_down_H <= 50)
-        {
-            single_side_state = 1;
-        }
+        // if (NEAR_LINE - right_bp_down_H >= 20 && NEAR_LINE - right_bp_down_H <= 50)
+        // {
+        //     single_side_state = 1;
+        // }
+        // if (NEAR_LINE - left_bp_down_H >= 20 && NEAR_LINE - left_bp_down_H <= 50)
+        // {
+        //     single_side_state = 1;
+        // }
     }
     else if (judge_lmr == -1)
     {
@@ -1686,11 +1689,8 @@ void mend_single_side()
             }
         }
     }
-    if (single_side_state)
-    {
-        int white_count = calc_white(NEAR_LINE - 40, NEAR_LINE - 70, middle - 20, middle + 20);
-        element_end_judge(&single_side_end_judge, white_count < 300);
-    }
+    white_count = calc_white(NEAR_LINE - 40, NEAR_LINE - 60, middle - 40, middle + 40);
+    element_end_judge(&single_side_end_judge, white_count < 300);
 #if ONBOARD
 #else 
     if (judge_lmr == 0)
@@ -1717,13 +1717,13 @@ void mend_single_side()
 
 void front_stairs_end_check()
 {
-    int white_count = calc_white(NEAR_LINE, NEAR_LINE - 20, middle - 30, middle + 30);
+    white_count = calc_white(NEAR_LINE, NEAR_LINE - 20, middle - 30, middle + 30);
     element_end_judge(&front_stairs_end_judge, white_count < 200);
 }
 
 void back_stairs_end_check()
 {
-    int white_count = calc_white(NEAR_LINE, NEAR_LINE - 20, 64, 124);
+    white_count = calc_white(NEAR_LINE, NEAR_LINE - 20, 64, 124);
 	element_end_judge(&back_stairs_end_judge, white_count < 200);
 }
 
@@ -1731,7 +1731,7 @@ void jolt_end_check()
 {
     if (jolt_lock == 2)
     {
-        int white_count = calc_white(NEAR_LINE, NEAR_LINE - 20, 64, 124);
+        white_count = calc_white(NEAR_LINE, NEAR_LINE - 20, 64, 124);
         element_end_judge(&jolt_end_judge, white_count < 400);
     }
 }
