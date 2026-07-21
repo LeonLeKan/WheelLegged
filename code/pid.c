@@ -4,6 +4,7 @@
 volatile PID_t angle_loop1;
 volatile PID_t angle_loop2;
 volatile PID_t speed_loop;
+volatile PID_t speed_loop2;
 volatile PID_t turn_loop1;
 volatile PID_t turn_loop2;
 volatile PID_t aspeed_loop;
@@ -38,7 +39,14 @@ void PID_Update_Lo(volatile PID_t *p)
         p->Error0 = p->Target - p->Actual;
     }
 
-    p->ErrorInt += p->Error0;
+    if (p == &speed_loop2 && p->Error0 > 0.5f)
+    {
+        p->ErrorInt = 0.0f;
+    }
+    else 
+    {
+        p->ErrorInt += p->Error0;
+    }
 
     if (p->ErrorInt > p->ErrorIntMax)
     {
@@ -109,6 +117,23 @@ void sp_zero(void)
     speed_loop.Kp = 0;
     speed_loop.Ki = 0;
     speed_loop.Kd = 0;
+}
+
+void sp2pid_update(float kp, float ki, float kd)
+{
+    speed_loop2.Kp = kp;
+    speed_loop2.Ki = ki;
+    speed_loop2.Kd = kd;
+    speed_loop2.OutMax = +30;
+    speed_loop2.OutMin = -30;
+    speed_loop2.ErrorIntMax = 500;
+}
+
+void sp2_zero(void)
+{
+    speed_loop2.Kp = 0;
+    speed_loop2.Ki = 0;
+    speed_loop2.Kd = 0;
 }
 
 void tu1pid_update(float kp, float ki, float kd)
@@ -249,6 +274,7 @@ void para_zero(void)
     an1_zero();
     an2_zero();
     sp_zero();
+    sp2_zero();
     tu1_zero();
     tu2_zero();
     as_zero();
@@ -263,6 +289,7 @@ void out_zero(void)
     angle_loop1.Out = 0.0f;
     angle_loop2.Out = 0.0f;
     speed_loop.Out = 0.0f;
+    speed_loop2.Out = 0.0f;
     turn_loop1.Out = 0.0f;
     turn_loop2.Out = 0.0f;
     aspeed_loop.Out = 0.0f;

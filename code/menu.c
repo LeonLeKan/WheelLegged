@@ -7,13 +7,14 @@
 
 volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
-MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *modiro, *thnum, *tunum, *uturn3, *saveall, *currentMenu;
-MENU *speed, *anloop1, *anloop2, *sploop, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
-    *esha, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *kgray, *whiga, *minth, *maxth, *jocnt, *saveim,
-    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *dis0, *dis1, *speedl, *balspeed, *thsp, *rotusp, *dis2, *saveel;
+MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *modiro, *thnum, *tunum, *uturn3, *jump, *saveall, *currentMenu;
+MENU *speed, *anloop1, *anloop2, *sploop, *sploop2, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
+    *esha, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *kgray, *whiga, *minth, *maxth, *sicnt, *frcnt, *bacnt, *jocnt, *saveim,
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *tunext, *dis1, *speedl, *balspeed, *thsp, *rotusp, *dis2, *curnext, *tunesp, *cwtucop1, *ccwtucop1, *uturnsp, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
+    *sp2kp, *sp2ki, *sp2kd,
     *tu1kp, *tu1ki, *tu1kd,
     *tu2kp, *tu2ki, *tu2kd,
     *askp, *aski, *askd,
@@ -22,10 +23,10 @@ MENU *an1kp, *an1ki, *an1kd,
     *joskp, *joski, *joskd,
     *joykp, *joyki, *joykd,
     *rollbias, *pitchbias, *yawbias,
-    *zeroan1, *zeroan2, *zerosp, *zerotu1, *zerotu2, *zeroas, *zerosn, *zeroya, *zerojos, *zerojoy, *zerobi,
-    *savean1, *savean2, *savesp, *savetu1, *savetu2, *saveas, *savesn, *saveya, *savejos, *savejoy, *savebi;
+    *zeroan1, *zeroan2, *zerosp, *zerosp2, *zerotu1, *zerotu2, *zeroas, *zerosn, *zeroya, *zerojos, *zerojoy, *zerobi,
+    *savean1, *savean2, *savesp, *savesp2, *savetu1, *savetu2, *saveas, *savesn, *saveya, *savejos, *savejoy, *savebi;
 
-#define MENU_POOL_SIZE 128
+#define MENU_POOL_SIZE 256
 
 static MENU menu_pool[MENU_POOL_SIZE];
 static uint16_t menu_pool_used = 0;
@@ -99,7 +100,8 @@ void create_1st_menu(void)
     thnum = createMenu("thnum", 1, 7, MENU_TYPE_INT, NULL);
     tunum = createMenu("tunum", 1, 8, MENU_TYPE_INT, NULL);
     uturn3 = createMenu("uturn3", 1, 9, MENU_TYPE_INT, NULL);
-    saveall = createMenu("save", 1, 10, MENU_TYPE_FUNCTION, menu_save);
+    jump = createMenu("jump", 1, 10, MENU_TYPE_INT, NULL);
+    saveall = createMenu("save", 1, 11, MENU_TYPE_FUNCTION, menu_save);
 
     WheelLeg->child = Balance;
     Balance->parent = WheelLeg;
@@ -111,6 +113,7 @@ void create_1st_menu(void)
     thnum->parent = WheelLeg;
     tunum->parent = WheelLeg;
     uturn3->parent = WheelLeg;
+    jump->parent = WheelLeg;
     saveall->parent = WheelLeg;
 
     Balance->next = Image;
@@ -129,8 +132,10 @@ void create_1st_menu(void)
     tunum->last = thnum;
     tunum->next = uturn3;
     uturn3->last = tunum;
-    uturn3->next = saveall;
-    saveall->last = uturn3;
+    uturn3->next = jump;
+    jump->last = uturn3;
+    jump->next = saveall;
+    saveall->last = jump;
     saveall->next = Balance;
     Balance->last = saveall;
 
@@ -143,16 +148,17 @@ void create_2nd_menu(void)
     anloop1 = createMenu("anloop1", 2, 2, MENU_TYPE_NORMAL, NULL);
     anloop2 = createMenu("anloop2", 2, 3, MENU_TYPE_NORMAL, NULL);
     sploop = createMenu("sploop", 2, 4, MENU_TYPE_NORMAL, NULL);
-    tuloop1 = createMenu("tuloop1", 2, 5, MENU_TYPE_NORMAL, NULL);
-    tuloop2 = createMenu("tuloop2", 2, 6, MENU_TYPE_NORMAL, NULL);
-    asloop = createMenu("asloop", 2, 7, MENU_TYPE_NORMAL, NULL);
-    snloop = createMenu("snloop", 2, 8, MENU_TYPE_NORMAL, NULL);
-    yaloop = createMenu("yaloop", 2, 9, MENU_TYPE_NORMAL, NULL);
-    josloop = createMenu("josloop", 2, 10, MENU_TYPE_NORMAL, NULL);
-    joyloop = createMenu("joyloop", 2, 11, MENU_TYPE_NORMAL, NULL);
-    imubias = createMenu("imubias", 2, 12, MENU_TYPE_NORMAL, NULL);
-    pzero = createMenu("pzero", 2, 13, MENU_TYPE_FLOAT, NULL);
-    pinit = createMenu("pinit", 2, 14, MENU_TYPE_FLOAT, NULL);
+    sploop2 = createMenu("sploop2", 2, 5, MENU_TYPE_NORMAL, NULL);
+    tuloop1 = createMenu("tuloop1", 2, 6, MENU_TYPE_NORMAL, NULL);
+    tuloop2 = createMenu("tuloop2", 2, 7, MENU_TYPE_NORMAL, NULL);
+    asloop = createMenu("asloop", 2, 8, MENU_TYPE_NORMAL, NULL);
+    snloop = createMenu("snloop", 2, 9, MENU_TYPE_NORMAL, NULL);
+    yaloop = createMenu("yaloop", 2, 10, MENU_TYPE_NORMAL, NULL);
+    josloop = createMenu("josloop", 2, 11, MENU_TYPE_NORMAL, NULL);
+    joyloop = createMenu("joyloop", 2, 12, MENU_TYPE_NORMAL, NULL);
+    imubias = createMenu("imubias", 2, 13, MENU_TYPE_NORMAL, NULL);
+    pzero = createMenu("pzero", 2, 14, MENU_TYPE_FLOAT, NULL);
+    pinit = createMenu("pinit", 2, 15, MENU_TYPE_FLOAT, NULL);
 
     esha = createMenu("esha", 2, 1, MENU_TYPE_INT, NULL);
     imexp = createMenu("imexp", 2, 2, MENU_TYPE_INT, NULL);
@@ -165,8 +171,11 @@ void create_2nd_menu(void)
     whiga = createMenu("whiga", 2, 9, MENU_TYPE_INT, NULL);
     minth = createMenu("minth", 2, 10, MENU_TYPE_INT, NULL);
     maxth = createMenu("maxth", 2, 11, MENU_TYPE_INT, NULL);
-    jocnt = createMenu("jocnt", 2, 12, MENU_TYPE_INT, NULL);
-    saveim = createMenu("save", 2, 13, MENU_TYPE_FUNCTION, menu_save);
+    sicnt = createMenu("sicnt", 2, 12, MENU_TYPE_INT, NULL);
+    frcnt = createMenu("frcnt", 2, 13, MENU_TYPE_INT, NULL);
+    bacnt = createMenu("bacnt", 2, 14, MENU_TYPE_INT, NULL);
+    jocnt = createMenu("jocnt", 2, 15, MENU_TYPE_INT, NULL);
+    saveim = createMenu("save", 2, 16, MENU_TYPE_FUNCTION, menu_save);
 
     change = createMenu("change", 2, 1, MENU_TYPE_FUNCTION, control_to_ins_menu);
     snspeed = createMenu("snspeed", 2, 2, MENU_TYPE_INT, NULL);
@@ -184,14 +193,19 @@ void create_2nd_menu(void)
     joangle = createMenu("joangle", 2, 14, MENU_TYPE_FLOAT, NULL);
     jolock = createMenu("jolock", 2, 15, MENU_TYPE_INT, NULL);
     xythun = createMenu("xythun", 2, 16, MENU_TYPE_FLOAT, NULL);
-    dis0 = createMenu("dis0", 2, 17, MENU_TYPE_FLOAT, NULL);
+    tunext = createMenu("tunext", 2, 17, MENU_TYPE_INT, NULL);
     dis1 = createMenu("dis1", 2, 18, MENU_TYPE_FLOAT, NULL);
     speedl = createMenu("speedl", 2, 19, MENU_TYPE_INT, NULL);
     balspeed = createMenu("balspeed", 2, 20, MENU_TYPE_INT, NULL);
     thsp = createMenu("thsp", 2, 21, MENU_TYPE_INT, NULL);
     rotusp = createMenu("rotusp", 2, 22, MENU_TYPE_INT, NULL);
     dis2 = createMenu("dis2", 2, 23, MENU_TYPE_FLOAT, NULL);
-    saveel = createMenu("save", 2, 24, MENU_TYPE_FUNCTION, menu_save);
+    curnext = createMenu("curnext", 2, 24, MENU_TYPE_INT, NULL);
+    tunesp = createMenu("tunesp", 2, 25, MENU_TYPE_INT, NULL);
+    cwtucop1 = createMenu("cwtucop1", 2, 26, MENU_TYPE_FLOAT, NULL);
+    ccwtucop1 = createMenu("ccwtucop1", 2, 27, MENU_TYPE_FLOAT, NULL);
+    uturnsp = createMenu("uturnsp", 2, 28, MENU_TYPE_INT, NULL);
+    saveel = createMenu("save", 2, 29, MENU_TYPE_FUNCTION, menu_save);
 
     speed->next = anloop1;
     anloop1->last = speed;
@@ -199,8 +213,10 @@ void create_2nd_menu(void)
     anloop2->last = anloop1;
     anloop2->next = sploop;
     sploop->last = anloop2;
-    sploop->next = tuloop1;
-    tuloop1->last = sploop;
+    sploop->next = sploop2;
+    sploop2->last = sploop;
+    sploop2->next = tuloop1;
+    tuloop1->last = sploop2;
     tuloop1->next = tuloop2;
     tuloop2->last = tuloop1;
     tuloop2->next = asloop;
@@ -242,8 +258,14 @@ void create_2nd_menu(void)
     minth->last = whiga;
     minth->next = maxth;
     maxth->last = minth;
-    maxth->next = jocnt;
-    jocnt->last = maxth;
+    maxth->next = sicnt;
+    sicnt->last = maxth;
+    sicnt->next = frcnt;
+    frcnt->last = sicnt;
+    frcnt->next = bacnt;
+    bacnt->last = frcnt;
+    bacnt->next = jocnt;
+    jocnt->last = bacnt;
     jocnt->next = saveim;
     saveim->last = jocnt;
     saveim->next = esha;
@@ -279,10 +301,10 @@ void create_2nd_menu(void)
     jolock->last = joangle;
     jolock->next = xythun;
     xythun->last = jolock;
-    xythun->next = dis0;
-    dis0->last = xythun;
-    dis0->next = dis1;
-    dis1->last = dis0;
+    xythun->next = tunext;
+    tunext->last = xythun;
+    tunext->next = dis1;
+    dis1->last = tunext;
     dis1->next = speedl;
     speedl->last = dis1;
     speedl->next = balspeed;
@@ -293,8 +315,18 @@ void create_2nd_menu(void)
     rotusp->last = thsp;
     rotusp->next = dis2;
     dis2->last = rotusp;
-    dis2->next = saveel;
-    saveel->last = dis2;
+    dis2->next = curnext;
+    curnext->last = dis2;
+    curnext->next = tunesp;
+    tunesp->last = curnext;
+    tunesp->next = cwtucop1;
+    cwtucop1->last = tunesp;
+    cwtucop1->next = ccwtucop1;
+    ccwtucop1->last = cwtucop1;
+    ccwtucop1->next = uturnsp;
+    uturnsp->last = ccwtucop1;
+    uturnsp->next = saveel;
+    saveel->last = uturnsp;
     saveel->next = change;
     change->last = saveel;
 
@@ -303,6 +335,7 @@ void create_2nd_menu(void)
     anloop1->parent = Balance;
     anloop2->parent = Balance;
     sploop->parent = Balance;
+    sploop2->parent = Balance;
     tuloop1->parent = Balance;
     tuloop2->parent = Balance;
     asloop->parent = Balance;
@@ -326,8 +359,9 @@ void create_2nd_menu(void)
     whiga->parent = Image;
     minth->parent = Image;
     maxth->parent = Image;
-    jocnt->parent = Image;
-    saveim->parent = Image;
+    sicnt->parent = Image;
+    frcnt->parent = Image;
+    bacnt->parent = Image;
     jocnt->parent = Image;
     saveim->parent = Image;
 
@@ -348,13 +382,18 @@ void create_2nd_menu(void)
     joangle->parent = Element;
     jolock->parent = Element;
     xythun->parent = Element;
-    dis0->parent = Element;
+    tunext->parent = Element;
     dis1->parent = Element;
     speedl->parent = Element;
     balspeed->parent = Element;
     thsp->parent = Element;
     rotusp->parent = Element;
     dis2->parent = Element;
+    curnext->parent = Element;
+    tunesp->parent = Element;
+    cwtucop1->parent = Element;
+    ccwtucop1->parent = Element;
+    uturnsp->parent = Element;
     saveel->parent = Element;
 }
 
@@ -371,6 +410,10 @@ void create_3rd_menu(void)
     spkp = createMenu("spkp", 3, 1, MENU_TYPE_FLOAT, NULL);
     spki = createMenu("spki", 3, 2, MENU_TYPE_FLOAT, NULL);
     spkd = createMenu("spkd", 3, 3, MENU_TYPE_FLOAT, NULL);
+
+    sp2kp = createMenu("sp2kp", 3, 1, MENU_TYPE_FLOAT, NULL);
+    sp2ki = createMenu("sp2ki", 3, 2, MENU_TYPE_FLOAT, NULL);
+    sp2kd = createMenu("sp2kd", 3, 3, MENU_TYPE_FLOAT, NULL);
 
     tu1kp = createMenu("tu1kp", 3, 1, MENU_TYPE_FLOAT, NULL);
     tu1ki = createMenu("tu1ki", 3, 2, MENU_TYPE_FLOAT, NULL);
@@ -392,10 +435,6 @@ void create_3rd_menu(void)
     yaki = createMenu("yaki", 3, 2, MENU_TYPE_FLOAT, NULL);
     yakd = createMenu("yakd", 3, 3, MENU_TYPE_FLOAT, NULL);
 
-    yakp = createMenu("yakp", 3, 1, MENU_TYPE_FLOAT, NULL);
-    yaki = createMenu("yaki", 3, 2, MENU_TYPE_FLOAT, NULL);
-    yakd = createMenu("yakd", 3, 3, MENU_TYPE_FLOAT, NULL);
-
     joskp = createMenu("joskp", 3, 1, MENU_TYPE_FLOAT, NULL);
     joski = createMenu("joski", 3, 2, MENU_TYPE_FLOAT, NULL);
     joskd = createMenu("joskd", 3, 3, MENU_TYPE_FLOAT, NULL);
@@ -411,6 +450,7 @@ void create_3rd_menu(void)
     savean1 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
     savean2 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
     savesp = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
+    savesp2 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
     savetu1 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
     savetu2 = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
     saveas = createMenu("save", 3, 4, MENU_TYPE_FUNCTION, menu_save);
@@ -423,6 +463,7 @@ void create_3rd_menu(void)
     zeroan1 = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
     zeroan2 = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
     zerosp = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
+    zerosp2 = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
     zerotu1 = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
     zerotu2 = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
     zeroas = createMenu("zero", 3, 5, MENU_TYPE_FUNCTION, menu_zero);
@@ -467,6 +508,18 @@ void create_3rd_menu(void)
     zerosp->last = savesp;
     zerosp->next = spkp;
     spkp->last = zerosp;
+
+    sploop2->child = sp2kp;
+    sp2kp->next = sp2ki;
+    sp2ki->last = sp2kp;
+    sp2ki->next = sp2kd;
+    sp2kd->last = sp2ki;
+    sp2kd->next = savesp2;
+    savesp2->last = sp2kd;
+    savesp2->next = zerosp2;
+    zerosp2->last = savesp2;
+    zerosp2->next = sp2kp;
+    sp2kp->last = zerosp2;
 
     tuloop1->child = tu1kp;
     tu1kp->next = tu1ki;
@@ -581,6 +634,12 @@ void create_3rd_menu(void)
     spkd->parent = sploop;
     zerosp->parent = sploop;
     savesp->parent = sploop;
+
+    sp2kp->parent = sploop2;
+    sp2ki->parent = sploop2;
+    sp2kd->parent = sploop2;
+    zerosp2->parent = sploop2;
+    savesp2->parent = sploop2;
 
     tu1kp->parent = tuloop1;
     tu1ki->parent = tuloop1;
@@ -1089,6 +1148,10 @@ void menu_save(void)
     flash_union_buffer[index++].int32_type = uturn_3->data_int;
     node_count++;
 
+    MENU *jumpmode = jump;
+    flash_union_buffer[index++].int32_type = jumpmode->data_int;
+    node_count++;
+
     flash_union_buffer[0].float_type = menu_magic;
     flash_union_buffer[1].uint32_type = node_count;
 
@@ -1261,6 +1324,13 @@ void menu_load(void)
     {
         uturn_3->data_int = 0;
     }
+
+    MENU *jumpmode = jump;
+    jumpmode->data_int = (int)flash_union_buffer[idx++].int32_type;
+    if (fabs((float)jumpmode->data_int) >= 100000)
+    {
+        jumpmode->data_int = 0;
+    }
 }
 
 void menu_zero(void)
@@ -1290,7 +1360,6 @@ void menu_zero(void)
     currentMenu->exec_flag = 1;
     ips200_clear();
 }
-uint8_t my_img[CAMERA_H][CAMERA_W];
 
 void ins_to_control_menu(void)
 {

@@ -25,6 +25,7 @@ typedef struct
 extern volatile PID_t angle_loop1;
 extern volatile PID_t angle_loop2;
 extern volatile PID_t speed_loop;
+extern volatile PID_t speed_loop2;
 extern volatile PID_t turn_loop1;
 extern volatile PID_t turn_loop2;
 extern volatile PID_t aspeed_loop;
@@ -41,6 +42,8 @@ void an2pid_update(float kp, float ki, float kd);
 void an2_zero(void);
 void sppid_update(float kp, float ki, float kd);
 void sp_zero(void);
+void sp2pid_update(float kp, float ki, float kd);
+void sp2_zero(void);
 void tu1pid_update(float kp, float ki, float kd);
 void tu1_zero(void);
 void tu2pid_update_f(float kp, float ki, float kd);
