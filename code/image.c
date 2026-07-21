@@ -86,7 +86,7 @@ int white_count = 0;    // 白色像素点数量
 
 // 上台阶
 int stair_distance;     // 到下一级台阶的距离
-int stair_distance_side = 1; // 用左边线还是右边线微调距离，0-左边线 1-右边线 2-不进行距离微调
+int stair_distance_side = 0; // 用左边线还是右边线微调距离，0-左边线 1-右边线 2-不进行距离微调
 end_judge_t front_stairs_end_judge = { 40, 3, 0, 0 };
 
 // 下台阶

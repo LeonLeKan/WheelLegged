@@ -39,7 +39,7 @@ void PID_Update_Lo(volatile PID_t *p)
         p->Error0 = p->Target - p->Actual;
     }
 
-    if (p == &speed_loop2 && p->Error0 > 0.5f)
+    if ((p == &speed_loop2 || p == &speed_loop) && p->Error0 > 0.5f)
     {
         p->ErrorInt = 0.0f;
     }
@@ -179,6 +179,16 @@ void tu2pid_update_j(float kp, float ki, float kd)
     turn_loop2.Kd = kd;
     turn_loop2.OutMax = +turnamj->data_int;
     turn_loop2.OutMin = -turnamj->data_int;
+    turn_loop2.ErrorIntMax = 200;
+}
+
+void tu2pid_update_h(float kp, float ki, float kd)
+{
+    turn_loop2.Kp = kp;
+    turn_loop2.Ki = ki;
+    turn_loop2.Kd = kd;
+    turn_loop2.OutMax = +turnamh->data_int;
+    turn_loop2.OutMin = -turnamh->data_int;
     turn_loop2.ErrorIntMax = 200;
 }
 

@@ -357,13 +357,20 @@ void location_update_2_2(void)
     }
     else if (jump->data_int == 2)
     {
+        if (current_target && !current_target->next && de_stairs_flag == 0) 
+        {
+            current_state = STATE_DE_STAIRS;
+            de_stairs_flag = 1;
+        }
+
         if (!current_target) 
         {
             ins_stop();
+            de_stairs_flag = 0;
             front_stairs_end_judge.thre = frcnt->data_int;
             now_element = FRONT_STAIRS;
             image_block = 1;
-            current_state = STATE_SIMPLE_FIND;
+            current_state = STATE_FIND_JUMP;
         }
     }
 }

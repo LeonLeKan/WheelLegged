@@ -25,23 +25,37 @@ volatile uint8_t follow_speed_change = 0;
 
 static void accelerate_to_forward(void)
 {
-    if (testnum->data_int == 1)
+    if (testnum->data_int == 2 && road_idx[road_num] == 0)
     {
-        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)thsp->data_int / 100.0f - 1.0f))
+        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed0->data_int / 100.0f - 1.0f))
         {
             current_state = STATE_FORWARD;
         }
     }
-    else if (testnum->data_int == 0)
+    else if (testnum->data_int == 2 && road_idx[road_num] == 1)
     {
-        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed->data_int / 100.0f))
+        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed1->data_int / 100.0f - 1.0f))
         {
             current_state = STATE_FORWARD;
         }
     }
-    else if (testnum->data_int == 2)
+    else if (testnum->data_int == 2 && road_idx[road_num] == 2)
     {
-        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed->data_int / 100.0f - 1.0f))
+        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed2->data_int / 100.0f - 1.0f))
+        {
+            current_state = STATE_FORWARD;
+        }
+    }
+    else if (testnum->data_int == 2 && road_idx[road_num] == 3)
+    {
+        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed3->data_int / 100.0f - 1.0f))
+        {
+            current_state = STATE_FORWARD;
+        }
+    }
+    else if (testnum->data_int == 2 && road_idx[road_num] == 4)
+    {
+        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed4->data_int / 100.0f - 1.0f))
         {
             current_state = STATE_FORWARD;
         }
@@ -186,9 +200,9 @@ static void deaccelerate_within_2(void)
         double dis_1 = sqrt((x_within_now - x_within_tgt) * (x_within_now - x_within_tgt) + (y_within_now - y_within_tgt) * (y_within_now - y_within_tgt));
         if(road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
         {
-            if (dis_1 < 1.0f)
+            if (dis_1 < dis2->data_float)
             {
-                speed_2_change = 1;
+                speed_2_change = 2;
             }
         }
         else
@@ -282,11 +296,23 @@ static void quit_single_side(void)
 
 static void decline_to_stairs(void)
 {
-    if (current_state == STATE_DE_STAIRS
-      && speed_loop.Actual < ((float)stspeed->data_int / 100.0f + 1.0f)
-      && current_target)
+    if (jump->data_int == 1)
     {
-        current_state = STATE_TRA_STAIRS;
+        if (current_state == STATE_DE_STAIRS
+        && speed_loop.Actual < ((float)stspeed->data_int / 100.0f + 1.0f)
+        && current_target)
+        {
+            current_state = STATE_TRA_STAIRS;
+        }
+    }
+    else if (jump->data_int == 2)
+    {
+        if (current_state == STATE_DE_STAIRS
+        && speed_loop.Actual < ((float)sipsp->data_int / 100.0f + 1.0f)
+        && current_target)
+        {
+            current_state = STATE_TRA_STAIRS;
+        }
     }
 }
 
@@ -368,8 +394,9 @@ static void judge_time_to_jump(void)
 
 static void simple_find_jump(void)
 {
-    if (current_state == STATE_SIMPLE_FIND && stair_distance <= 40)
+    if (current_state == STATE_SIMPLE_FIND && stair_distance <= stdis1->data_int && stair_distance > 0)
     {
+        image_block = 0;
         current_state = STATE_SIMPLE_JUMP;
     }
 }

@@ -59,11 +59,10 @@ void control_state_accelerate(void)
     {
         count = 0;
 
-        speed_loop.Target = (float)speed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
-        servo_set(60.0f, 120.0f,
-                  60.0f, 120.0f);
+        servo_set(50.0f, 130.0f,
+                  50.0f, 130.0f);
 
         PID_Update_Lo(&yaw_loop);
     }
@@ -98,12 +97,10 @@ void control_state_deaccelerate(void)
 
         if (testnum->data_int == 0 || testnum->data_int == 1)
         {
-            speed_loop2.Target = (float)speed->data_int / 100.0f;
             speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         }
         else if (testnum->data_int == 2)
         {
-            speed_loop.Target = (float)speed->data_int / 100.0f;
             speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         }
 
@@ -222,7 +219,7 @@ void control_state_thunder(void)
 {
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
-    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+    tu2pid_update_h(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
 
     static float yaw_thunder_now = 0.0f;
     static float yaw_thunder_last = 0.0f;
@@ -565,13 +562,32 @@ void control_state_forward(void)
         }
         else if (testnum->data_int == 2)
         {
-            if (speed_2_change == 1)
+            if (speed_2_change == 2)
             {
                 speed_loop.Target = (float)uturnsp->data_int / 100.0f;
             }
-            else if (speed_2_change == 0)
+            else if (speed_2_change == 0 || speed_2_change == 3)
             {
-                speed_loop.Target = (float)speed->data_int / 100.0f;
+                if (road_idx[road_num] == 0)
+                {
+                    speed_loop.Target = (float)speed0->data_int / 100.0f;
+                }
+                else if (road_idx[road_num] == 1)
+                {
+                    speed_loop.Target = (float)speed1->data_int / 100.0f;
+                }
+                else if (road_idx[road_num] == 2)
+                {
+                    speed_loop.Target = (float)speed2->data_int / 100.0f;
+                }
+                else if (road_idx[road_num] == 3)
+                {
+                    speed_loop.Target = (float)speed3->data_int / 100.0f;
+                }
+                else if (road_idx[road_num] == 4)
+                {
+                    speed_loop.Target = (float)speed4->data_int / 100.0f;
+                }
             }
             speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
             PID_Update_Lo(&speed_loop);
@@ -796,7 +812,14 @@ void control_state_de_stairs(void)
     {
         count = 0;
 
-        speed_loop.Target = (float)stspeed->data_int / 100.0f;
+        if (jump->data_int == 1)
+        {
+            speed_loop.Target = (float)stspeed->data_int / 100.0f;
+        }
+        else if (jump->data_int == 2)
+        {
+            speed_loop.Target = (float)sipsp->data_int / 100.0f;
+        }
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         servo_set(110.0f, 70.0f,
@@ -834,7 +857,14 @@ void control_state_tra_stairs(void)
     {
         count = 0;
 
-        speed_loop.Target = (float)stspeed->data_int / 100.0f;
+        if (jump->data_int == 1)
+        {
+            speed_loop.Target = (float)stspeed->data_int / 100.0f;
+        }
+        else if (jump->data_int == 2)
+        {
+            speed_loop.Target = (float)sipsp->data_int / 100.0f;
+        }
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
@@ -989,7 +1019,7 @@ void control_state_simple_find(void)
     {
         count = 0;
 
-        speed_loop.Target = (float)speed->data_int / 100.0f;
+        speed_loop.Target = (float)speed2->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
@@ -1034,23 +1064,26 @@ void control_state_simple_jump(void)
     yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
 
+    static uint8_t quit_simple_jump = 0;
+    static uint32_t quit_simple_count = 0;
+
     if (simple_jump_flag == 1 && simple_jump_count <= 2)
     {
         static uint32_t count = 0;
         count++;
         if (count < 17)
         {
-            servo_set(20.0f, 160.0f,
-                      160.0f, 20.0f);
+            servo_set(40.0f, 140.0f,
+                      140.0f, 40.0f);
         }
 
-        else if (count >= 17 && count < 45)
+        else if (count >= 17 && count < 30)
         {
-            servo_set(120.0f, 60.0f,
-                      60.0f, 120.0f);
+            servo_set(110.0f, 70.0f,
+                      70.0f, 110.0f);
         }
 
-        else if (count >= 45)
+        else if (count >= 30)
         {
             count = 0;
             servo_set(90.0f, 90.0f,
@@ -1079,7 +1112,7 @@ void control_state_simple_jump(void)
         static uint32_t count2 = 0;
         count1++;
         count2++;
-        if (count2 >= 30 && simple_jump_count <= 2)
+        if (count2 >= 38 && simple_jump_count <= 2)
         {
             count2 = 0;
             simple_jump_flag = 1;
@@ -1087,17 +1120,28 @@ void control_state_simple_jump(void)
         else if (simple_jump_count >= 3)
         {
             count2 = 0;
-            if (front_stairs_end_judge.end_flag == 1)
+            if (quit_simple_jump == 0)
             {
-                image_block = 0;
-                current_state = STATE_MODIFY;
+                quit_simple_count++;
+            }
+            if (quit_simple_count >= 60)
+            {
+                quit_simple_jump = 1;
+                image_block = 1;
+                if (front_stairs_end_judge.end_flag == 1)
+                {
+                    quit_simple_count = 0;
+                    quit_simple_jump = 0;
+                    image_block = 0;
+                    current_state = STATE_MODIFY;
+                }
             }
         }
         if (count1 >= 4)
         {
             count1 = 0;
 
-            speed_loop.Target = (float)speed->data_int / 100.0f;
+            speed_loop.Target = (float)speed2->data_int / 100.0f;
             speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
             PID_Update_Lo(&speed_loop);
@@ -1109,7 +1153,7 @@ void control_state_simple_jump(void)
             filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
 
             servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
-                    90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
+                      90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
 
             if (modify_idx[road_num] == 1)
             {
@@ -1674,7 +1718,7 @@ void control_state_modify(void)
     {
         count = 0;
 
-        speed_loop.Target = (float)speed->data_int / 100.0f;
+        speed_loop.Target = (float)modisp->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
