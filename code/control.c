@@ -1422,6 +1422,55 @@ void control_state_de_jolt(void)
     small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
 }
 
+void control_state_jolt_jump(void)
+{
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+    tu2pid_update_j(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+
+
+    angle_loop2.Target = pzero->data_float;
+    angle_loop2.Actual = imu.output.euler[1];
+    PID_Update_Lo(&angle_loop2);
+
+    aspeed_loop.Target = angle_loop2.Out;
+    aspeed_loop.Actual = imu.output.gyro[1];
+    PID_Update_Lo(&aspeed_loop);
+
+    small_driver_set_duty((int16)(aspeed_loop.Out), (int16)(-(aspeed_loop.Out)));
+
+
+    // 小跳逻辑
+    static uint32_t count = 0;
+    count++;
+    if (count < 17)
+    {
+        servo_set(50.0f, 130.0f,
+            130.0f, 50.0f);
+    }
+
+    else if (count >= 17 && count < 30)
+    {
+        servo_set(110.0f, 70.0f,
+            70.0f, 110.0f);
+    }
+
+    else if (count >= 30)
+    {
+        count = 0;
+        servo_set(90.0f, 90.0f,
+            90.0f, 90.0f);
+        angle_loop2.ErrorInt = 0.0f;
+        speed_loop.ErrorInt = 0.0f;
+        turn_loop2.ErrorInt = 0.0f;
+
+        // 跳完后清空速度环积分，切换到JOLT状态
+        speed_loop.ErrorInt = 0;
+        current_state = STATE_JOLT;
+    }
+}
+
 void control_state_jolt(void)
 {
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);

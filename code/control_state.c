@@ -651,6 +651,9 @@ void control_state_update(void)
     case STATE_DE_JOLT:
         control_state_de_jolt();
         break;
+    case STATE_JOLT_JUMP:
+        control_state_jolt_jump();
+        break;
     case STATE_JOLT:
         control_state_jolt();
         break;

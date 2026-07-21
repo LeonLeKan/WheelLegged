@@ -479,6 +479,6 @@ void location_update_2_4(void)
         now_element = JOLT;
         image_block = 1;
         joy_loop.Target = joangle->data_float;
-        current_state = STATE_DE_JOLT;
+        current_state = STATE_JOLT_JUMP;
     }
 }
