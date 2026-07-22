@@ -36,6 +36,7 @@ void control_state_jump_up(void);
 void control_state_de_follow(void);
 void control_state_tra_follow(void);
 void control_state_follow_stairs(void);
+void control_state_maintain_follow(void);
 void control_state_de_jolt(void);
 void control_state_jolt_jump();
 void control_state_jolt(void);

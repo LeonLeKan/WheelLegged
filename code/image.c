@@ -86,7 +86,7 @@ int white_count = 0;    // 白色像素点数量
 
 // 上台阶
 int stair_distance;     // 到下一级台阶的距离
-int stair_distance_side = 0; // 用左边线还是右边线微调距离，0-左边线 1-右边线 2-不进行距离微调
+int stair_distance_side = 1; // 用左边线还是右边线微调距离，0-左边线 1-右边线 2-不进行距离微调
 end_judge_t front_stairs_end_judge = { 40, 3, 0, 0 };
 
 // 下台阶
@@ -957,7 +957,7 @@ void search_white_range()
             }
         }
         white_range[i].num = tnum;
-        int expected_w =  0.8 * get_expected_road_width(i, 100, 30);
+        int expected_w =  0.6 * get_expected_road_width(i, 100, 30);
         if (!found_road_start && longest >= expected_w)
         {
             found_road_start = 1;
@@ -1351,8 +1351,7 @@ void get_mid_line(void)
 
     for (int i = NEAR_LINE; i >= FAR_LINE; i--)
     {
-        if (left_line[i] == MISS || right_line[i] == MISS
-            || right_line[i] - left_line[i] < 0.5 * get_expected_road_width(i, 100, 30))//直道
+        if (left_line[i] == MISS || right_line[i] == MISS)//直道
         {
             mid_line[i] = MISS;
         }
@@ -1460,20 +1459,20 @@ void mend_stairs()
     if (NEAR_LINE - road_start >= 20)
     {
         uint8_t lstart, rstart;
-        if (NEAR_LINE - road_start >= 50)
+        if (NEAR_LINE - road_start >= 30)
         {
-            lstart = find_least_square_start(left_line, road_start, road_end, 8, 0, false, 0.85, 0.8, 1.2);
-            rstart = find_least_square_start(right_line, road_start, road_end, 8, 1, false, 0.85, 0.8, 1.2);
+            lstart = find_least_square_start(left_line, road_start, road_end, 6, 0, false, 0.85, 1, 1.3);
+            rstart = find_least_square_start(right_line, road_start, road_end, 6, 1, false, 0.85, 1, 1.3);
         }
         else
         {
-            lstart = find_least_square_start(left_line, road_start, road_end, 8, 0, false, 0.85, 0.2, 1);
-            rstart = find_least_square_start(right_line, road_start, road_end, 8, 1, false, 0.85, 0.2, 1);
+            lstart = find_least_square_start(left_line, road_start, road_end, 6, 0, false, 0.85, 0.2, 1);
+            rstart = find_least_square_start(right_line, road_start, road_end, 6, 1, false, 0.85, 0.2, 1);
         }
         if (lstart && rstart)
         {
-            least_square_get_line(left_line, lstart - 2, 6, input, NEAR_LINE, lstart);
-            least_square_get_line(right_line, rstart - 2, 6, input, NEAR_LINE, rstart);
+            least_square_get_line(left_line, lstart - 1, 5, input, NEAR_LINE, lstart);
+            least_square_get_line(right_line, rstart - 1, 5, input, NEAR_LINE, rstart);
         }
         else
         {

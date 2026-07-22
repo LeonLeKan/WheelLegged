@@ -7,7 +7,7 @@
 
 volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
-MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *modiro, *thnum, *tunum, *uturn3, *jump, *saveall, *currentMenu;
+MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *modiro, *thnum, *tunum, *uturn3, *jump, *stside, *saveall, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *sploop2, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
     *esha, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *kgray, *whiga, *minth, *maxth, *sicnt, *frcnt, *bacnt, *jocnt, *saveim,
     *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *tunext, *dis1, *speedl, *balspeed, *thsp, *rotusp, *dis2, *curnext, *tunesp, *cwtucop1, *ccwtucop1, *uturnsp, *turnamh, *speed0, *speed1, *speed2, *speed3, *speed4, *modisp, *sipsp, *saveel;
@@ -101,7 +101,8 @@ void create_1st_menu(void)
     tunum = createMenu("tunum", 1, 8, MENU_TYPE_INT, NULL);
     uturn3 = createMenu("uturn3", 1, 9, MENU_TYPE_INT, NULL);
     jump = createMenu("jump", 1, 10, MENU_TYPE_INT, NULL);
-    saveall = createMenu("save", 1, 11, MENU_TYPE_FUNCTION, menu_save);
+    stside = createMenu("stside", 1, 11, MENU_TYPE_INT, NULL);
+    saveall = createMenu("save", 1, 12, MENU_TYPE_FUNCTION, menu_save);
 
     WheelLeg->child = Balance;
     Balance->parent = WheelLeg;
@@ -114,6 +115,7 @@ void create_1st_menu(void)
     tunum->parent = WheelLeg;
     uturn3->parent = WheelLeg;
     jump->parent = WheelLeg;
+    stside->parent = WheelLeg;
     saveall->parent = WheelLeg;
 
     Balance->next = Image;
@@ -134,8 +136,10 @@ void create_1st_menu(void)
     uturn3->last = tunum;
     uturn3->next = jump;
     jump->last = uturn3;
-    jump->next = saveall;
-    saveall->last = jump;
+    jump->next = stside;
+    stside->last = jump;
+    stside->next = saveall;
+    saveall->last = stside;
     saveall->next = Balance;
     Balance->last = saveall;
 
@@ -1184,6 +1188,10 @@ void menu_save(void)
     flash_union_buffer[index++].int32_type = jumpmode->data_int;
     node_count++;
 
+    MENU *stair_side = stside;
+    flash_union_buffer[index++].int32_type = stair_side->data_int;
+    node_count++;
+
     flash_union_buffer[0].float_type = menu_magic;
     flash_union_buffer[1].uint32_type = node_count;
 
@@ -1362,6 +1370,13 @@ void menu_load(void)
     if (fabs((float)jumpmode->data_int) >= 100000)
     {
         jumpmode->data_int = 0;
+    }
+
+    MENU *stair_side = stside;
+    stair_side->data_int = (int)flash_union_buffer[idx++].int32_type;
+    if (fabs((float)stair_side->data_int) >= 100000)
+    {
+        stair_side->data_int = 0;
     }
 }
 

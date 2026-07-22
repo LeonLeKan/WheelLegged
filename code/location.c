@@ -359,8 +359,16 @@ void location_update_2_2(void)
     {
         if (current_target && !current_target->next && de_stairs_flag == 0) 
         {
-            current_state = STATE_DE_STAIRS;
-            de_stairs_flag = 1;
+            if (speed2->data_int - sipsp->data_int > 0.9f)
+            {
+                current_state = STATE_DE_STAIRS;
+                de_stairs_flag = 1;
+            }
+            else if (speed2->data_int - sipsp->data_int <= 0.9f)
+            {
+                current_state = STATE_TRA_STAIRS;
+                de_stairs_flag = 1;
+            }
         }
 
         if (!current_target) 
@@ -370,7 +378,8 @@ void location_update_2_2(void)
             front_stairs_end_judge.thre = frcnt->data_int;
             now_element = FRONT_STAIRS;
             image_block = 1;
-            current_state = STATE_FIND_JUMP;
+            speed_loop.ErrorInt= 0.0f;
+            current_state = STATE_SIMPLE_FIND;
         }
     }
 }
@@ -477,7 +486,7 @@ void location_update_2_4(void)
         roll_base = rollba->data_float;
         jolt_end_judge.thre = jocnt->data_int;
         now_element = JOLT;
-        image_block = 1;
+        image_block = 0;
         joy_loop.Target = joangle->data_float;
         current_state = STATE_JOLT_JUMP;
     }

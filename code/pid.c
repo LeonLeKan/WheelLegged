@@ -107,8 +107,8 @@ void sppid_update(float kp, float ki, float kd)
     speed_loop.Kp = kp;
     speed_loop.Ki = ki;
     speed_loop.Kd = kd;
-    speed_loop.OutMax = +30;
-    speed_loop.OutMin = -30;
+    speed_loop.OutMax = +50;
+    speed_loop.OutMin = -50;
     speed_loop.ErrorIntMax = 500;
 }
 
@@ -124,8 +124,8 @@ void sp2pid_update(float kp, float ki, float kd)
     speed_loop2.Kp = kp;
     speed_loop2.Ki = ki;
     speed_loop2.Kd = kd;
-    speed_loop2.OutMax = +30;
-    speed_loop2.OutMin = -30;
+    speed_loop2.OutMax = +50;
+    speed_loop2.OutMin = -50;
     speed_loop2.ErrorIntMax = 500;
 }
 
@@ -220,8 +220,8 @@ void snpid_update(float kp, float ki, float kd)
     single_loop.Kp = kp;
     single_loop.Ki = ki;
     single_loop.Kd = kd;
-    single_loop.OutMax = +100;
-    single_loop.OutMin = -100;
+    single_loop.OutMax = +30;
+    single_loop.OutMin = -30;
 }
 
 void sn_zero(void)
@@ -252,8 +252,8 @@ void jospid_update(float kp, float ki, float kd)
     jos_loop.Kp = kp;
     jos_loop.Ki = ki;
     jos_loop.Kd = kd;
-    jos_loop.OutMax = +100;
-    jos_loop.OutMin = -100;
+    jos_loop.OutMax = +30;
+    jos_loop.OutMin = -30;
 }
 
 void jos_zero(void)

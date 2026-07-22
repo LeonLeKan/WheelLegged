@@ -241,8 +241,6 @@ static void stand_to_single_side(void)
 
 static void quit_single_side(void)
 {
-    static uint32_t switch_from_single_side_to_forward_count = 0;
-
     if (current_state == STATE_SINGLE_SIDE)
     {
         if (single_lock == 0)
@@ -265,14 +263,9 @@ static void quit_single_side(void)
         }
         if (single_lock == 3)
         {
-            switch_from_single_side_to_forward_count++;
-            if (switch_from_single_side_to_forward_count >= 100)
-            {
-                single_lock = 0;
-                switch_from_single_side_to_forward_count = 0;
-                image_block = 0;
-                current_state = STATE_MODIFY;
-            }
+            single_lock = 0;
+            image_block = 0;
+            current_state = STATE_MODIFY;
         }
     }
     else if (current_state == STATE_MODIFY)
@@ -411,8 +404,19 @@ static void de_to_tra_follow(void)
 
 static void quit_follow_stairs(void)
 {
-    if ((current_state == STATE_TRA_FOLLOW || current_state == STATE_DE_FOLLOW) && stair_distance <= 50)
+    static uint32_t not_find_follow = 0;
+    static uint8_t not_find_flag = 0;
+    if ((current_state == STATE_TRA_FOLLOW || current_state == STATE_DE_FOLLOW) && not_find_flag == 0)
     {
+        not_find_follow++;
+        if (not_find_follow >= 600)
+        {
+            current_state = STATE_MODIFY;
+        }
+    }
+    if ((current_state == STATE_TRA_FOLLOW || current_state == STATE_DE_FOLLOW) && stair_distance <= 50 && stair_distance > 0)
+    {
+        not_find_flag = 1;
         current_state = STATE_FOLLOW_STAIRS;
     }
     if (current_state == STATE_FOLLOW_STAIRS)
@@ -427,15 +431,23 @@ static void quit_follow_stairs(void)
             follow_lock_count_1++;
             if (follow_lock_count_1 >= 200)
             {
-                follow_lock = 2;
+                follow_lock = 0;
                 follow_lock_count_1 = 0;
-                follow_speed_change = 1;
+                current_state = STATE_MAINTAIN_FOLLOW;
             }
         }
-        if (follow_lock == 2)
+    }
+    if (current_state == STATE_MAINTAIN_FOLLOW)
+    {
+        if (follow_lock == 0)
+        {
+            follow_lock = 1;
+            follow_lock_count_2 = 0;
+        }
+        if (follow_lock == 1)
         {
             follow_lock_count_2++;
-            if (follow_lock_count_2 >= 300)
+            if (follow_lock_count_2 >= 100)
             {
                 follow_lock = 3;
                 follow_lock_count_2 = 0;
@@ -443,15 +455,11 @@ static void quit_follow_stairs(void)
         }
         if (follow_lock == 3 && back_stairs_end_judge.end_flag == 1)
         {
-            follow_lock = 4;
-        }
-        if (follow_lock == 4)
-        {
             image_block = 0;
             current_state = STATE_MODIFY;
         }
     }
-    else if (current_state == STATE_MODIFY)
+    if (current_state == STATE_MODIFY)
     {
         if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 0.5f)   ||
             (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 0.5f) ||
@@ -647,6 +655,9 @@ void control_state_update(void)
         break;
     case STATE_FOLLOW_STAIRS:
         control_state_follow_stairs();
+        break;
+    case STATE_MAINTAIN_FOLLOW:
+        control_state_maintain_follow();
         break;
     case STATE_DE_JOLT:
         control_state_de_jolt();

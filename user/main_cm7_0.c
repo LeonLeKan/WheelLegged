@@ -24,6 +24,7 @@ void remote_control(void);
 void calculate_route(void);
 void calculate_modify(void);
 void calculate_uturn_3(void);
+void image_update(void);
 
 uint8_t motion_mode1 = 0;
 uint8_t motion_mode2 = 0;
@@ -92,13 +93,7 @@ int main(void)
     // 菜单里读取陀螺仪固定偏置
     imu_set_gyro_bias(rollbias->data_float, pitchbias->data_float, yawbias->data_float);
 
-    error_calc_far_line = (uint8_t)farl->data_int;
-    error_calc_near_line = (uint8_t)nearl->data_int;
-    enable_dis_shadow = (uint8_t)esha->data_int;
-    k_gray_dis = (float)kgray->data_int / 10.0f;
-    WHITE_GAP = (uint8_t)whiga->data_int;
-    MIN_THRE = (uint8_t)minth->data_int;
-    MAX_THRE = (uint8_t)maxth->data_int;
+    image_update();
 
     // 判断科目几，以及科目三的路径
     if (testnum->data_int == 2)
@@ -526,4 +521,16 @@ void calculate_uturn_3(void)
             uturn_3_idx[i] = 0;
         }
     }
+}
+
+void image_update(void)
+{
+    error_calc_far_line = (uint8_t)farl->data_int;
+    error_calc_near_line = (uint8_t)nearl->data_int;
+    enable_dis_shadow = (uint8_t)esha->data_int;
+    k_gray_dis = (float)kgray->data_int / 10.0f;
+    WHITE_GAP = (uint8_t)whiga->data_int;
+    MIN_THRE = (uint8_t)minth->data_int;
+    MAX_THRE = (uint8_t)maxth->data_int;
+    stair_distance_side = (int)stside->data_int;
 }
