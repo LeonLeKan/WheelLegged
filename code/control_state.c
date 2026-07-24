@@ -301,7 +301,7 @@ static void decline_to_stairs(void)
     else if (jump->data_int == 2)
     {
         if (current_state == STATE_DE_STAIRS
-        && speed_loop.Actual < ((float)sipsp->data_int / 100.0f + 1.0f)
+        && speed_loop.Actual < ((float)sipsp->data_int / 100.0f)
         && current_target)
         {
             current_state = STATE_TRA_STAIRS;
@@ -387,10 +387,14 @@ static void judge_time_to_jump(void)
 
 static void simple_find_jump(void)
 {
-    if (current_state == STATE_SIMPLE_FIND && stair_distance <= stdis1->data_int && stair_distance > 0)
+    if (current_state == STATE_SIMPLE_MAINTAIN && stair_distance <= stdis1->data_int && stair_distance > 0)
     {
         image_block = 0;
         current_state = STATE_SIMPLE_JUMP;
+    }
+    else if (current_state == STATE_SIMPLE_FIND && stair_distance <= stdis2->data_int)
+    {
+        current_state = STATE_SIMPLE_MAINTAIN;
     }
 }
 
@@ -635,6 +639,9 @@ void control_state_update(void)
     case STATE_FIND_JUMP:
         control_state_find_jump();
         break;
+    case STATE_SIMPLE_MAINTAIN:
+        control_state_simple_maintain();
+        break;
     case STATE_MAINTAIN_JUMP:
         control_state_maintain_jump();
         break;
@@ -661,9 +668,6 @@ void control_state_update(void)
         break;
     case STATE_DE_JOLT:
         control_state_de_jolt();
-        break;
-    case STATE_JOLT_JUMP:
-        control_state_jolt_jump();
         break;
     case STATE_JOLT:
         control_state_jolt();

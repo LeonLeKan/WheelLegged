@@ -944,6 +944,67 @@ void control_state_find_jump(void)
     small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
 }
 
+void control_state_simple_maintain(void)
+{
+    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
+    aspid_update(askp->data_float, aski->data_float, askd->data_float);
+    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
+    yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
+    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+
+    static uint32_t count = 0;
+    count++;
+    if (count >= 4)
+    {
+        count = 0;
+
+        speed_loop.Target = (float)sipsp->data_int / 100.0f;
+        speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+
+        PID_Update_Lo(&speed_loop);
+
+        // 对speed_loop.Out进行低通滤波
+        static float filtered_speed_out = 0.0f;
+        static const float speed_alpha = 0.1f;
+
+        filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
+
+        servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
+                  90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
+
+        if (modify_idx[road_num] == 1)
+        {
+            yaw_loop.Target = 0.0f;
+            yaw_loop.Actual = imu.output.euler[2];
+        }
+        else if (modify_idx[road_num] == 2)
+        {
+            yaw_loop.Target = 180.0f;
+            yaw_loop.Actual = imu.output.euler[2];
+        }
+        else if (modify_idx[road_num] == 3)
+        {
+            yaw_loop.Target = -180.0f;
+            yaw_loop.Actual = imu.output.euler[2];
+        }
+        PID_Update_Lo(&yaw_loop);
+    }
+
+    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual;
+    turn_loop2.Actual = -imu.body.gyro[2];
+    PID_Update_Lo(&turn_loop2);
+
+    angle_loop2.Target = pzero->data_float;
+    angle_loop2.Actual = imu.output.euler[1];
+    PID_Update_Lo(&angle_loop2);
+
+    aspeed_loop.Target = angle_loop2.Out;
+    aspeed_loop.Actual = imu.output.gyro[1];
+    PID_Update_Lo(&aspeed_loop);
+
+    small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
+}
+
 void control_state_maintain_jump(void)
 {
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
@@ -1112,7 +1173,12 @@ void control_state_simple_jump(void)
         static uint32_t count2 = 0;
         count1++;
         count2++;
-        if (count2 >= 42 && simple_jump_count <= 2)
+        if (count2 >= 38 && simple_jump_count == 1)
+        {
+            count2 = 0;
+            simple_jump_flag = 1;
+        }
+        else if (count2 >= 38 && simple_jump_count == 2)
         {
             count2 = 0;
             simple_jump_flag = 1;
@@ -1439,9 +1505,8 @@ void control_state_de_jolt(void)
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
     sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
-    joypid_update(joykp->data_float, joyki->data_float, joykd->data_float);
-    tu2pid_update_j(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
-    jospid_update(joskp->data_float, joski->data_float, joskd->data_float);
+    yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
+    tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
 
     static uint32_t count = 0;
     count++;
@@ -1455,13 +1520,12 @@ void control_state_de_jolt(void)
         servo_set(110.0f, 70.0f,
                   110.0f, 70.0f);
 
-        yaw_loop.Target = 0.0f;
+        yaw_loop.Target = joangle->data_float;
         yaw_loop.Actual = imu.output.euler[2];
-        joy_loop.Actual = imu.output.euler[2];
-        PID_Update_Lo(&joy_loop);
+        PID_Update_Lo(&yaw_loop);
     }
 
-    turn_loop2.Target = -joy_loop.Out * speed_loop.Actual;
+    turn_loop2.Target = -yaw_loop.Out * speed_loop.Actual;
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 
@@ -1476,50 +1540,7 @@ void control_state_de_jolt(void)
     small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
 }
 
-void control_state_jolt_jump(void)
-{
-    an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
-    aspid_update(askp->data_float, aski->data_float, askd->data_float);
-    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
-    tu2pid_update_j(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
 
-    angle_loop2.Target = pzero->data_float;
-    angle_loop2.Actual = imu.output.euler[1];
-    PID_Update_Lo(&angle_loop2);
-
-    aspeed_loop.Target = angle_loop2.Out;
-    aspeed_loop.Actual = imu.output.gyro[1];
-    PID_Update_Lo(&aspeed_loop);
-
-    small_driver_set_duty((int16)(aspeed_loop.Out), (int16)(-(aspeed_loop.Out)));
-
-    // 小跳逻辑
-    static uint32_t count = 0;
-    count++;
-    if (count < 25)
-    {
-        servo_set(20.0f, 160.0f,
-                  160.0f, 20.0f);
-    }
-
-    else if (count >= 25 && count < 50)
-    {
-        servo_set(130.0f, 50.0f,
-                  50.0f, 130.0f);
-    }
-
-    else if (count >= 50)
-    {
-        count = 0;
-        image_block = 1;
-        servo_set(90.0f, 90.0f,
-                  90.0f, 90.0f);
-        angle_loop2.ErrorInt = 0.0f;
-        speed_loop.ErrorInt = 0.0f;
-        turn_loop2.ErrorInt = 0.0f;
-        current_state = STATE_JOLT;
-    }
-}
 
 void control_state_jolt(void)
 {
@@ -1538,16 +1559,19 @@ void control_state_jolt(void)
     static float filtered_speed_out = 0.0f;
     static const float speed_alpha = 0.1f;
 
+    speed_loop.Target = (float)jospeed->data_int / 100.0f;
+    speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+
     if (count >= 4)
     {
         count = 0;
 
-        speed_loop.Target = (float)jospeed->data_int / 100.0f;
-        speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
-
         PID_Update_Lo(&speed_loop);
 
         filtered_speed_out = speed_alpha * speed_loop.Out + (1.0f - speed_alpha) * filtered_speed_out;
+
+        servo_set(90.0f - filtered_speed_out, 90.0f + filtered_speed_out,
+                  90.0f - filtered_speed_out, 90.0f + filtered_speed_out);
 
         yaw_loop.Target = 0.0f;
         yaw_loop.Actual = imu.output.euler[2];
@@ -1555,27 +1579,16 @@ void control_state_jolt(void)
         PID_Update_Lo(&joy_loop);
     }
 
-    // 单边桥控制
-    jos_loop.Target = roll_base;
-    jos_loop.Actual = imu.output.euler[0];
-    PID_Update_Lo(&jos_loop);
-
-    // 对jos_loop.Out进行低通滤波
-    static float filtered_jos_out = 0.0f;
-    static const float jos_alpha = 0.1f;
-
-    filtered_jos_out = jos_alpha * jos_loop.Out + (1.0f - jos_alpha) * filtered_jos_out;
-
-    servo_set(90.0f - filtered_speed_out - filtered_jos_out, 90.0f + filtered_speed_out + filtered_jos_out,
-              90.0f - filtered_speed_out + filtered_jos_out, 90.0f + filtered_speed_out - filtered_jos_out);
-
     if (speed_loop.Actual < 0.5f && speed_loop.Actual > -0.5f)
     {
         jolt_trap_count++;
-        if (jolt_trap_count >= 20)
+        if (jolt_trap_count >= 30)
         {
             jolt_trap_count = 0;
-            current_state = STATE_JOLT_TRAP;
+            if (fabs(imu.output.euler[2] - joy_loop.Target) < 20.0f)
+            {
+                current_state = STATE_JOLT_TRAP;
+            }
         }
     }
     else
@@ -1583,6 +1596,10 @@ void control_state_jolt(void)
         jolt_trap_count = 0;
     }
 
+    if (speed_loop.Actual < 1.0f)
+    {
+        speed_loop.Actual = 1.0f;
+    }
     turn_loop2.Target = -joy_loop.Out * speed_loop.Actual;
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
@@ -1643,10 +1660,21 @@ void control_state_jolt_trap(void)
         jolt_trap_count = 0;
     }
 
-    if (jolt_speed_change_flag == 0)
+    if (jolt_speed_change_flag == 0 && imu.output.euler[1] <= 30.0f)
     {
-        servo_set(45.0f, 135.0f,
-                  40.0f, 140.0f);
+        servo_set(50.0f, 130.0f,
+                  50.0f, 130.0f);
+        jolt_speed_change_count++;
+        if (jolt_speed_change_count >= 80)
+        {
+            jolt_speed_change_count = 0;
+            jolt_speed_change_flag = 1;
+        }
+    }
+    else if (jolt_speed_change_flag == 0 && imu.output.euler[1] > 30.0f)
+    {
+        servo_set(70.0f, 110.0f,
+                  70.0f, 110.0f);
         jolt_speed_change_count++;
         if (jolt_speed_change_count >= 80)
         {
@@ -1668,7 +1696,7 @@ void control_state_jolt_trap(void)
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 
-    angle_loop2.Target = pzero->data_float;
+    angle_loop2.Target = pzero->data_float - 2.0f;
     angle_loop2.Actual = imu.output.euler[1];
     PID_Update_Lo(&angle_loop2);
 

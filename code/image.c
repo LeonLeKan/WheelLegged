@@ -1459,20 +1459,20 @@ void mend_stairs()
     if (NEAR_LINE - road_start >= 20)
     {
         uint8_t lstart, rstart;
-        if (NEAR_LINE - road_start >= 30)
+        if (NEAR_LINE - road_start >= 60)
         {
-            lstart = find_least_square_start(left_line, road_start, road_end, 6, 0, false, 0.85, 1, 1.3);
-            rstart = find_least_square_start(right_line, road_start, road_end, 6, 1, false, 0.85, 1, 1.3);
+            lstart = find_least_square_start(left_line, road_start, road_end, 8, 0, false, 0.85, 0.8, 1.3);
+            rstart = find_least_square_start(right_line, road_start, road_end, 8, 1, false, 0.85, 0.8, 1.3);
         }
         else
         {
-            lstart = find_least_square_start(left_line, road_start, road_end, 6, 0, false, 0.85, 0.2, 1);
-            rstart = find_least_square_start(right_line, road_start, road_end, 6, 1, false, 0.85, 0.2, 1);
+            lstart = find_least_square_start(left_line, road_start, road_end, 8, 0, false, 0.85, 0.0, 1);
+            rstart = find_least_square_start(right_line, road_start, road_end, 8, 1, false, 0.85, 0.0, 1);
         }
         if (lstart && rstart)
         {
-            least_square_get_line(left_line, lstart - 1, 5, input, NEAR_LINE, lstart);
-            least_square_get_line(right_line, rstart - 1, 5, input, NEAR_LINE, rstart);
+            least_square_get_line(left_line, lstart - 2, 6, input, NEAR_LINE, lstart);
+            least_square_get_line(right_line, rstart - 2, 6, input, NEAR_LINE, rstart);
         }
         else
         {
@@ -1818,6 +1818,11 @@ void image_main()
 
     switch (now_element)
     {
+    case FRONT_STAIRS:
+        if(stair_distance <= 50)
+        {
+            error = 0;
+        }
     case BACK_STAIRS:
         if (follow_lock == 3)
         {

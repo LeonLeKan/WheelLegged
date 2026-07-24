@@ -181,7 +181,9 @@ static void apply_bias_and_cordinate_transform(void)
             corrected_gyro[2] += imu.rot_comp.param.yaw_compensate_cw;
         }
     }
-
+    else {
+        imu.state = IMU_STATE_NORMAL;
+    }
     // 转换至FLU坐标系
     imu.body.acc[0] = imu.raw.acc[1];
     imu.body.acc[1] = imu.raw.acc[0];

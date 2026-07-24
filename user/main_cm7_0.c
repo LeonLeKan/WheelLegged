@@ -175,6 +175,10 @@ int main(void)
                 remote_control();
                 current_state = STATE_STAND_STILL;
                 imu_state_show();
+                if (motion_mode4 == 0)
+                {
+                    wifi_send_data();
+                }
                 if (gpio_get_level(BUTTON_OK) == 0 && get_ready == 0)
                 {
                     get_ready = 1;

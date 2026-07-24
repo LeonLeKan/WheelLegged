@@ -486,8 +486,8 @@ void location_update_2_4(void)
         roll_base = rollba->data_float;
         jolt_end_judge.thre = jocnt->data_int;
         now_element = JOLT;
-        image_block = 0;
+        image_block = 1;
         joy_loop.Target = joangle->data_float;
-        current_state = STATE_JOLT_JUMP;
+        current_state = STATE_DE_JOLT;
     }
 }
