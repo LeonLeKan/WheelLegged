@@ -341,8 +341,16 @@ void location_update_2_2(void)
     {
         if (current_target && !current_target->next && de_stairs_flag == 0) 
         {
-            current_state = STATE_DE_STAIRS;
-            de_stairs_flag = 1;
+            if (speed2->data_int - stspeed->data_int > 90.0f)
+            {
+                current_state = STATE_DE_STAIRS;
+                de_stairs_flag = 1;
+            }
+            else if (speed2->data_int - stspeed->data_int <= 90.0f)
+            {
+                current_state = STATE_TRA_STAIRS;
+                de_stairs_flag = 1;
+            }
         }
 
         if (!current_target) 
@@ -359,12 +367,12 @@ void location_update_2_2(void)
     {
         if (current_target && !current_target->next && de_stairs_flag == 0) 
         {
-            if (speed2->data_int - sipsp->data_int > 0.9f)
+            if (speed2->data_int - sipsp->data_int > 90.0f)
             {
                 current_state = STATE_DE_STAIRS;
                 de_stairs_flag = 1;
             }
-            else if (speed2->data_int - sipsp->data_int <= 0.9f)
+            else if (speed2->data_int - sipsp->data_int <= 90.0f)
             {
                 current_state = STATE_TRA_STAIRS;
                 de_stairs_flag = 1;

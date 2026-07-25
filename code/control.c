@@ -1019,7 +1019,7 @@ void control_state_maintain_jump(void)
     {
         count = 0;
 
-        speed_loop.Target = 2.0f;
+        speed_loop.Target = (float)stspeed->data_int / 100.0f;
         speed_loop.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         PID_Update_Lo(&speed_loop);
@@ -1132,19 +1132,19 @@ void control_state_simple_jump(void)
     {
         static uint32_t count = 0;
         count++;
-        if (count < 17)
+        if (count < 20)
         {
             servo_set(40.0f, 140.0f,
                       140.0f, 40.0f);
         }
 
-        else if (count >= 17 && count < 30)
+        else if (count >= 20 && count < 32)
         {
-            servo_set(110.0f, 70.0f,
-                      70.0f, 110.0f);
+            servo_set(120.0f, 60.0f,
+                      60.0f, 120.0f);
         }
 
-        else if (count >= 30)
+        else if (count >= 32)
         {
             count = 0;
             servo_set(90.0f, 90.0f,
@@ -1173,12 +1173,12 @@ void control_state_simple_jump(void)
         static uint32_t count2 = 0;
         count1++;
         count2++;
-        if (count2 >= 38 && simple_jump_count == 1)
+        if (count2 >= 30 && simple_jump_count == 1)
         {
             count2 = 0;
             simple_jump_flag = 1;
         }
-        else if (count2 >= 38 && simple_jump_count == 2)
+        else if (count2 >= 30 && simple_jump_count == 2)
         {
             count2 = 0;
             simple_jump_flag = 1;
@@ -1276,16 +1276,17 @@ void control_state_jump_up(void)
                   160.0f, 20.0f);
     }
 
-    else if (count >= 17 && count < 45)
+    else if (count >= 17 && count < 35)
     {
         servo_set(120.0f, 60.0f,
                   60.0f, 120.0f);
     }
 
-    else if (count >= 45)
+    else if (count >= 35)
     {
         count = 0;
-        image_block = 1;
+        image_block = 0;
+        jump_lock = 1;
         servo_set(90.0f, 90.0f,
                   90.0f, 90.0f);
         angle_loop2.ErrorInt = 0.0f;
@@ -1696,7 +1697,7 @@ void control_state_jolt_trap(void)
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 
-    angle_loop2.Target = pzero->data_float - 2.0f;
+    angle_loop2.Target = pzero->data_float;
     angle_loop2.Actual = imu.output.euler[1];
     PID_Update_Lo(&angle_loop2);
 

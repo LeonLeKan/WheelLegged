@@ -292,7 +292,7 @@ static void decline_to_stairs(void)
     if (jump->data_int == 1)
     {
         if (current_state == STATE_DE_STAIRS
-        && speed_loop.Actual < ((float)stspeed->data_int / 100.0f + 1.0f)
+        && speed_loop.Actual < ((float)stspeed->data_int / 100.0f)
         && current_target)
         {
             current_state = STATE_TRA_STAIRS;
@@ -311,7 +311,7 @@ static void decline_to_stairs(void)
 
 static void judge_time_to_jump(void)
 {
-    if ((current_state == STATE_FIND_JUMP || current_state == STATE_MAINTAIN_JUMP) && jump_lock == 0)
+    if (current_state == STATE_MAINTAIN_JUMP && jump_lock == 0)
     {
         if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f)
         {
@@ -319,7 +319,6 @@ static void judge_time_to_jump(void)
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
-            jump_lock = 1;
         }
         else if (stair_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f)
         {
@@ -327,7 +326,6 @@ static void judge_time_to_jump(void)
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
-            jump_lock = 1;
         }
         else if (stair_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f)
         {
@@ -335,13 +333,15 @@ static void judge_time_to_jump(void)
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
-            jump_lock = 1;
         }
         else if (jump_count >= 3)
         {
             current_state = STATE_MAINTAIN_JUMP;
-            if (front_stairs_end_judge.end_flag == 1)
+            static uint32_t quit_image_jump_count = 0;
+            quit_image_jump_count++;
+            if (quit_image_jump_count >= 100)
             {
+                quit_image_jump_count = 0;
                 image_block = 0;
                 current_state = STATE_MODIFY;
             }
@@ -368,8 +368,9 @@ static void judge_time_to_jump(void)
     if (jump_lock == 1 && jump_count < 3)
     {
         jump_lock_count++;
-        if (jump_lock_count >= 120)
+        if (jump_lock_count >= 30)
         {
+            image_block = 1;
             jump_lock = 0;
             jump_lock_count = 0;
         }
@@ -377,7 +378,7 @@ static void judge_time_to_jump(void)
     else if (jump_lock == 1 && jump_count >= 3)
     {
         jump_lock_count++;
-        if (jump_lock_count >= 60)
+        if (jump_lock_count >= 40)
         {
             jump_lock = 0;
             jump_lock_count = 0;
@@ -392,9 +393,13 @@ static void simple_find_jump(void)
         image_block = 0;
         current_state = STATE_SIMPLE_JUMP;
     }
-    else if (current_state == STATE_SIMPLE_FIND && stair_distance <= stdis2->data_int)
+    else if (current_state == STATE_SIMPLE_FIND && stair_distance <= 60 && stair_distance > 0)
     {
         current_state = STATE_SIMPLE_MAINTAIN;
+    }
+    else if (current_state == STATE_FIND_JUMP && stair_distance <= 40 && stair_distance > 0)
+    {
+        current_state = STATE_MAINTAIN_JUMP;
     }
 }
 
