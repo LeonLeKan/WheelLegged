@@ -59,7 +59,7 @@ void wifi_send_image_thre(void)
     if (mt9v03x_finish_flag)
     {
         mt9v03x_finish_flag = 0;
-        now_element = SINGLE_SIDE;
+        now_element = FRONT_STAIRS;
         image_main();
 
         for (int i = 0; i < CAMERA_H; i++)
