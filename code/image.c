@@ -1,6 +1,7 @@
 #include "image.h"
 
 #if ONBOARD
+#include "control.h"
 #include "control_state.h"
 uint8_t* fullBuffer = &mt9v03x_image[0][0];
 #endif
@@ -9,6 +10,7 @@ uint8_t* fullBuffer = &mt9v03x_image[0][0];
 #else
 uint8_t follow_lock;    // 调试用
 uint8_t jolt_lock = 2;
+uint8_t jump_count = 0;
 #endif
 
 int f[10 * CAMERA_H];//考察连通域联通性
@@ -1461,18 +1463,18 @@ void mend_stairs()
         uint8_t lstart, rstart;
         if (NEAR_LINE - road_start >= 60)
         {
-            lstart = find_least_square_start(left_line, road_start, road_end, 8, 0, false, 0.85, 0.8, 1.3);
-            rstart = find_least_square_start(right_line, road_start, road_end, 8, 1, false, 0.85, 0.8, 1.3);
+            lstart = find_least_square_start(left_line, road_start, road_end, 10, 0, false, 0.85, 1.2, -0.8);
+            rstart = find_least_square_start(right_line, road_start, road_end, 10, 1, false, 0.85, 1.2, -0.8);
         }
         else
         {
-            lstart = find_least_square_start(left_line, road_start, road_end, 8, 0, false, 0.85, 0.0, 1);
-            rstart = find_least_square_start(right_line, road_start, road_end, 8, 1, false, 0.85, 0.0, 1);
+            lstart = find_least_square_start(left_line, road_start, road_end, 10, 0, false, 0.85, 1, -0.8);
+            rstart = find_least_square_start(right_line, road_start, road_end, 10, 1, false, 0.85, 1, -0.8);
         }
         if (lstart && rstart)
         {
-            least_square_get_line(left_line, lstart - 2, 6, input, NEAR_LINE, lstart);
-            least_square_get_line(right_line, rstart - 2, 6, input, NEAR_LINE, rstart);
+            least_square_get_line(left_line, lstart - 2, 8, input, NEAR_LINE, lstart);
+            least_square_get_line(right_line, rstart - 2, 8, input, NEAR_LINE, rstart);
         }
         else
         {
@@ -1506,16 +1508,16 @@ void mend_stairs()
 
 void calc_stair_distance()
 {
-    if (NEAR_LINE - road_start >= 2)
+    if (jump_count == 0 || jump_count == 2)
     {
 		uint8_t correct_start = road_start;
         if (stair_distance_side == 0)
         {
-            correct_start = find_least_square_start(left_line, road_start, road_end, 6, 0, false, 0.7, 0.0, 1.2);
+            correct_start = find_least_square_start(left_line, road_start, road_end, 6, 0, false, 0.6, 0.0, 1.2);
         }
 		else if (stair_distance_side == 1)
 		{
-			correct_start = find_least_square_start(right_line, road_start, road_end, 6, 1, false, 0.7, 0.0, 1.2);
+			correct_start = find_least_square_start(right_line, road_start, road_end, 6, 1, false, 0.6, 0.0, 1.2);
 		}
         // 如果stair_distance == 2 不进行距离微调
 
@@ -1527,7 +1529,7 @@ void calc_stair_distance()
         else 
 			stair_distance = NEAR_LINE - road_start + 5;
     }
-    else {
+    else if(jump_count == 1) {
         stair_distance = NEAR_LINE - road_end;
     }
     if (stair_distance == 0)
@@ -1818,11 +1820,6 @@ void image_main()
 
     switch (now_element)
     {
-    case FRONT_STAIRS:
-        if(stair_distance <= 50)
-        {
-            error = 0;
-        }
     case BACK_STAIRS:
         if (follow_lock == 3)
         {

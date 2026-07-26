@@ -378,7 +378,7 @@ static void judge_time_to_jump(void)
     else if (jump_lock == 1 && jump_count >= 3)
     {
         jump_lock_count++;
-        if (jump_lock_count >= 40)
+        if (jump_lock_count >= 30)
         {
             jump_lock = 0;
             jump_lock_count = 0;

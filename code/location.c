@@ -222,16 +222,20 @@ void location_update_2_0(void)
 
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
-        advance_to_next_waypoint();
-    }
-
-    if (current_target->id_startup == tunum->data_int)
+        if (road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
         {
             imu.rot_comp.param.yaw_compensate_cw = cwtucop->data_float;
             imu.rot_comp.param.yaw_compensate_ccw = ccwtucop->data_float;
             current_state = STATE_UTURN;
             advance_to_next_waypoint();
         }
+        else
+        {
+            imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+            imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
+            advance_to_next_waypoint();
+        }
+    }
 
     if (!current_target) 
     {
@@ -279,6 +283,8 @@ void location_update_2_1(void)
         }
         else
         {
+            imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+            imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
             advance_to_next_waypoint();
         }
     }
@@ -333,6 +339,8 @@ void location_update_2_2(void)
         }
         else
         {
+            imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+            imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
             advance_to_next_waypoint();
         }
     }
@@ -431,6 +439,8 @@ void location_update_2_3(void)
         }
         else
         {
+            imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+            imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
             advance_to_next_waypoint();
         }
     }
@@ -484,6 +494,8 @@ void location_update_2_4(void)
         }
         else
         {
+            imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+            imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
             advance_to_next_waypoint();
         }
     }

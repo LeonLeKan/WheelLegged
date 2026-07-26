@@ -1828,6 +1828,8 @@ void control_state_uturn(void)
     {
         speed_loop.ErrorInt = 0.0f;
         turn_loop2.ErrorInt = 0.0f;
+        imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+        imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
         current_state = STATE_FORWARD;
     }
 }

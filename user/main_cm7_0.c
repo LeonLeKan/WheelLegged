@@ -93,6 +93,7 @@ int main(void)
     // 菜单里读取陀螺仪固定偏置
     imu_set_gyro_bias(rollbias->data_float, pitchbias->data_float, yawbias->data_float);
 
+    // 图像初始化
     image_update();
 
     // 判断科目几，以及科目三的路径
