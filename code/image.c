@@ -1513,11 +1513,11 @@ void calc_stair_distance()
         uint8_t correct_start = road_start;
         if (stair_distance_side == 0)
         {
-            correct_start = find_least_square_start(left_line, road_start, road_end, 6, 0, false, 0.6, 0.0, 1.2);
+            correct_start = find_least_square_start(left_line, road_start, road_end, 6, 0, false, 0.6, 1.2, 0.0);
         }
         else if (stair_distance_side == 1)
         {
-            correct_start = find_least_square_start(right_line, road_start, road_end, 6, 1, false, 0.6, 0.0, 1.2);
+            correct_start = find_least_square_start(right_line, road_start, road_end, 6, 1, false, 0.6, 1.2, 0.0);
         }
         // 如果stair_distance == 2 不进行距离微调
 
@@ -1546,8 +1546,8 @@ void mend_single_side()
     float input[2];
     if (NEAR_LINE - road_start >= 20 && road_start - road_end >= 10)
     {
-        uint8_t lstart = find_least_square_start(left_line, road_start, road_end, 5, 0, false, 0.85, 1.3, 0.8);
-        uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 5, 1, false, 0.85, 1.3, 0.8);
+        uint8_t lstart = find_least_square_start(left_line, road_start, road_end, 6, 0, false, 0.85, 1.3, 0.8);
+        uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 6, 1, false, 0.85, 1.3, 0.8);
         if (lstart) least_square_get_line(left_line, lstart, 6, input, NEAR_LINE, lstart);
         if (rstart) least_square_get_line(right_line, rstart, 6, input, NEAR_LINE, rstart);
     }
