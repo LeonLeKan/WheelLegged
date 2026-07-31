@@ -368,7 +368,7 @@ void location_update_2_2(void)
             front_stairs_end_judge.thre = frcnt->data_int;
             now_element = FRONT_STAIRS;
             image_block = 1;
-            current_state = STATE_FIND_JUMP;
+            current_state = STATE_MAINTAIN_JUMP;
         }
     }
     else if (jump->data_int == 2)
@@ -395,7 +395,7 @@ void location_update_2_2(void)
             now_element = FRONT_STAIRS;
             image_block = 1;
             speed_loop.ErrorInt= 0.0f;
-            current_state = STATE_SIMPLE_FIND;
+            current_state = STATE_SIMPLE_MAINTAIN;
         }
     }
 }

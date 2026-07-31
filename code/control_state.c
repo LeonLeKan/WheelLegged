@@ -25,14 +25,14 @@ volatile uint8_t follow_speed_change = 0;
 
 static void accelerate_to_forward(void)
 {
-    if (testnum->data_int == 2 && road_idx[road_num] == 0)
+    if (testnum->data_int == 2 && (road_idx[road_num] == 0 || road_idx[road_num] == 7))
     {
         if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed0->data_int / 100.0f - 1.0f))
         {
             current_state = STATE_FORWARD;
         }
     }
-    else if (testnum->data_int == 2 && road_idx[road_num] == 1)
+    else if (testnum->data_int == 2 && (road_idx[road_num] == 1 || road_idx[road_num] == 5))
     {
         if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed1->data_int / 100.0f - 1.0f))
         {
@@ -53,7 +53,7 @@ static void accelerate_to_forward(void)
             current_state = STATE_FORWARD;
         }
     }
-    else if (testnum->data_int == 2 && road_idx[road_num] == 4)
+    else if (testnum->data_int == 2 && (road_idx[road_num] == 4 || road_idx[road_num] == 6))
     {
         if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed4->data_int / 100.0f - 1.0f))
         {
@@ -313,21 +313,21 @@ static void judge_time_to_jump(void)
 {
     if (current_state == STATE_MAINTAIN_JUMP && jump_lock == 0)
     {
-        if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f)
+        if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && stair_distance > 0)
         {
             mid_update = 0;
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
         }
-        else if (stair_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f)
+        else if (stair_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && stair_distance > 0)
         {
             mid_update = 0;
             image_block = 0;
             jump_count += 1;
             current_state = STATE_JUMP_UP;
         }
-        else if (stair_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f)
+        else if (stair_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && stair_distance > 0)
         {
             mid_update = 0;
             image_block = 0;

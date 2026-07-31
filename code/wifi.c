@@ -31,14 +31,10 @@ void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
 
-    oscilloscope_data.data[0] = jump_lock;
-    oscilloscope_data.data[1] = jump_lock_count;
-    oscilloscope_data.data[2] = current_state;
-    oscilloscope_data.data[3] = stair_distance;
-    oscilloscope_data.data[4] = jump_count;
-    oscilloscope_data.data[5] = image_block;
+    oscilloscope_data.data[0] = speed_loop.Target;
+    oscilloscope_data.data[1] = stair_distance;
 
-    oscilloscope_data.channel_num = 6;
+    oscilloscope_data.channel_num = 2;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 
@@ -59,7 +55,7 @@ void wifi_send_image_thre(void)
     if (mt9v03x_finish_flag)
     {
         mt9v03x_finish_flag = 0;
-        now_element = FRONT_STAIRS;
+        now_element = SINGLE_SIDE;
         image_main();
 
         for (int i = 0; i < CAMERA_H; i++)

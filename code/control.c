@@ -283,7 +283,7 @@ void control_state_thunder(void)
             yaw_accumulate += yaw_thunder_diff;
             yaw_thunder_last = yaw_thunder_now;
 
-            if (yaw_accumulate <= -690.0f)
+            if (yaw_accumulate <= -620.0f)
             {
                 yaw_thunder_now = 0.0f;
                 yaw_thunder_last = 0.0f;
@@ -351,7 +351,7 @@ void control_state_thunder(void)
             yaw_accumulate += yaw_thunder_diff;
             yaw_thunder_last = yaw_thunder_now;
 
-            if (yaw_accumulate >= 690.0f)
+            if (yaw_accumulate >= 620.0f)
             {
                 yaw_thunder_now = 0.0f;
                 yaw_thunder_last = 0.0f;
@@ -416,7 +416,7 @@ void control_state_thunder(void)
             yaw_accumulate += yaw_thunder_diff;
             yaw_thunder_last = yaw_thunder_now;
 
-            if (yaw_accumulate <= -690.0f)
+            if (yaw_accumulate <= -620.0f)
             {
                 yaw_thunder_now = 0.0f;
                 yaw_thunder_last = 0.0f;
@@ -481,7 +481,7 @@ void control_state_thunder(void)
             yaw_accumulate += yaw_thunder_diff;
             yaw_thunder_last = yaw_thunder_now;
 
-            if (yaw_accumulate >= 690.0f)
+            if (yaw_accumulate >= 620.0f)
             {
                 yaw_thunder_now = 0.0f;
                 yaw_thunder_last = 0.0f;
@@ -568,11 +568,11 @@ void control_state_forward(void)
             }
             else if (speed_2_change == 0 || speed_2_change == 3)
             {
-                if (road_idx[road_num] == 0)
+                if (road_idx[road_num] == 0 || road_idx[road_num] == 7)
                 {
                     speed_loop.Target = (float)speed0->data_int / 100.0f;
                 }
-                else if (road_idx[road_num] == 1)
+                else if (road_idx[road_num] == 1 || road_idx[road_num] == 5)
                 {
                     speed_loop.Target = (float)speed1->data_int / 100.0f;
                 }
@@ -584,7 +584,7 @@ void control_state_forward(void)
                 {
                     speed_loop.Target = (float)speed3->data_int / 100.0f;
                 }
-                else if (road_idx[road_num] == 4)
+                else if (road_idx[road_num] == 4 || road_idx[road_num] == 6)
                 {
                     speed_loop.Target = (float)speed4->data_int / 100.0f;
                 }
@@ -1173,12 +1173,12 @@ void control_state_simple_jump(void)
         static uint32_t count2 = 0;
         count1++;
         count2++;
-        if (count2 >= 30 && simple_jump_count == 1)
+        if (count2 >= 45 && simple_jump_count == 1)
         {
             count2 = 0;
             simple_jump_flag = 1;
         }
-        else if (count2 >= 30 && simple_jump_count == 2)
+        else if (count2 >= 45 && simple_jump_count == 2)
         {
             count2 = 0;
             simple_jump_flag = 1;
@@ -1663,8 +1663,8 @@ void control_state_jolt_trap(void)
 
     if (jolt_speed_change_flag == 0 && imu.output.euler[1] <= 30.0f)
     {
-        servo_set(50.0f, 130.0f,
-                  50.0f, 130.0f);
+        servo_set(45.0f, 135.0f,
+                  45.0f, 135.0f);
         jolt_speed_change_count++;
         if (jolt_speed_change_count >= 80)
         {
