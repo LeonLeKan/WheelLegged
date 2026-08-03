@@ -47,10 +47,10 @@ static float clamp_angle(float angle)
     return angle;
 }
 
-void servo_set(float servo_right_back, float servo_left_front, float servo_right_front, float servo_left_back)
+void servo_set(float servo_right_front, float servo_left_front, float servo_right_back, float servo_left_back)
 {
-    servo1_set_angle(clamp_angle(servo_right_back)); 
+    servo1_set_angle(clamp_angle(servo_right_front)); 
     servo2_set_angle(clamp_angle(servo_left_front)); 
-    servo3_set_angle(clamp_angle(servo_right_front));
+    servo3_set_angle(clamp_angle(servo_right_back));
     servo4_set_angle(clamp_angle(servo_left_back));
 }
