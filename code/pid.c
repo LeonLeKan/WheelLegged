@@ -39,7 +39,7 @@ void PID_Update_Lo(volatile PID_t *p)
         p->Error0 = p->Target - p->Actual;
     }
 
-    if ((p == &speed_loop2 || p == &speed_loop) && p->Error0 > 0.5f)
+    if ((p == &speed_loop2 || p == &speed_loop) && fabs(p->Error0) > 0.5f)
     {
         p->ErrorInt = 0.0f;
     }
@@ -124,8 +124,8 @@ void sp2pid_update(float kp, float ki, float kd)
     speed_loop2.Kp = kp;
     speed_loop2.Ki = ki;
     speed_loop2.Kd = kd;
-    speed_loop2.OutMax = +35;
-    speed_loop2.OutMin = -35;
+    speed_loop2.OutMax = +4;
+    speed_loop2.OutMin = -4;
     speed_loop2.ErrorIntMax = 500;
 }
 

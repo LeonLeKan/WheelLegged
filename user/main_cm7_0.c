@@ -96,18 +96,11 @@ int main(void)
     // 图像初始化
     image_update();
 
-    // 判断科目几，以及科目三的路径
-    if (testnum->data_int == 2)
-    {
-        calculate_route();
-        calculate_modify();
-        calculate_uturn_3();
-        save_manager_load(testnum->data_int + road_idx[road_num]);
-    }
-    else if (testnum->data_int == 1 || testnum->data_int == 0)
-    {
-        save_manager_load(testnum->data_int);
-    }
+    // 判断科目三的路径
+    calculate_route();
+    calculate_modify();
+    calculate_uturn_3();
+    save_manager_load(testnum->data_int + road_idx[road_num]);
 
     // 设置曝光度
     mt9v03x_set_exposure_time(imexp->data_int);
@@ -193,24 +186,9 @@ int main(void)
                     }
                     else if (test_state == 0)
                     {
-                        if (testnum->data_int == 2)
-                        {
-                            imu.rot_comp.param.yaw_compensate_cw = 0.0f;
-                            imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
-                            current_state = STATE_ACCELERATE;
-                        }
-                        else if (testnum->data_int == 1)
-                        {
-                            imu.rot_comp.param.yaw_compensate_cw = 0.0f;
-                            imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
-                            current_state = STATE_FORWARD;
-                        }
-                        else if (testnum->data_int == 0)
-                        {
-                            imu.rot_comp.param.yaw_compensate_cw = 0.0f;
-                            imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
-                            current_state = STATE_FORWARD;
-                        }
+                        imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+                        imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
+                        current_state = STATE_FORWARD;
                         ins_reset();
                     }
                     while (true)
@@ -415,7 +393,7 @@ void remote_control(void)
 {
     if (1 == uart_receiver.finsh_flag)
     {
-        speed_loop.Target = (uart_receiver.channel[1] - 832) / 200.0f;
+        speed_loop2.Target = (uart_receiver.channel[1] - 832) / 400.0f;
         yaw_test_bias = (uart_receiver.channel[0] - 832) * 1.5;
         if ((uart_receiver.channel[3] == 1792 || uart_receiver.channel[3] == 992 || uart_receiver.channel[3] == 192) && test_state == 0)
         {

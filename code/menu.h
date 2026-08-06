@@ -53,7 +53,7 @@ typedef enum
 extern MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *modiro, *thnum, *tunum, *uturn3, *jump, *stside, *saveall, *currentMenu;
 extern MENU *speed, *anloop1, *anloop2, *sploop, *sploop2, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
     *esha, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *kgray, *whiga, *minth, *maxth, *sicnt, *frcnt, *bacnt, *jocnt, *saveim,
-    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *tunext, *dis1, *speedl, *balspeed, *thsp, *rotusp, *dis2, *curnext, *tunesp, *cwtucop1, *ccwtucop1, *uturnsp, *turnamh, *speed0, *speed1, *speed2, *speed3, *speed4, *modisp, *sipsp, *saveel;
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *tunext, *dis1, *speedl, *balspeed, *thsp, *rotusp, *dis2, *curnext, *follsp, *cwtucop1, *ccwtucop1, *uturnsp, *turnamh, *speed0, *speed1, *speed2, *speed3, *speed4, *modisp, *sipsp, *saveel;
 extern MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,

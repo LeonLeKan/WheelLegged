@@ -65,24 +65,13 @@ void pit0_ch2_isr() // 定时器通道 2 周期中断服务函数
 {
     pit_isr_flag_clear(PIT_CH2);
     // 中断2: 惯导位置更新
-    if ((current_state == STATE_ACCELERATE  ||
-         current_state == STATE_FORWARD     ||
+    if ((current_state == STATE_FORWARD     ||
          current_state == STATE_DE_THUNDER  ||
-         current_state == STATE_TRA_THUNDER ||
          current_state == STATE_DE_STAIRS   ||
-         current_state == STATE_TRA_STAIRS  ||
          current_state == STATE_UTURN)      &&
          disturb_flag  == 0)
     {
-        if (testnum->data_int == 0)
-        {
-            location_update_0();
-        }
-        else if (testnum->data_int == 1)
-        {
-            location_update_1();
-        }
-        else if (testnum->data_int == 2 && road_idx[road_num] == 0)
+        if (testnum->data_int == 2 && road_idx[road_num] == 0)
         {
             location_update_2_0();
         }
@@ -120,12 +109,6 @@ void pit0_ch2_isr() // 定时器通道 2 周期中断服务函数
 void pit0_ch10_isr() // 定时器通道 10 周期中断服务函数
 {
     pit_isr_flag_clear(PIT_CH10);
-    // 中断10：如果GPS有数据，就进行解析
-    if (gnss_flag)
-    {
-        gnss_flag = 0;
-        gnss_data_parse();
-    }
 }
 
 void pit0_ch11_isr() // 定时器通道 11 周期中断服务函数

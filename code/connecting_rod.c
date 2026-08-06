@@ -10,7 +10,7 @@ float cos_perform(float L1, float L2, float L3)
     return acos(angel)*180.0f/PI;
 }
 
-void transform_xy_right(float x, float y, float *servo_front, float *servo_back)
+void transform_xy_right(float x, float y, float volatile *servo_front, float volatile *servo_back)
 {
     //L1 is for middle, L2 is for front and L3 is for back
     float L1 = sqrt(x*x + y*y);
@@ -25,7 +25,7 @@ void transform_xy_right(float x, float y, float *servo_front, float *servo_back)
     *servo_back  = 270.0f - angle3 - angle4;
 }
 
-void transform_xy_left(float x, float y, float *servo_front, float *servo_back)
+void transform_xy_left(float x, float y, float volatile *servo_front, float volatile *servo_back)
 {
     //L1 is for middle, L2 is for front and L3 is for back
     float L1 = sqrt(x*x + y*y);

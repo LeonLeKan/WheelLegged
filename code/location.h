@@ -25,7 +25,6 @@ extern uint8_t thunder_count;
 extern uint8_t thunder_direction_flag;
 extern double thunder_final_angle;
 
-void location_update_0(void);
 void location_update_1(void);
 void location_update_2_0(void);
 void location_update_2_1(void);

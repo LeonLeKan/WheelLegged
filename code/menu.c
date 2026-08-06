@@ -10,7 +10,7 @@ volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *modiro, *thnum, *tunum, *uturn3, *jump, *stside, *saveall, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *sploop2, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
     *esha, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *kgray, *whiga, *minth, *maxth, *sicnt, *frcnt, *bacnt, *jocnt, *saveim,
-    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *tunext, *dis1, *speedl, *balspeed, *thsp, *rotusp, *dis2, *curnext, *tunesp, *cwtucop1, *ccwtucop1, *uturnsp, *turnamh, *speed0, *speed1, *speed2, *speed3, *speed4, *modisp, *sipsp, *saveel;
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *tunext, *dis1, *speedl, *balspeed, *thsp, *rotusp, *dis2, *curnext, *follsp, *cwtucop1, *ccwtucop1, *uturnsp, *turnamh, *speed0, *speed1, *speed2, *speed3, *speed4, *modisp, *sipsp, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
@@ -205,7 +205,7 @@ void create_2nd_menu(void)
     rotusp = createMenu("rotusp", 2, 22, MENU_TYPE_INT, NULL);
     dis2 = createMenu("dis2", 2, 23, MENU_TYPE_FLOAT, NULL);
     curnext = createMenu("curnext", 2, 24, MENU_TYPE_INT, NULL);
-    tunesp = createMenu("tunesp", 2, 25, MENU_TYPE_INT, NULL);
+    follsp = createMenu("follsp", 2, 25, MENU_TYPE_INT, NULL);
     cwtucop1 = createMenu("cwtucop1", 2, 26, MENU_TYPE_FLOAT, NULL);
     ccwtucop1 = createMenu("ccwtucop1", 2, 27, MENU_TYPE_FLOAT, NULL);
     uturnsp = createMenu("uturnsp", 2, 28, MENU_TYPE_INT, NULL);
@@ -329,10 +329,10 @@ void create_2nd_menu(void)
     dis2->last = rotusp;
     dis2->next = curnext;
     curnext->last = dis2;
-    curnext->next = tunesp;
-    tunesp->last = curnext;
-    tunesp->next = cwtucop1;
-    cwtucop1->last = tunesp;
+    curnext->next = follsp;
+    follsp->last = curnext;
+    follsp->next = cwtucop1;
+    cwtucop1->last = follsp;
     cwtucop1->next = ccwtucop1;
     ccwtucop1->last = cwtucop1;
     ccwtucop1->next = uturnsp;
@@ -418,7 +418,7 @@ void create_2nd_menu(void)
     rotusp->parent = Element;
     dis2->parent = Element;
     curnext->parent = Element;
-    tunesp->parent = Element;
+    follsp->parent = Element;
     cwtucop1->parent = Element;
     ccwtucop1->parent = Element;
     uturnsp->parent = Element;

@@ -50,58 +50,6 @@ static void advance_to_next_waypoint(void)
     }
 }
 
-void location_update_0(void)
-{
-    waypoint_list_t *list = save_manager_get_active_save();
-    
-    if (!current_target)
-    {
-        current_target = list->head->next;
-    }
-        
-    if (!current_target)
-    {
-        return;
-    }
-
-    double x_now = imu.output.position_x;
-    double y_now = imu.output.position_y;
-
-    double x_tgt = current_target->waypoint.x;
-    double y_tgt = current_target->waypoint.y;
-
-    double target_deg = direction_calculate(x_tgt, y_tgt, x_now, y_now);
-
-    yaw_loop.Target = target_deg;
-    yaw_loop.Actual = imu.output.euler[2];
-
-    double dx = x_tgt - x_now;
-    double dy = y_tgt - y_now;
-
-    if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_0)
-    {
-        if (current_target->id_startup == tunum->data_int)
-        {
-            imu.rot_comp.param.yaw_compensate_cw = cwtucop->data_float;
-            imu.rot_comp.param.yaw_compensate_ccw = ccwtucop->data_float;
-            current_state = STATE_UTURN;
-            advance_to_next_waypoint();
-        }
-        else
-        {
-            imu.rot_comp.param.yaw_compensate_cw = 0.0f;
-            imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
-            advance_to_next_waypoint();
-        }
-    }
-
-    if (!current_target) 
-    {
-        yaw_de_final = imu.output.euler[2];
-        current_state = STATE_DEACCELERATE;
-    }
-}
-
 void location_update_1(void)
 {
     waypoint_list_t *list = save_manager_get_active_save();
@@ -129,15 +77,13 @@ void location_update_1(void)
 
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
-    if (current_state != STATE_ACCELERATE)
+    
+    if (sqrt(dx * dx + dy * dy) < xythun->data_float && 
+        sqrt(dx * dx + dy * dy) >= XYMIN_BIA_1 &&
+        current_state != STATE_THUNDER &&
+        thunder_count < thnum->data_int)
     {
-        if (sqrt(dx * dx + dy * dy) < xythun->data_float && sqrt(dx * dx + dy * dy) >= XYMIN_BIA_1 &&
-            current_state != STATE_TRA_THUNDER &&
-            current_state != STATE_THUNDER &&
-            thunder_count < thnum->data_int)
-        {
-            current_state = STATE_DE_THUNDER;
-        }
+        current_state = STATE_DE_THUNDER;
     }
 
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_1)
@@ -301,7 +247,6 @@ void location_update_2_1(void)
 
 void location_update_2_2(void)
 {
-    static uint8_t de_stairs_flag = 0;
     waypoint_list_t *list = save_manager_get_active_save();
     
     if (!current_target)
@@ -347,24 +292,14 @@ void location_update_2_2(void)
 
     if (jump->data_int == 1)
     {
-        if (current_target && !current_target->next && de_stairs_flag == 0) 
+        if (current_target && !current_target->next) 
         {
-            if (speed2->data_int - stspeed->data_int > 90.0f)
-            {
-                current_state = STATE_DE_STAIRS;
-                de_stairs_flag = 1;
-            }
-            else if (speed2->data_int - stspeed->data_int <= 90.0f)
-            {
-                current_state = STATE_TRA_STAIRS;
-                de_stairs_flag = 1;
-            }
+            current_state = STATE_DE_STAIRS;
         }
 
         if (!current_target) 
         {
             ins_stop();
-            de_stairs_flag = 0;
             front_stairs_end_judge.thre = frcnt->data_int;
             now_element = FRONT_STAIRS;
             image_block = 1;
@@ -373,28 +308,18 @@ void location_update_2_2(void)
     }
     else if (jump->data_int == 2)
     {
-        if (current_target && !current_target->next && de_stairs_flag == 0) 
+        if (current_target && !current_target->next) 
         {
-            if (speed2->data_int - sipsp->data_int > 90.0f)
-            {
-                current_state = STATE_DE_STAIRS;
-                de_stairs_flag = 1;
-            }
-            else if (speed2->data_int - sipsp->data_int <= 90.0f)
-            {
-                current_state = STATE_TRA_STAIRS;
-                de_stairs_flag = 1;
-            }
+            current_state = STATE_DE_STAIRS;
         }
 
         if (!current_target) 
         {
             ins_stop();
-            de_stairs_flag = 0;
             front_stairs_end_judge.thre = frcnt->data_int;
             now_element = FRONT_STAIRS;
             image_block = 1;
-            speed_loop.ErrorInt= 0.0f;
+            speed_loop2.ErrorInt= 0.0f;
             current_state = STATE_SIMPLE_MAINTAIN;
         }
     }

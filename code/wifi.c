@@ -31,8 +31,8 @@ void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
 
-    oscilloscope_data.data[0] = speed_loop.Target;
-    oscilloscope_data.data[1] = stair_distance;
+    oscilloscope_data.data[0] = motor_value.receive_left_speed_data;
+    oscilloscope_data.data[1] = motor_value.receive_right_speed_data;
 
     oscilloscope_data.channel_num = 2;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
