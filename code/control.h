@@ -18,12 +18,13 @@ extern volatile float servo_right_back;
 extern volatile float servo_left_back;
 
 void control_init(void);
+void control_modify_judge(void);
+bool control_modify_switch(int road_num, float euler_angle);
 
 void control_state_idle(void);
 void control_state_stand_still(void);
 void control_state_deaccelerate(void);
 void control_state_de_thunder(void);
-void control_state_tra_thunder(void);
 void control_state_thunder(void);
 void control_state_forward(void);
 void control_state_decline_front_single_side(void);

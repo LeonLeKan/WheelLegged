@@ -101,6 +101,7 @@ int main(void)
     calculate_route();
     calculate_modify();
     calculate_uturn_3();
+    calculate_thun_3();
     save_manager_load(testnum->data_int + road_idx[road_num]);
 
     // 设置曝光度

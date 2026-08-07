@@ -43,12 +43,16 @@ static void deaccelerate_within_2(void)
 
         double dis_0 = sqrt((x_within_tgt - x_within_tgt_next) * (x_within_tgt - x_within_tgt_next) + (y_within_tgt - y_within_tgt_next) * (y_within_tgt - y_within_tgt_next));
         double dis_1 = sqrt((x_within_now - x_within_tgt) * (x_within_now - x_within_tgt) + (y_within_now - y_within_tgt) * (y_within_now - y_within_tgt));
-        if(road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
+        if (road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
         {
             if (dis_1 < dis2->data_float)
             {
                 speed_2_change = 2;
             }
+        }
+        else if (road_idx[road_num] == thun_3_idx[0] && current_target->id_startup <= thun_3_idx[1])
+        {
+            speed_2_change = 3;
         }
         else
         {
@@ -115,9 +119,7 @@ static void quit_single_side(void)
     }
     else if (current_state == STATE_MODIFY)
     {
-        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 0.5f)   ||
-            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 0.5f) ||
-            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 0.5f))
+        if (control_modify_switch(road_num, imu.output.euler[2]) == true)
         {
             disturb_flag = 1;
             last_raw_yaw = 0.0f;
@@ -172,9 +174,7 @@ static void judge_time_to_jump(void)
     }
     else if (current_state == STATE_MODIFY)
     {
-        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 0.5f)   ||
-            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 0.5f) ||
-            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 0.5f))
+        if (control_modify_switch(road_num, imu.output.euler[2]) == true)
         {
             disturb_flag = 1;
             jump_count = 0;
@@ -277,9 +277,7 @@ static void quit_follow_stairs(void)
     }
     if (current_state == STATE_MODIFY)
     {
-        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 0.5f)   ||
-            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 0.5f) ||
-            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 0.5f))
+        if (control_modify_switch(road_num, imu.output.euler[2]) == true)
         {
             disturb_flag = 1;
             last_raw_yaw = 0.0f;
@@ -332,9 +330,7 @@ static void quit_jolt(void)
     }
     else if (current_state == STATE_MODIFY)
     {
-        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 0.5f)   ||
-            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 0.5f) ||
-            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 0.5f))
+        if (control_modify_switch(road_num, imu.output.euler[2]) == true)
         {
             disturb_flag = 1;
             angle_loop2.ErrorInt = 0.0f;

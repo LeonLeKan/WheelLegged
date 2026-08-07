@@ -10,7 +10,8 @@ volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *modiro, *uturn3, *jump, *stside, *thun3, *saveall, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *sploop2, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
     *esha, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *kgray, *whiga, *minth, *maxth, *sicnt, *frcnt, *bacnt, *jocnt, *saveim,
-    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *tunext, *dis1, *speedl, *balspeed, *thsp, *rotusp, *dis2, *thunsp, *follsp, *cwtucop1, *ccwtucop1, *uturnsp, *turnamh, *speed0, *speed1, *speed2, *speed3, *speed4, *modisp, *sipsp, *saveel;
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *tunext, *dis1, *speedl, *balspeed, *thsp, *rotusp, *dis2, *thunsp, *follsp, *cwtucop1, *ccwtucop1, *uturnsp, *turnamh, *speed0, *speed1, *speed2, *speed3, *speed4, *modisp, *sipsp, 
+    *modi1, *modi2, *modi3, *modi4, *modi5, *modi6, *modi7, *modi8, *modi9, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
@@ -213,7 +214,16 @@ void create_2nd_menu(void)
     speed4 = createMenu("speed4", 2, 34, MENU_TYPE_INT, NULL);
     modisp = createMenu("modisp", 2, 35, MENU_TYPE_INT, NULL);
     sipsp = createMenu("sipsp", 2, 36, MENU_TYPE_INT, NULL);
-    saveel = createMenu("save", 2, 37, MENU_TYPE_FUNCTION, menu_save);
+    modi1 = createMenu("modi1", 2, 37, MENU_TYPE_FLOAT, NULL);
+    modi2 = createMenu("modi2", 2, 38, MENU_TYPE_FLOAT, NULL);
+    modi3 = createMenu("modi3", 2, 39, MENU_TYPE_FLOAT, NULL);
+    modi4 = createMenu("modi4", 2, 40, MENU_TYPE_FLOAT, NULL);
+    modi5 = createMenu("modi5", 2, 41, MENU_TYPE_FLOAT, NULL);
+    modi6 = createMenu("modi6", 2, 42, MENU_TYPE_FLOAT, NULL);
+    modi7 = createMenu("modi7", 2, 43, MENU_TYPE_FLOAT, NULL);
+    modi8 = createMenu("modi8", 2, 44, MENU_TYPE_FLOAT, NULL);
+    modi9 = createMenu("modi9", 2, 45, MENU_TYPE_FLOAT, NULL);
+    saveel = createMenu("save", 2, 46, MENU_TYPE_FUNCTION, menu_save);
 
     speed->next = anloop1;
     anloop1->last = speed;
@@ -349,8 +359,26 @@ void create_2nd_menu(void)
     modisp->last = speed4;
     modisp->next = sipsp;
     sipsp->last = modisp;
-    sipsp->next = saveel;
-    saveel->last = sipsp;
+    sipsp->next = modi1;
+    modi1->last = sipsp;
+    modi1->next = modi2;
+    modi2->last = modi1;
+    modi2->next = modi3;
+    modi3->last = modi2;
+    modi3->next = modi4;
+    modi4->last = modi3;
+    modi4->next = modi5;
+    modi5->last = modi4;
+    modi5->next = modi6;
+    modi6->last = modi5;
+    modi6->next = modi7;
+    modi7->last = modi6;
+    modi7->next = modi8;
+    modi8->last = modi7;
+    modi8->next = modi9;
+    modi9->last = modi8;
+    modi9->next = saveel;
+    saveel->last = modi9;
     saveel->next = change;
     change->last = saveel;
 
@@ -426,6 +454,15 @@ void create_2nd_menu(void)
     speed4->parent = Element;
     modisp->parent = Element;
     sipsp->parent = Element;
+    modi1->parent = Element;
+    modi2->parent = Element;
+    modi3->parent = Element;
+    modi4->parent = Element;
+    modi5->parent = Element;
+    modi6->parent = Element;
+    modi7->parent = Element;
+    modi8->parent = Element;
+    modi9->parent = Element;
     saveel->parent = Element;
 }
 

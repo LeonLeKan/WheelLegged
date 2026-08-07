@@ -69,6 +69,24 @@ void PID_Update_Lo(volatile PID_t *p)
     }
 }
 
+void PID_Update_In(volatile PID_t *p)
+{
+    p->Error1 = p->Error0;
+    p->Error0 = p->Target - p->Actual;
+    p->Error2 = p->Error1;
+
+    p->Out += p->Kp * (p->Error0 - p->Error1) + p->Ki * p->Error0 + p->Kd * (p->Error0 - 2 * p->Error1 + p->Error2);
+
+    if (p->Out > p->OutMax)
+    {
+        p->Out = p->OutMax;
+    }
+    if (p->Out < p->OutMin)
+    {
+        p->Out = p->OutMin;
+    }
+}
+
 void an1pid_update(float kp, float ki, float kd)
 {
     angle_loop1.Kp = kp;
@@ -104,19 +122,19 @@ void an2_zero(void)
 
 void sppid_update(float kp, float ki, float kd)
 {
-    speed_loop.Kp = kp;
-    speed_loop.Ki = ki;
-    speed_loop.Kd = kd;
-    speed_loop.OutMax = +50;
-    speed_loop.OutMin = -50;
-    speed_loop.ErrorIntMax = 500;
+    speed_loop2.Kp = kp;
+    speed_loop2.Ki = ki;
+    speed_loop2.Kd = kd;
+    speed_loop2.OutMax = +50;
+    speed_loop2.OutMin = -50;
+    speed_loop2.ErrorIntMax = 500;
 }
 
 void sp_zero(void)
 {
-    speed_loop.Kp = 0;
-    speed_loop.Ki = 0;
-    speed_loop.Kd = 0;
+    speed_loop2.Kp = 0;
+    speed_loop2.Ki = 0;
+    speed_loop2.Kd = 0;
 }
 
 void sp2pid_update(float kp, float ki, float kd)

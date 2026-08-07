@@ -28,6 +28,70 @@ void control_init(void)
     pit_ms_init(PIT_CH2, 20);
 }
 
+void control_modify_judge(void)
+{
+    if (modify_idx[road_num] == 1)
+    {
+        yaw_loop.Target = modi1->data_float;
+        yaw_loop.Actual = imu.output.euler[2];
+    }
+    else if (modify_idx[road_num] == 2)
+    {
+        yaw_loop.Target = modi2->data_float;
+        yaw_loop.Actual = imu.output.euler[2];
+    }
+    else if (modify_idx[road_num] == 3)
+    {
+        yaw_loop.Target = modi3->data_float;
+        yaw_loop.Actual = imu.output.euler[2];
+    }
+    else if (modify_idx[road_num] == 4)
+    {
+        yaw_loop.Target = modi4->data_float;
+        yaw_loop.Actual = imu.output.euler[2];
+    }
+    else if (modify_idx[road_num] == 5)
+    {
+        yaw_loop.Target = modi5->data_float;
+        yaw_loop.Actual = imu.output.euler[2];
+    }
+    else if (modify_idx[road_num] == 6)
+    {
+        yaw_loop.Target = modi6->data_float;
+        yaw_loop.Actual = imu.output.euler[2];
+    }
+    else if (modify_idx[road_num] == 7)
+    {
+        yaw_loop.Target = modi7->data_float;
+        yaw_loop.Actual = imu.output.euler[2];
+    }
+    else if (modify_idx[road_num] == 8)
+    {
+        yaw_loop.Target = modi8->data_float;
+        yaw_loop.Actual = imu.output.euler[2];
+    }
+    else if (modify_idx[road_num] == 9)
+    {
+        yaw_loop.Target = modi9->data_float;
+        yaw_loop.Actual = imu.output.euler[2];
+    }
+}
+
+bool control_modify_switch(int road_num, float euler_angle)
+{
+    int idx = modify_idx[road_num];
+    
+    return (idx == 1 && fabs(euler_angle - modi1->data_float) < 0.5f) ||
+           (idx == 2 && fabs(euler_angle - modi2->data_float) < 0.5f) ||
+           (idx == 3 && fabs(euler_angle - modi3->data_float) < 0.5f) ||
+           (idx == 4 && fabs(euler_angle - modi4->data_float) < 0.5f) ||
+           (idx == 5 && fabs(euler_angle - modi5->data_float) < 0.5f) ||
+           (idx == 6 && fabs(euler_angle - modi6->data_float) < 0.5f) ||
+           (idx == 7 && fabs(euler_angle - modi7->data_float) < 0.5f) ||
+           (idx == 8 && fabs(euler_angle - modi8->data_float) < 0.5f) ||
+           (idx == 9 && fabs(euler_angle - modi9->data_float) < 0.5f);
+}
+
 void control_state_idle(void)
 {
     para_zero();
@@ -55,6 +119,7 @@ void control_state_deaccelerate(void)
 {
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
+    sp2pid_update(sp2kp->data_float, sp2ki->data_float, sp2kd->data_float);
     yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
 
@@ -66,6 +131,7 @@ void control_state_deaccelerate(void)
 
         speed_loop2.Target = 0.0f;
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+        PID_Update_Lo(&speed_loop2);
       
         transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
         transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
@@ -464,6 +530,10 @@ void control_state_forward(void)
                 speed_loop2.Target = (float)speed4->data_int / 100.0f;
             }
         }
+        else if (speed_2_change == 3)
+        {
+            speed_loop2.Target = (float)thsp->data_int / 100.0f;
+        }
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         PID_Update_Lo(&speed_loop2);
 
@@ -539,7 +609,7 @@ void control_state_stand_front_single_side(void)
 {
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
-    sp2pid_update(sp2kp->data_float, sp2ki->data_float, sp2kd->data_float);
+    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
 
@@ -553,11 +623,14 @@ void control_state_stand_front_single_side(void)
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        // 对speed_loop2.Out进行低通滤波
+        static float filtered_speed_out = 0.0f;
+        static const float speed_alpha = 0.1f;
 
-        servo_set_01(servo_right_front - 10.0f, servo_left_front + 10.0f,
-                     servo_right_back + 10.0f, servo_left_back - 10.0f);
+        filtered_speed_out = speed_alpha * speed_loop2.Out + (1.0f - speed_alpha) * filtered_speed_out;
+
+        servo_set(80.0f - filtered_speed_out, 100.0f + filtered_speed_out,
+                  100.0f - filtered_speed_out, 80.0f + filtered_speed_out);
 
         turn_loop1.Target = 0.0f;
         turn_loop1.Actual = (float)error;
@@ -583,13 +656,17 @@ void control_state_single_side(void)
 {
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
-    sp2pid_update(sp2kp->data_float, sp2ki->data_float, sp2kd->data_float);
+    sppid_update(spkp->data_float, spki->data_float, spkd->data_float);
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
     snpid_update(snkp->data_float, snki->data_float, snkd->data_float);
 
     static uint32_t count = 0;
     count++;
+
+    // 对speed_loop2.Out进行低通滤波
+    static float filtered_speed_out = 0.0f;
+    static const float speed_alpha = 0.1f;
 
     if (count >= 4)
     {
@@ -599,27 +676,26 @@ void control_state_single_side(void)
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        filtered_speed_out = speed_alpha * speed_loop2.Out + (1.0f - speed_alpha) * filtered_speed_out;
 
         turn_loop1.Target = 0.0f;
         turn_loop1.Actual = (float)error;
         PID_Update_Lo(&turn_loop1);
     }
 
-    if (fabs(imu.output.euler[0] - roll_base) <= 3.0f)
-    {
-        single_loop.Target = roll_base;
-        single_loop.Actual = imu.output.euler[0];
-        PID_Update_Lo(&single_loop);
-    }
-    else
-    {
-        single_loop.Out = 0.0f;
-    }
+    // 单边桥控制
+    single_loop.Target = roll_base;
+    single_loop.Actual = imu.output.euler[0];
+    PID_Update_In(&single_loop);
 
-    servo_set_01(servo_right_front - single_loop.Out - 10.0f, servo_left_front + single_loop.Out + 10.0f,
-                 servo_right_back - single_loop.Out + 10.0f, servo_left_back + single_loop.Out - 10.0f);
+    // 对single_loop.Out进行低通滤波
+    static float filtered_single_out = 0.0f;
+    static const float single_alpha = 0.1f;
+
+    filtered_single_out = single_alpha * single_loop.Out + (1.0f - single_alpha) * filtered_single_out;
+
+    servo_set(75.0f - filtered_speed_out + filtered_single_out, 105.0f + filtered_speed_out + filtered_single_out,
+              105.0f - filtered_speed_out - filtered_single_out, 75.0f + filtered_speed_out - filtered_single_out);
 
     turn_loop2.Target = -turn_loop1.Out * speed_loop2.Actual;
     turn_loop2.Actual = -imu.body.gyro[2];
@@ -709,21 +785,7 @@ void control_state_simple_maintain(void)
         servo_set_01(servo_right_front, servo_left_front,
                      servo_right_back, servo_left_back);
 
-        if (modify_idx[road_num] == 1)
-        {
-            yaw_loop.Target = 0.0f;
-            yaw_loop.Actual = imu.output.euler[2];
-        }
-        else if (modify_idx[road_num] == 2)
-        {
-            yaw_loop.Target = 180.0f;
-            yaw_loop.Actual = imu.output.euler[2];
-        }
-        else if (modify_idx[road_num] == 3)
-        {
-            yaw_loop.Target = -180.0f;
-            yaw_loop.Actual = imu.output.euler[2];
-        }
+        control_modify_judge();
         PID_Update_Lo(&yaw_loop);
     }
 
@@ -766,21 +828,7 @@ void control_state_maintain_jump(void)
         servo_set_01(servo_right_front, servo_left_front,
                      servo_right_back, servo_left_back);
 
-        if (modify_idx[road_num] == 1)
-        {
-            yaw_loop.Target = 0.0f;
-            yaw_loop.Actual = imu.output.euler[2];
-        }
-        else if (modify_idx[road_num] == 2)
-        {
-            yaw_loop.Target = 180.0f;
-            yaw_loop.Actual = imu.output.euler[2];
-        }
-        else if (modify_idx[road_num] == 3)
-        {
-            yaw_loop.Target = -180.0f;
-            yaw_loop.Actual = imu.output.euler[2];
-        }
+        control_modify_judge();
         PID_Update_Lo(&yaw_loop);
     }
 
@@ -902,21 +950,7 @@ void control_state_simple_jump(void)
             servo_set_01(servo_right_front, servo_left_front,
                          servo_right_back, servo_left_back);
 
-            if (modify_idx[road_num] == 1)
-            {
-                yaw_loop.Target = 0.0f;
-                yaw_loop.Actual = imu.output.euler[2];
-            }
-            else if (modify_idx[road_num] == 2)
-            {
-                yaw_loop.Target = 180.0f;
-                yaw_loop.Actual = imu.output.euler[2];
-            }
-            else if (modify_idx[road_num] == 3)
-            {
-                yaw_loop.Target = -180.0f;
-                yaw_loop.Actual = imu.output.euler[2];
-            }
+            control_modify_judge();
             PID_Update_Lo(&yaw_loop);
         }
 
@@ -1089,21 +1123,7 @@ void control_state_maintain_follow(void)
         servo_set_01(servo_right_front, servo_left_front,
                      servo_right_back, servo_left_back);
 
-        if (modify_idx[road_num] == 1)
-        {
-            yaw_loop.Target = 0.0f;
-            yaw_loop.Actual = imu.output.euler[2];
-        }
-        else if (modify_idx[road_num] == 2)
-        {
-            yaw_loop.Target = 180.0f;
-            yaw_loop.Actual = imu.output.euler[2];
-        }
-        else if (modify_idx[road_num] == 3)
-        {
-            yaw_loop.Target = -180.0f;
-            yaw_loop.Actual = imu.output.euler[2];
-        }
+        control_modify_judge();
         PID_Update_Lo(&yaw_loop);
     }
 
@@ -1212,11 +1232,7 @@ void control_state_jolt(void)
         jolt_trap_count = 0;
     }
 
-    if (speed_loop2.Actual < 1.0f)
-    {
-        speed_loop2.Actual = 1.0f;
-    }
-    turn_loop2.Target = -joy_loop.Out * speed_loop2.Actual;
+    turn_loop2.Target = -joy_loop.Out;
     turn_loop2.Actual = -imu.body.gyro[2];
     PID_Update_Lo(&turn_loop2);
 
@@ -1443,21 +1459,7 @@ void control_state_modify(void)
         servo_set_01(servo_right_front, servo_left_front,
                      servo_right_back, servo_left_back);
 
-        if (modify_idx[road_num] == 1)
-        {
-            yaw_loop.Target = 0.0f;
-            yaw_loop.Actual = imu.output.euler[2];
-        }
-        else if (modify_idx[road_num] == 2)
-        {
-            yaw_loop.Target = 180.0f;
-            yaw_loop.Actual = imu.output.euler[2];
-        }
-        else if (modify_idx[road_num] == 3)
-        {
-            yaw_loop.Target = -180.0f;
-            yaw_loop.Actual = imu.output.euler[2];
-        }
+        control_modify_judge();
         PID_Update_Lo(&yaw_loop);
     }
 

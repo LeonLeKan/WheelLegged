@@ -78,6 +78,17 @@ void location_update_2_0(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
+    if (road_idx[road_num] == thun_3_idx[0])
+    {
+        if (sqrt(dx * dx + dy * dy) < xythun->data_float && 
+            sqrt(dx * dx + dy * dy) >= XYMIN_BIA_1 &&
+            current_state != STATE_THUNDER &&
+            current_target->id_startup <= thun_3_idx[1])
+        {
+            current_state = STATE_DE_THUNDER;
+        }
+    }
+
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
         if (road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
@@ -89,7 +100,7 @@ void location_update_2_0(void)
         }
         if (road_idx[road_num] == thun_3_idx[0])
         {
-            if (current_target->id_startup < thun_3_idx[1])
+            if (current_target->id_startup <= thun_3_idx[1])
             {
                 yaw_thunder_memory = imu.output.euler[2];
                 thunder_final_angle = atan2((current_target->next->waypoint.y - current_target->waypoint.y), (current_target->next->waypoint.x - current_target->waypoint.x)) * RAD_TO_DEG;
@@ -166,6 +177,17 @@ void location_update_2_1(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
+    if (road_idx[road_num] == thun_3_idx[0])
+    {
+        if (sqrt(dx * dx + dy * dy) < xythun->data_float && 
+            sqrt(dx * dx + dy * dy) >= XYMIN_BIA_1 &&
+            current_state != STATE_THUNDER &&
+            current_target->id_startup <= thun_3_idx[1])
+        {
+            current_state = STATE_DE_THUNDER;
+        }
+    }
+
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
         if (road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
@@ -177,7 +199,7 @@ void location_update_2_1(void)
         }
         if (road_idx[road_num] == thun_3_idx[0])
         {
-            if (current_target->id_startup < thun_3_idx[1])
+            if (current_target->id_startup <= thun_3_idx[1])
             {
                 yaw_thunder_memory = imu.output.euler[2];
                 thunder_final_angle = atan2((current_target->next->waypoint.y - current_target->waypoint.y), (current_target->next->waypoint.x - current_target->waypoint.x)) * RAD_TO_DEG;
@@ -257,6 +279,17 @@ void location_update_2_2(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
+    if (road_idx[road_num] == thun_3_idx[0])
+    {
+        if (sqrt(dx * dx + dy * dy) < xythun->data_float && 
+            sqrt(dx * dx + dy * dy) >= XYMIN_BIA_1 &&
+            current_state != STATE_THUNDER &&
+            current_target->id_startup <= thun_3_idx[1])
+        {
+            current_state = STATE_DE_THUNDER;
+        }
+    }
+
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
         if (road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
@@ -268,7 +301,7 @@ void location_update_2_2(void)
         }
         if (road_idx[road_num] == thun_3_idx[0])
         {
-            if (current_target->id_startup < thun_3_idx[1])
+            if (current_target->id_startup <= thun_3_idx[1])
             {
                 yaw_thunder_memory = imu.output.euler[2];
                 thunder_final_angle = atan2((current_target->next->waypoint.y - current_target->waypoint.y), (current_target->next->waypoint.x - current_target->waypoint.x)) * RAD_TO_DEG;
@@ -373,6 +406,17 @@ void location_update_2_3(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
+    if (road_idx[road_num] == thun_3_idx[0])
+    {
+        if (sqrt(dx * dx + dy * dy) < xythun->data_float && 
+            sqrt(dx * dx + dy * dy) >= XYMIN_BIA_1 &&
+            current_state != STATE_THUNDER &&
+            current_target->id_startup <= thun_3_idx[1])
+        {
+            current_state = STATE_DE_THUNDER;
+        }
+    }
+
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
         if (road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
@@ -384,7 +428,7 @@ void location_update_2_3(void)
         }
         if (road_idx[road_num] == thun_3_idx[0])
         {
-            if (current_target->id_startup < thun_3_idx[1])
+            if (current_target->id_startup <= thun_3_idx[1])
             {
                 yaw_thunder_memory = imu.output.euler[2];
                 thunder_final_angle = atan2((current_target->next->waypoint.y - current_target->waypoint.y), (current_target->next->waypoint.x - current_target->waypoint.x)) * RAD_TO_DEG;
@@ -464,6 +508,17 @@ void location_update_2_4(void)
     double dx = x_tgt - x_now;
     double dy = y_tgt - y_now;
 
+    if (road_idx[road_num] == thun_3_idx[0])
+    {
+        if (sqrt(dx * dx + dy * dy) < xythun->data_float && 
+            sqrt(dx * dx + dy * dy) >= XYMIN_BIA_1 &&
+            current_state != STATE_THUNDER &&
+            current_target->id_startup <= thun_3_idx[1])
+        {
+            current_state = STATE_DE_THUNDER;
+        }
+    }
+
     if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_2)
     {
         if (road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
@@ -475,7 +530,7 @@ void location_update_2_4(void)
         }
         if (road_idx[road_num] == thun_3_idx[0])
         {
-            if (current_target->id_startup < thun_3_idx[1])
+            if (current_target->id_startup <= thun_3_idx[1])
             {
                 yaw_thunder_memory = imu.output.euler[2];
                 thunder_final_angle = atan2((current_target->next->waypoint.y - current_target->waypoint.y), (current_target->next->waypoint.x - current_target->waypoint.x)) * RAD_TO_DEG;

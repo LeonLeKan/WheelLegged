@@ -31,10 +31,11 @@ void wifi_send_data(void)
 {
     seekfree_assistant_oscilloscope_struct oscilloscope_data;
 
-    oscilloscope_data.data[0] = motor_value.receive_left_speed_data;
-    oscilloscope_data.data[1] = motor_value.receive_right_speed_data;
+    oscilloscope_data.data[0] = speed_loop2.Target;
+    oscilloscope_data.data[1] = speed_loop2.Actual;
+    oscilloscope_data.data[2] = current_state;
 
-    oscilloscope_data.channel_num = 2;
+    oscilloscope_data.channel_num = 3;
     seekfree_assistant_oscilloscope_send(&oscilloscope_data);
 }
 
