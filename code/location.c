@@ -10,11 +10,11 @@ waypoint_node_t *current_target = NULL;
 uint8_t road_idx[5];
 uint8_t modify_idx[5];
 uint8_t uturn_3_idx[2];
+uint8_t thun_3_idx[2];
 uint8_t road_num = 0;
 uint8_t disturb_flag = 0;
 float last_raw_yaw = 0.0f;
 float target_yaw = 0.0f;
-uint8_t thunder_count = 0;
 uint8_t thunder_direction_flag = 0;
 double thunder_final_angle = 0.0f;
 
@@ -47,94 +47,6 @@ static void advance_to_next_waypoint(void)
     else
     {
         current_target = NULL;
-    }
-}
-
-void location_update_1(void)
-{
-    waypoint_list_t *list = save_manager_get_active_save();
-    
-    if (!current_target)
-    {
-        current_target = list->head->next;
-    }
-        
-    if (!current_target)
-    {
-        return;
-    }
-
-    double x_now = imu.output.position_x;
-    double y_now = imu.output.position_y;
-
-    double x_tgt = current_target->waypoint.x;
-    double y_tgt = current_target->waypoint.y;
-
-    double target_deg = direction_calculate(x_tgt, y_tgt, x_now, y_now);
-
-    yaw_loop.Target = target_deg;
-    yaw_loop.Actual = imu.output.euler[2];
-
-    double dx = x_tgt - x_now;
-    double dy = y_tgt - y_now;
-    
-    if (sqrt(dx * dx + dy * dy) < xythun->data_float && 
-        sqrt(dx * dx + dy * dy) >= XYMIN_BIA_1 &&
-        current_state != STATE_THUNDER &&
-        thunder_count < thnum->data_int)
-    {
-        current_state = STATE_DE_THUNDER;
-    }
-
-    if (sqrt(dx * dx + dy * dy) < XYMIN_BIA_1)
-    {
-        if (current_target->id_startup == tunum->data_int)
-        {
-            imu.rot_comp.param.yaw_compensate_cw = cwtucop->data_float;
-            imu.rot_comp.param.yaw_compensate_ccw = ccwtucop->data_float;
-            current_state = STATE_UTURN;
-            advance_to_next_waypoint();
-        }
-        else if (thunder_count < thnum->data_int)
-        {
-            thunder_count++;
-            yaw_thunder_memory = imu.output.euler[2];
-            thunder_final_angle = atan2((current_target->next->waypoint.y - current_target->waypoint.y), (current_target->next->waypoint.x - current_target->waypoint.x)) * RAD_TO_DEG;
-            if ((yaw_thunder_memory >= thunder_final_angle) &&
-                 !((yaw_thunder_memory >= thunder_final_angle) && (thunder_final_angle >= 0.0f)))
-            {
-                thunder_direction_flag = 1;
-            }
-            else if ((yaw_thunder_memory < thunder_final_angle) &&
-                 !((yaw_thunder_memory < thunder_final_angle) && (thunder_final_angle < 0.0f))) 
-            {
-                thunder_direction_flag = 2;
-            }
-            else if ((yaw_thunder_memory >= thunder_final_angle) && (thunder_final_angle >= 0.0f))
-            {
-                thunder_direction_flag = 4;
-            }
-            else if ((yaw_thunder_memory < thunder_final_angle) && (thunder_final_angle < 0.0f))
-            {
-                thunder_direction_flag = 3;
-            }
-            imu.rot_comp.param.yaw_compensate_cw = cwtucop1->data_float;
-            imu.rot_comp.param.yaw_compensate_ccw = ccwtucop1->data_float;
-            current_state = STATE_THUNDER;
-            advance_to_next_waypoint();
-        }
-        else
-        {
-            imu.rot_comp.param.yaw_compensate_cw = 0;
-            imu.rot_comp.param.yaw_compensate_ccw = 0;
-            advance_to_next_waypoint();
-        }
-    }
-
-    if (!current_target)
-    {
-        yaw_de_final = imu.output.euler[2];
-        current_state = STATE_DEACCELERATE;
     }
 }
 
@@ -174,6 +86,42 @@ void location_update_2_0(void)
             imu.rot_comp.param.yaw_compensate_ccw = ccwtucop->data_float;
             current_state = STATE_UTURN;
             advance_to_next_waypoint();
+        }
+        if (road_idx[road_num] == thun_3_idx[0])
+        {
+            if (current_target->id_startup < thun_3_idx[1])
+            {
+                yaw_thunder_memory = imu.output.euler[2];
+                thunder_final_angle = atan2((current_target->next->waypoint.y - current_target->waypoint.y), (current_target->next->waypoint.x - current_target->waypoint.x)) * RAD_TO_DEG;
+                if ((yaw_thunder_memory >= thunder_final_angle) &&
+                        !((yaw_thunder_memory >= thunder_final_angle) && (thunder_final_angle >= 0.0f)))
+                {
+                    thunder_direction_flag = 1;
+                }
+                else if ((yaw_thunder_memory < thunder_final_angle) &&
+                        !((yaw_thunder_memory < thunder_final_angle) && (thunder_final_angle < 0.0f))) 
+                {
+                    thunder_direction_flag = 2;
+                }
+                else if ((yaw_thunder_memory >= thunder_final_angle) && (thunder_final_angle >= 0.0f))
+                {
+                    thunder_direction_flag = 4;
+                }
+                else if ((yaw_thunder_memory < thunder_final_angle) && (thunder_final_angle < 0.0f))
+                {
+                    thunder_direction_flag = 3;
+                }
+                imu.rot_comp.param.yaw_compensate_cw = cwtucop1->data_float;
+                imu.rot_comp.param.yaw_compensate_ccw = ccwtucop1->data_float;
+                current_state = STATE_THUNDER;
+                advance_to_next_waypoint();
+            }
+            else
+            {
+                imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+                imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
+                advance_to_next_waypoint();
+            }
         }
         else
         {
@@ -226,6 +174,42 @@ void location_update_2_1(void)
             imu.rot_comp.param.yaw_compensate_ccw = ccwtucop->data_float;
             current_state = STATE_UTURN;
             advance_to_next_waypoint();
+        }
+        if (road_idx[road_num] == thun_3_idx[0])
+        {
+            if (current_target->id_startup < thun_3_idx[1])
+            {
+                yaw_thunder_memory = imu.output.euler[2];
+                thunder_final_angle = atan2((current_target->next->waypoint.y - current_target->waypoint.y), (current_target->next->waypoint.x - current_target->waypoint.x)) * RAD_TO_DEG;
+                if ((yaw_thunder_memory >= thunder_final_angle) &&
+                        !((yaw_thunder_memory >= thunder_final_angle) && (thunder_final_angle >= 0.0f)))
+                {
+                    thunder_direction_flag = 1;
+                }
+                else if ((yaw_thunder_memory < thunder_final_angle) &&
+                        !((yaw_thunder_memory < thunder_final_angle) && (thunder_final_angle < 0.0f))) 
+                {
+                    thunder_direction_flag = 2;
+                }
+                else if ((yaw_thunder_memory >= thunder_final_angle) && (thunder_final_angle >= 0.0f))
+                {
+                    thunder_direction_flag = 4;
+                }
+                else if ((yaw_thunder_memory < thunder_final_angle) && (thunder_final_angle < 0.0f))
+                {
+                    thunder_direction_flag = 3;
+                }
+                imu.rot_comp.param.yaw_compensate_cw = cwtucop1->data_float;
+                imu.rot_comp.param.yaw_compensate_ccw = ccwtucop1->data_float;
+                current_state = STATE_THUNDER;
+                advance_to_next_waypoint();
+            }
+            else
+            {
+                imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+                imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
+                advance_to_next_waypoint();
+            }
         }
         else
         {
@@ -281,6 +265,42 @@ void location_update_2_2(void)
             imu.rot_comp.param.yaw_compensate_ccw = ccwtucop->data_float;
             current_state = STATE_UTURN;
             advance_to_next_waypoint();
+        }
+        if (road_idx[road_num] == thun_3_idx[0])
+        {
+            if (current_target->id_startup < thun_3_idx[1])
+            {
+                yaw_thunder_memory = imu.output.euler[2];
+                thunder_final_angle = atan2((current_target->next->waypoint.y - current_target->waypoint.y), (current_target->next->waypoint.x - current_target->waypoint.x)) * RAD_TO_DEG;
+                if ((yaw_thunder_memory >= thunder_final_angle) &&
+                        !((yaw_thunder_memory >= thunder_final_angle) && (thunder_final_angle >= 0.0f)))
+                {
+                    thunder_direction_flag = 1;
+                }
+                else if ((yaw_thunder_memory < thunder_final_angle) &&
+                        !((yaw_thunder_memory < thunder_final_angle) && (thunder_final_angle < 0.0f))) 
+                {
+                    thunder_direction_flag = 2;
+                }
+                else if ((yaw_thunder_memory >= thunder_final_angle) && (thunder_final_angle >= 0.0f))
+                {
+                    thunder_direction_flag = 4;
+                }
+                else if ((yaw_thunder_memory < thunder_final_angle) && (thunder_final_angle < 0.0f))
+                {
+                    thunder_direction_flag = 3;
+                }
+                imu.rot_comp.param.yaw_compensate_cw = cwtucop1->data_float;
+                imu.rot_comp.param.yaw_compensate_ccw = ccwtucop1->data_float;
+                current_state = STATE_THUNDER;
+                advance_to_next_waypoint();
+            }
+            else
+            {
+                imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+                imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
+                advance_to_next_waypoint();
+            }
         }
         else
         {
@@ -362,6 +382,42 @@ void location_update_2_3(void)
             current_state = STATE_UTURN;
             advance_to_next_waypoint();
         }
+        if (road_idx[road_num] == thun_3_idx[0])
+        {
+            if (current_target->id_startup < thun_3_idx[1])
+            {
+                yaw_thunder_memory = imu.output.euler[2];
+                thunder_final_angle = atan2((current_target->next->waypoint.y - current_target->waypoint.y), (current_target->next->waypoint.x - current_target->waypoint.x)) * RAD_TO_DEG;
+                if ((yaw_thunder_memory >= thunder_final_angle) &&
+                        !((yaw_thunder_memory >= thunder_final_angle) && (thunder_final_angle >= 0.0f)))
+                {
+                    thunder_direction_flag = 1;
+                }
+                else if ((yaw_thunder_memory < thunder_final_angle) &&
+                        !((yaw_thunder_memory < thunder_final_angle) && (thunder_final_angle < 0.0f))) 
+                {
+                    thunder_direction_flag = 2;
+                }
+                else if ((yaw_thunder_memory >= thunder_final_angle) && (thunder_final_angle >= 0.0f))
+                {
+                    thunder_direction_flag = 4;
+                }
+                else if ((yaw_thunder_memory < thunder_final_angle) && (thunder_final_angle < 0.0f))
+                {
+                    thunder_direction_flag = 3;
+                }
+                imu.rot_comp.param.yaw_compensate_cw = cwtucop1->data_float;
+                imu.rot_comp.param.yaw_compensate_ccw = ccwtucop1->data_float;
+                current_state = STATE_THUNDER;
+                advance_to_next_waypoint();
+            }
+            else
+            {
+                imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+                imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
+                advance_to_next_waypoint();
+            }
+        }
         else
         {
             imu.rot_comp.param.yaw_compensate_cw = 0.0f;
@@ -416,6 +472,42 @@ void location_update_2_4(void)
             imu.rot_comp.param.yaw_compensate_ccw = ccwtucop->data_float;
             current_state = STATE_UTURN;
             advance_to_next_waypoint();
+        }
+        if (road_idx[road_num] == thun_3_idx[0])
+        {
+            if (current_target->id_startup < thun_3_idx[1])
+            {
+                yaw_thunder_memory = imu.output.euler[2];
+                thunder_final_angle = atan2((current_target->next->waypoint.y - current_target->waypoint.y), (current_target->next->waypoint.x - current_target->waypoint.x)) * RAD_TO_DEG;
+                if ((yaw_thunder_memory >= thunder_final_angle) &&
+                        !((yaw_thunder_memory >= thunder_final_angle) && (thunder_final_angle >= 0.0f)))
+                {
+                    thunder_direction_flag = 1;
+                }
+                else if ((yaw_thunder_memory < thunder_final_angle) &&
+                        !((yaw_thunder_memory < thunder_final_angle) && (thunder_final_angle < 0.0f))) 
+                {
+                    thunder_direction_flag = 2;
+                }
+                else if ((yaw_thunder_memory >= thunder_final_angle) && (thunder_final_angle >= 0.0f))
+                {
+                    thunder_direction_flag = 4;
+                }
+                else if ((yaw_thunder_memory < thunder_final_angle) && (thunder_final_angle < 0.0f))
+                {
+                    thunder_direction_flag = 3;
+                }
+                imu.rot_comp.param.yaw_compensate_cw = cwtucop1->data_float;
+                imu.rot_comp.param.yaw_compensate_ccw = ccwtucop1->data_float;
+                current_state = STATE_THUNDER;
+                advance_to_next_waypoint();
+            }
+            else
+            {
+                imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+                imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
+                advance_to_next_waypoint();
+            }
         }
         else
         {

@@ -46,7 +46,6 @@ extern volatile uint32_t jump_lock_count;
 extern volatile uint8_t follow_lock;
 extern volatile uint32_t follow_lock_count_1;
 extern volatile uint32_t follow_lock_count_2;
-extern volatile uint8_t follow_speed_change;
 
 void control_state_switch(void);
 void control_state_update(void);

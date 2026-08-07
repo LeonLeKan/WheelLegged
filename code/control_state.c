@@ -21,7 +21,6 @@ volatile uint32_t jump_lock_count = 0;
 volatile uint8_t follow_lock = 0;
 volatile uint32_t follow_lock_count_1 = 0;
 volatile uint32_t follow_lock_count_2 = 0;
-volatile uint8_t follow_speed_change = 0;
 
 static void deaccelerate_to_stop(void)
 {
@@ -283,7 +282,6 @@ static void quit_follow_stairs(void)
             (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 0.5f))
         {
             disturb_flag = 1;
-            follow_speed_change = 0;
             last_raw_yaw = 0.0f;
             target_yaw = 0.0f;
             ins_reset();

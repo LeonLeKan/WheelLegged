@@ -24,6 +24,7 @@ void remote_control(void);
 void calculate_route(void);
 void calculate_modify(void);
 void calculate_uturn_3(void);
+void calculate_thun_3(void);
 void image_update(void);
 
 uint8_t motion_mode1 = 0;
@@ -502,6 +503,40 @@ void calculate_uturn_3(void)
         else
         {
             uturn_3_idx[i] = 0;
+        }
+    }
+}
+
+void calculate_thun_3(void)
+{
+    int temp = thun3->data_int;
+    uint8_t digits[2] = {0};
+    int count = 0;
+
+    if (temp == 0)
+    {
+        digits[0] = 0;
+        count = 1;
+    }
+    else
+    {
+        while (temp > 0 && count < 2)
+        {
+            digits[count] = (uint8_t)(temp % 10);
+            count++;
+            temp /= 10;
+        }
+    }
+
+    for (int i = 0; i < 2; i++)
+    {
+        if (i < count)
+        {
+            thun_3_idx[i] = digits[count - 1 - i];
+        }
+        else
+        {
+            thun_3_idx[i] = 0;
         }
     }
 }

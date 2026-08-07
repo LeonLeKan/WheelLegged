@@ -7,10 +7,10 @@
 
 volatile menu_state_t menu_current_state = MENU_STATE_CONTROL;
 
-MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *modiro, *thnum, *tunum, *uturn3, *jump, *stside, *saveall, *currentMenu;
+MENU *WheelLeg, *Balance, *Image, *Element, *testnum, *road2, *modiro, *uturn3, *jump, *stside, *thun3, *saveall, *currentMenu;
 MENU *speed, *anloop1, *anloop2, *sploop, *sploop2, *tuloop1, *tuloop2, *asloop, *snloop, *yaloop, *josloop, *joyloop, *imubias, *pzero, *pinit,
     *esha, *imexp, *farl, *nearl, *stdis1, *stdis2, *stdis3, *kgray, *whiga, *minth, *maxth, *sicnt, *frcnt, *bacnt, *jocnt, *saveim,
-    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *tunext, *dis1, *speedl, *balspeed, *thsp, *rotusp, *dis2, *curnext, *follsp, *cwtucop1, *ccwtucop1, *uturnsp, *turnamh, *speed0, *speed1, *speed2, *speed3, *speed4, *modisp, *sipsp, *saveel;
+    *change, *snspeed, *rollba, *turnamf, *turnamt, *cwtucop, *ccwtucop, *stspeed, *jospeed, *snlock, *rospeed, *turnamj, *baspeed, *joangle, *jolock, *xythun, *tunext, *dis1, *speedl, *balspeed, *thsp, *rotusp, *dis2, *thunsp, *follsp, *cwtucop1, *ccwtucop1, *uturnsp, *turnamh, *speed0, *speed1, *speed2, *speed3, *speed4, *modisp, *sipsp, *saveel;
 MENU *an1kp, *an1ki, *an1kd,
     *an2kp, *an2ki, *an2kd,
     *spkp, *spki, *spkd,
@@ -97,12 +97,11 @@ void create_1st_menu(void)
     testnum = createMenu("testnum", 1, 4, MENU_TYPE_INT, NULL);
     road2 = createMenu("road2", 1, 5, MENU_TYPE_INT, NULL);
     modiro = createMenu("modiro", 1, 6, MENU_TYPE_INT, NULL);
-    thnum = createMenu("thnum", 1, 7, MENU_TYPE_INT, NULL);
-    tunum = createMenu("tunum", 1, 8, MENU_TYPE_INT, NULL);
-    uturn3 = createMenu("uturn3", 1, 9, MENU_TYPE_INT, NULL);
-    jump = createMenu("jump", 1, 10, MENU_TYPE_INT, NULL);
-    stside = createMenu("stside", 1, 11, MENU_TYPE_INT, NULL);
-    saveall = createMenu("save", 1, 12, MENU_TYPE_FUNCTION, menu_save);
+    uturn3 = createMenu("uturn3", 1, 7, MENU_TYPE_INT, NULL);
+    jump = createMenu("jump", 1, 8, MENU_TYPE_INT, NULL);
+    stside = createMenu("stside", 1, 9, MENU_TYPE_INT, NULL);
+    thun3 = createMenu("thun3", 1, 10, MENU_TYPE_INT, NULL);
+    saveall = createMenu("save", 1, 11, MENU_TYPE_FUNCTION, menu_save);
 
     WheelLeg->child = Balance;
     Balance->parent = WheelLeg;
@@ -111,11 +110,10 @@ void create_1st_menu(void)
     testnum->parent = WheelLeg;
     road2->parent = WheelLeg;
     modiro->parent = WheelLeg;
-    thnum->parent = WheelLeg;
-    tunum->parent = WheelLeg;
     uturn3->parent = WheelLeg;
     jump->parent = WheelLeg;
     stside->parent = WheelLeg;
+    thun3->parent = WheelLeg;
     saveall->parent = WheelLeg;
 
     Balance->next = Image;
@@ -128,18 +126,16 @@ void create_1st_menu(void)
     road2->last = testnum;
     road2->next = modiro;
     modiro->last = road2;
-    modiro->next = thnum;
-    thnum->last = modiro;
-    thnum->next = tunum;
-    tunum->last = thnum;
-    tunum->next = uturn3;
-    uturn3->last = tunum;
+    modiro->next = uturn3;
+    uturn3->last = modiro;
     uturn3->next = jump;
     jump->last = uturn3;
     jump->next = stside;
     stside->last = jump;
-    stside->next = saveall;
-    saveall->last = stside;
+    stside->next = thun3;
+    thun3->last = stside;
+    thun3->next = saveall;
+    saveall->last = thun3;
     saveall->next = Balance;
     Balance->last = saveall;
 
@@ -204,7 +200,7 @@ void create_2nd_menu(void)
     thsp = createMenu("thsp", 2, 21, MENU_TYPE_INT, NULL);
     rotusp = createMenu("rotusp", 2, 22, MENU_TYPE_INT, NULL);
     dis2 = createMenu("dis2", 2, 23, MENU_TYPE_FLOAT, NULL);
-    curnext = createMenu("curnext", 2, 24, MENU_TYPE_INT, NULL);
+    thunsp = createMenu("thunsp", 2, 24, MENU_TYPE_INT, NULL);
     follsp = createMenu("follsp", 2, 25, MENU_TYPE_INT, NULL);
     cwtucop1 = createMenu("cwtucop1", 2, 26, MENU_TYPE_FLOAT, NULL);
     ccwtucop1 = createMenu("ccwtucop1", 2, 27, MENU_TYPE_FLOAT, NULL);
@@ -327,10 +323,10 @@ void create_2nd_menu(void)
     rotusp->last = thsp;
     rotusp->next = dis2;
     dis2->last = rotusp;
-    dis2->next = curnext;
-    curnext->last = dis2;
-    curnext->next = follsp;
-    follsp->last = curnext;
+    dis2->next = thunsp;
+    thunsp->last = dis2;
+    thunsp->next = follsp;
+    follsp->last = thunsp;
     follsp->next = cwtucop1;
     cwtucop1->last = follsp;
     cwtucop1->next = ccwtucop1;
@@ -417,7 +413,7 @@ void create_2nd_menu(void)
     thsp->parent = Element;
     rotusp->parent = Element;
     dis2->parent = Element;
-    curnext->parent = Element;
+    thunsp->parent = Element;
     follsp->parent = Element;
     cwtucop1->parent = Element;
     ccwtucop1->parent = Element;
@@ -1172,14 +1168,6 @@ void menu_save(void)
     flash_union_buffer[index++].int32_type = modify_road->data_int;
     node_count++;
 
-    MENU *thun_num = thnum;
-    flash_union_buffer[index++].int32_type = thun_num->data_int;
-    node_count++;
-
-    MENU *turn_num = tunum;
-    flash_union_buffer[index++].int32_type = turn_num->data_int;
-    node_count++;
-
     MENU *uturn_3 = uturn3;
     flash_union_buffer[index++].int32_type = uturn_3->data_int;
     node_count++;
@@ -1190,6 +1178,10 @@ void menu_save(void)
 
     MENU *stair_side = stside;
     flash_union_buffer[index++].int32_type = stair_side->data_int;
+    node_count++;
+
+    MENU *thun_3 = thun3;
+    flash_union_buffer[index++].int32_type = thun_3->data_int;
     node_count++;
 
     flash_union_buffer[0].float_type = menu_magic;
@@ -1344,20 +1336,6 @@ void menu_load(void)
         modify_road->data_int = 0;
     }
 
-    MENU *thun_num = thnum;
-    thun_num->data_int = (int)flash_union_buffer[idx++].int32_type;
-    if (fabs((float)thun_num->data_int) >= 100000)
-    {
-        thun_num->data_int = 0;
-    }
-
-    MENU *turn_num = tunum;
-    turn_num->data_int = (int)flash_union_buffer[idx++].int32_type;
-    if (fabs((float)turn_num->data_int) >= 100000)
-    {
-        turn_num->data_int = 0;
-    }
-
     MENU *uturn_3 = uturn3;
     uturn_3->data_int = (int)flash_union_buffer[idx++].int32_type;
     if (fabs((float)uturn_3->data_int) >= 100000)
@@ -1377,6 +1355,13 @@ void menu_load(void)
     if (fabs((float)stair_side->data_int) >= 100000)
     {
         stair_side->data_int = 0;
+    }
+
+    MENU *thun_3 = thun3;
+    thun_3->data_int = (int)flash_union_buffer[idx++].int32_type;
+    if (fabs((float)thun_3->data_int) >= 100000)
+    {
+        thun_3->data_int = 0;
     }
 }
 

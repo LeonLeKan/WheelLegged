@@ -17,15 +17,14 @@ extern waypoint_node_t *current_target;
 extern uint8_t road_idx[5];
 extern uint8_t modify_idx[5];
 extern uint8_t uturn_3_idx[2];
+extern uint8_t thun_3_idx[2];
 extern uint8_t road_num;
 extern uint8_t disturb_flag;
 extern float last_raw_yaw;
 extern float target_yaw;
-extern uint8_t thunder_count;
 extern uint8_t thunder_direction_flag;
 extern double thunder_final_angle;
 
-void location_update_1(void);
 void location_update_2_0(void);
 void location_update_2_1(void);
 void location_update_2_2(void);
