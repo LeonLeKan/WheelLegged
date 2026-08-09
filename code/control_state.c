@@ -68,7 +68,7 @@ static void deaccelerate_within_2(void)
 static void decline_to_single_side_stand(void)
 {
     if (current_state == STATE_DECLINE_FRONT_SINGLE_SIDE
-      && speed_loop2.Actual < (float)snspeed->data_int / 100.0f)
+      && speed_loop2.Actual < (float)snspeed->data_int / 100.0f - 0.5f)
     {
         current_state = STATE_STAND_FRONT_SINGLE_SIDE;
     }
@@ -245,7 +245,7 @@ static void quit_follow_stairs(void)
         if (follow_lock == 1)
         {
             follow_lock_count_1++;
-            if (follow_lock_count_1 >= 200)
+            if (follow_lock_count_1 >= 100)
             {
                 follow_lock = 0;
                 follow_lock_count_1 = 0;
@@ -263,7 +263,7 @@ static void quit_follow_stairs(void)
         if (follow_lock == 1)
         {
             follow_lock_count_2++;
-            if (follow_lock_count_2 >= 100)
+            if (follow_lock_count_2 >= 150)
             {
                 follow_lock = 3;
                 follow_lock_count_2 = 0;

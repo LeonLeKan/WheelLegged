@@ -175,10 +175,12 @@ void control_state_de_thunder(void)
 
         speed_loop2.Target = (float)thunsp->data_int / 100.0f;
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+        speed_loop2.OutMax = +6;
+        speed_loop2.OutMin = -6;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        transform_xy_right(-speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(-speed_loop2.Out, 6.0f, &servo_left_front, &servo_left_back);
 
         servo_set_01(servo_right_front, servo_left_front,
                      servo_right_back, servo_left_back);
@@ -503,45 +505,58 @@ void control_state_forward(void)
     {
         count = 0;
 
-        if (speed_2_change == 2)
+        if (speed_2_change != 3)
         {
-            speed_loop2.Target = (float)uturnsp->data_int / 100.0f;
-        }
-        else if (speed_2_change == 0)
-        {
-            if (road_idx[road_num] == 0 || road_idx[road_num] == 7)
+            if (speed_2_change == 2)
             {
-                speed_loop2.Target = (float)speed0->data_int / 100.0f;
+                speed_loop2.Target = (float)uturnsp->data_int / 100.0f;
             }
-            else if (road_idx[road_num] == 1 || road_idx[road_num] == 5)
+            else if (speed_2_change == 0)
             {
-                speed_loop2.Target = (float)speed1->data_int / 100.0f;
+                if (road_idx[road_num] == 0 || road_idx[road_num] == 7)
+                {
+                    speed_loop2.Target = (float)speed0->data_int / 100.0f;
+                }
+                else if (road_idx[road_num] == 1 || road_idx[road_num] == 5)
+                {
+                    speed_loop2.Target = (float)speed1->data_int / 100.0f;
+                }
+                else if (road_idx[road_num] == 2)
+                {
+                    speed_loop2.Target = (float)speed2->data_int / 100.0f;
+                }
+                else if (road_idx[road_num] == 3)
+                {
+                    speed_loop2.Target = (float)speed3->data_int / 100.0f;
+                }
+                else if (road_idx[road_num] == 4 || road_idx[road_num] == 6)
+                {
+                    speed_loop2.Target = (float)speed4->data_int / 100.0f;
+                }
             }
-            else if (road_idx[road_num] == 2)
-            {
-                speed_loop2.Target = (float)speed2->data_int / 100.0f;
-            }
-            else if (road_idx[road_num] == 3)
-            {
-                speed_loop2.Target = (float)speed3->data_int / 100.0f;
-            }
-            else if (road_idx[road_num] == 4 || road_idx[road_num] == 6)
-            {
-                speed_loop2.Target = (float)speed4->data_int / 100.0f;
-            }
+            speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+            PID_Update_Lo(&speed_loop2);
+
+            transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+            transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+
+            servo_set_01(servo_right_front, servo_left_front,
+                         servo_right_back, servo_left_back);
         }
         else if (speed_2_change == 3)
         {
             speed_loop2.Target = (float)thsp->data_int / 100.0f;
+            speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+            speed_loop2.OutMax = +6;
+            speed_loop2.OutMin = -6;
+            PID_Update_Lo(&speed_loop2);
+
+            transform_xy_right(-speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);
+            transform_xy_left(-speed_loop2.Out, 6.0f, &servo_left_front, &servo_left_back);
+
+            servo_set_01(servo_right_front, servo_left_front,
+                         servo_right_back, servo_left_back);
         }
-        speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
-        PID_Update_Lo(&speed_loop2);
-
-        transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
-
-        servo_set_01(servo_right_front, servo_left_front,
-                     servo_right_back, servo_left_back);
 
         PID_Update_Lo(&yaw_loop);
     }
@@ -1400,6 +1415,9 @@ void control_state_uturn(void)
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
     sp2pid_update(sp2kp->data_float, sp2ki->data_float, sp2kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
+
+    imu.rot_comp.param.yaw_compensate_cw = cwtucop->data_float;
+    imu.rot_comp.param.yaw_compensate_ccw = ccwtucop->data_float;
 
     speed_loop2.Target = (float)uturnsp->data_int / 100.0f;
     speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;

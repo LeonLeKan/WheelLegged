@@ -959,13 +959,21 @@ void search_white_range()
             }
         }
         white_range[i].num = tnum;
-        int expected_w = get_expected_road_width(i, 100, 30);
-        if (!found_road_start && longest >= 0.6 * expected_w)
+        int expected_w = 0;
+        if(now_element == SINGLE_SIDE)
+        {
+            expected_w = 0.6 * get_expected_road_width(i, 100, 30);
+        }
+        else 
+        {
+            expected_w = 0.8 * get_expected_road_width(i, 100, 30);
+        }
+        if (!found_road_start && longest >= expected_w)
         {
             found_road_start = 1;
             road_start = i;
         }
-        else if (!found_road_end && found_road_start && longest < expected_w * 0.4)
+        else if (!found_road_end && found_road_start && longest < expected_w * 0.6)
         {
             found_road_end = 1;
             road_end = i;
@@ -1440,7 +1448,8 @@ uint8_t find_least_square_start(uint8_t* line, uint8_t start, uint8_t end, uint8
         if (change_y == 0) // 线条连续，没有跳变
         {
             // 检查赛道宽度是否合法
-            if (right_line[i] - left_line[i] < 0.6 * get_expected_road_width(i, 100, 30)) continue;
+            if (now_element == SINGLE_SIDE &&right_line[i] - left_line[i] < 0.6 * get_expected_road_width(i, 100, 30)) continue;
+            else if(right_line[i] - left_line[i] < 0.8 * get_expected_road_width(i, 100, 30)) continue;
             // 找到连续线段，判断k
             float input[3];
             least_square_with_R(line, i, limit, input);
@@ -1836,6 +1845,8 @@ void image_main()
             //    error = 0;
             //}
         }
+        if (error < -50) error = 0;
+        if (error > 50) error = 0;
         break;
     case SINGLE_SIDE:
         if (NEAR_LINE - road_start >= 20)

@@ -142,8 +142,8 @@ void sp2pid_update(float kp, float ki, float kd)
     speed_loop2.Kp = kp;
     speed_loop2.Ki = ki;
     speed_loop2.Kd = kd;
-    speed_loop2.OutMax = +4;
-    speed_loop2.OutMin = -4;
+    speed_loop2.OutMax = +3.5;
+    speed_loop2.OutMin = -3.5;
     speed_loop2.ErrorIntMax = 500;
 }
 
