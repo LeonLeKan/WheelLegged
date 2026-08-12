@@ -47,29 +47,29 @@ static float clamp_angle(float angle)
     return angle;
 }
 
-void servo_set(float servo_right_front, float servo_left_front, float servo_right_back, float servo_left_back)
+void servo_set(float servo_left_back, float servo_right_front, float servo_right_back, float servo_left_front)
 {
-    servo1_set_angle(clamp_angle(servo_right_front)); 
-    servo2_set_angle(clamp_angle(servo_left_front)); 
+    servo1_set_angle(clamp_angle(servo_left_back)); 
+    servo2_set_angle(clamp_angle(servo_right_front)); 
     servo3_set_angle(clamp_angle(servo_right_back));
-    servo4_set_angle(clamp_angle(servo_left_back));
+    servo4_set_angle(clamp_angle(servo_left_front));
 }
 
-void servo_set_01(float servo_right_front, float servo_left_front, float servo_right_back, float servo_left_back)
+void servo_set_01(float servo_left_back, float servo_right_front, float servo_right_back, float servo_left_front)
 {
-    static float filtered_right_front = 90.0f;
-    static float filtered_left_front = 90.0f;
-    static float filtered_right_back = 90.0f;
     static float filtered_left_back = 90.0f;
+    static float filtered_right_front = 90.0f;
+    static float filtered_right_back = 90.0f;
+    static float filtered_left_front = 90.0f;
     static const float filter_alpha = 0.1f;
 
-    filtered_right_front = filter_alpha * servo_right_front + (1.0f - filter_alpha) * filtered_right_front;
-    filtered_left_front = filter_alpha * servo_left_front + (1.0f - filter_alpha) * filtered_left_front;
-    filtered_right_back = filter_alpha * servo_right_back + (1.0f - filter_alpha) * filtered_right_back;
     filtered_left_back = filter_alpha * servo_left_back + (1.0f - filter_alpha) * filtered_left_back;
+    filtered_right_front = filter_alpha * servo_right_front + (1.0f - filter_alpha) * filtered_right_front;
+    filtered_right_back = filter_alpha * servo_right_back + (1.0f - filter_alpha) * filtered_right_back;
+    filtered_left_front = filter_alpha * servo_left_front + (1.0f - filter_alpha) * filtered_left_front;
 
-    servo1_set_angle(clamp_angle(filtered_right_front));
-    servo2_set_angle(clamp_angle(filtered_left_front));
+    servo1_set_angle(clamp_angle(filtered_left_back));
+    servo2_set_angle(clamp_angle(filtered_right_front));
     servo3_set_angle(clamp_angle(filtered_right_back));
-    servo4_set_angle(clamp_angle(filtered_left_back));
+    servo4_set_angle(clamp_angle(filtered_left_front));
 }

@@ -80,7 +80,7 @@ void control_modify_judge(void)
 bool control_modify_switch(int road_num, float euler_angle)
 {
     int idx = modify_idx[road_num];
-    
+
     return (idx == 1 && fabs(euler_angle - modi1->data_float) < 0.5f) ||
            (idx == 2 && fabs(euler_angle - modi2->data_float) < 0.5f) ||
            (idx == 3 && fabs(euler_angle - modi3->data_float) < 0.5f) ||
@@ -132,12 +132,12 @@ void control_state_deaccelerate(void)
         speed_loop2.Target = 0.0f;
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         PID_Update_Lo(&speed_loop2);
-      
-        transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
 
-        servo_set_01(servo_right_front, servo_left_front,
-                     servo_right_back, servo_left_back);
+        transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+
+        servo_set_01(servo_left_back, servo_right_front,
+                     servo_right_back, servo_left_front);
 
         yaw_loop.Target = yaw_de_final;
         yaw_loop.Actual = imu.output.euler[2];
@@ -179,11 +179,11 @@ void control_state_de_thunder(void)
         speed_loop2.OutMin = -5;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(-speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 6.0f, &servo_left_front, &servo_left_back);
+        transform_xy_right(speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(speed_loop2.Out, 6.0f, &servo_left_front, &servo_left_back);
 
-        servo_set_01(servo_right_front, servo_left_front,
-                     servo_right_back, servo_left_back);
+        servo_set_01(servo_left_back, servo_right_front,
+                     servo_right_back, servo_left_front);
 
         PID_Update_Lo(&yaw_loop);
     }
@@ -541,11 +541,11 @@ void control_state_forward(void)
         speed_loop2.OutMin = -5;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(-speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 6.0f, &servo_left_front, &servo_left_back);
+        transform_xy_right(speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(speed_loop2.Out, 6.0f, &servo_left_front, &servo_left_back);
 
-        servo_set_01(servo_right_front, servo_left_front,
-                     servo_right_back, servo_left_back);
+        servo_set_01(servo_left_back, servo_right_front,
+                     servo_right_back, servo_left_front);
 
         PID_Update_Lo(&yaw_loop);
     }
@@ -585,11 +585,11 @@ void control_state_decline_front_single_side(void)
         speed_loop2.OutMin = -5;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(-speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 6.0f, &servo_left_front, &servo_left_back);
+        transform_xy_right(speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(speed_loop2.Out, 6.0f, &servo_left_front, &servo_left_back);
 
-        servo_set_01(servo_right_front, servo_left_front,
-                     servo_right_back, servo_left_back);
+        servo_set_01(servo_left_back, servo_right_front,
+                     servo_right_back, servo_left_front);
 
         turn_loop1.Target = 0.0f;
         turn_loop1.Actual = (float)error;
@@ -635,8 +635,8 @@ void control_state_stand_front_single_side(void)
 
         filtered_speed_out = speed_alpha * speed_loop2.Out + (1.0f - speed_alpha) * filtered_speed_out;
 
-        servo_set(80.0f - filtered_speed_out, 100.0f + filtered_speed_out,
-                  100.0f - filtered_speed_out, 80.0f + filtered_speed_out);
+        servo_set(75.0f - filtered_speed_out, 75.0f + filtered_speed_out,
+                  105.0f + filtered_speed_out, 105.0f - filtered_speed_out);
 
         turn_loop1.Target = 0.0f;
         turn_loop1.Actual = (float)error;
@@ -700,8 +700,8 @@ void control_state_single_side(void)
 
     filtered_single_out = single_alpha * single_loop.Out + (1.0f - single_alpha) * filtered_single_out;
 
-    servo_set(75.0f - filtered_speed_out + filtered_single_out, 105.0f + filtered_speed_out + filtered_single_out,
-              105.0f - filtered_speed_out - filtered_single_out, 75.0f + filtered_speed_out - filtered_single_out);
+    servo_set(75.0f - filtered_speed_out + filtered_single_out, 75.0f + filtered_speed_out - filtered_single_out,
+              105.0f + filtered_speed_out + filtered_single_out, 105.0f - filtered_speed_out - filtered_single_out);
 
     turn_loop2.Target = -turn_loop1.Out * speed_loop2.Actual;
     turn_loop2.Actual = -imu.body.gyro[2];
@@ -743,11 +743,11 @@ void control_state_de_stairs(void)
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
 
-        servo_set_01(servo_right_front, servo_left_front,
-                     servo_right_back, servo_left_back);
+        servo_set_01(servo_left_back, servo_right_front,
+                     servo_right_back, servo_left_front);
 
         PID_Update_Lo(&yaw_loop);
     }
@@ -785,11 +785,11 @@ void control_state_simple_maintain(void)
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
 
-        servo_set_01(servo_right_front, servo_left_front,
-                     servo_right_back, servo_left_back);
+        servo_set_01(servo_left_back, servo_right_front,
+                     servo_right_back, servo_left_front);
 
         control_modify_judge();
         PID_Update_Lo(&yaw_loop);
@@ -828,11 +828,11 @@ void control_state_maintain_jump(void)
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
 
-        servo_set_01(servo_right_front, servo_left_front,
-                     servo_right_back, servo_left_back);
+        servo_set_01(servo_left_back, servo_right_front,
+                     servo_right_back, servo_left_front);
 
         control_modify_judge();
         PID_Update_Lo(&yaw_loop);
@@ -873,14 +873,14 @@ void control_state_simple_jump(void)
         count++;
         if (count < 20)
         {
-            servo_set(40.0f, 140.0f,
-                      140.0f, 40.0f);
+        servo_set(40.0f, 40.0f,
+                  140.0f, 140.0f);
         }
 
         else if (count >= 20 && count < 32)
         {
-            servo_set(120.0f, 60.0f,
-                      60.0f, 120.0f);
+            servo_set(120.0f, 120.0f,
+                      60.0f, 60.0f);
         }
 
         else if (count >= 32)
@@ -950,8 +950,8 @@ void control_state_simple_jump(void)
             speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
             PID_Update_Lo(&speed_loop2);
 
-            transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-            transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+            transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+            transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
 
             servo_set_01(servo_right_front, servo_left_front,
                          servo_right_back, servo_left_back);
@@ -993,14 +993,14 @@ void control_state_jump_up(void)
 
     if (count < 17)
     {
-        servo_set(20.0f, 160.0f,
-                  160.0f, 20.0f);
+        servo_set(20.0f, 20.0f,
+                  160.0f, 160.0f);
     }
 
     else if (count >= 17 && count < 35)
     {
-        servo_set(120.0f, 60.0f,
-                  60.0f, 120.0f);
+        servo_set(120.0f, 120.0f,
+                  60.0f, 60.0f);
     }
 
     else if (count >= 35)
@@ -1035,11 +1035,11 @@ void control_state_de_follow(void)
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
 
-        servo_set_01(servo_right_front, servo_left_front,
-                     servo_right_back, servo_left_back);
+        servo_set_01(servo_left_back, servo_right_front,
+                     servo_right_back, servo_left_front);
 
         turn_loop1.Target = 0.0f;
         turn_loop1.Actual = (float)error;
@@ -1079,11 +1079,11 @@ void control_state_follow_stairs(void)
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
 
-        servo_set_01(servo_right_front, servo_left_front,
-                     servo_right_back, servo_left_back);
+        servo_set_01(servo_left_back, servo_right_front,
+                     servo_right_back, servo_left_front);
 
         turn_loop1.Target = 0.0f;
         turn_loop1.Actual = (float)error;
@@ -1123,11 +1123,11 @@ void control_state_maintain_follow(void)
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
 
-        servo_set_01(servo_right_front, servo_left_front,
-                     servo_right_back, servo_left_back);
+        servo_set_01(servo_left_back, servo_right_front,
+                     servo_right_back, servo_left_front);
 
         control_modify_judge();
         PID_Update_Lo(&yaw_loop);
@@ -1166,7 +1166,7 @@ void control_state_de_jolt(void)
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
 
         servo_set(110.0f, 70.0f,
-                  110.0f, 70.0f);
+                  70.0f, 110.0f);
 
         yaw_loop.Target = joangle->data_float;
         yaw_loop.Actual = imu.output.euler[2];
@@ -1209,11 +1209,11 @@ void control_state_jolt(void)
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
 
-        servo_set_01(servo_right_front, servo_left_front,
-                     servo_right_back, servo_left_back);
+        servo_set_01(servo_left_back, servo_right_front,
+                     servo_right_back, servo_left_front);
 
         yaw_loop.Target = 0.0f;
         yaw_loop.Actual = imu.output.euler[2];
@@ -1299,7 +1299,7 @@ void control_state_jolt_trap(void)
     if (jolt_speed_change_flag == 0 && imu.output.euler[1] <= 30.0f)
     {
         servo_set(45.0f, 135.0f,
-                  45.0f, 135.0f);
+                  135.0f, 45.0f);
         jolt_speed_change_count++;
         if (jolt_speed_change_count >= 80)
         {
@@ -1310,7 +1310,7 @@ void control_state_jolt_trap(void)
     else if (jolt_speed_change_flag == 0 && imu.output.euler[1] > 30.0f)
     {
         servo_set(70.0f, 110.0f,
-                  70.0f, 110.0f);
+                  110.0f, 70.0f);
         jolt_speed_change_count++;
         if (jolt_speed_change_count >= 80)
         {
@@ -1368,11 +1368,11 @@ void control_state_test(void)
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
 
-        servo_set_01(servo_right_front, servo_left_front,
-                     servo_right_back, servo_left_back);
+        servo_set_01(servo_left_back, servo_right_front,
+                     servo_right_back, servo_left_front);
 
         yaw_loop.Actual = imu.output.euler[2];
         PID_Update_Lo(&yaw_loop);
@@ -1414,11 +1414,11 @@ void control_state_uturn(void)
     speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
     PID_Update_Lo(&speed_loop2);
 
-    transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-    transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+    transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+    transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
 
     servo_set_01(servo_right_front, servo_left_front,
-                    servo_right_back, servo_left_back);
+                 servo_right_back, servo_left_back);
 
     turn_loop2.Target = (float)rotusp->data_int;
     turn_loop2.Actual = -imu.body.gyro[2];
@@ -1462,11 +1462,11 @@ void control_state_modify(void)
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(-speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(-speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
 
-        servo_set_01(servo_right_front, servo_left_front,
-                     servo_right_back, servo_left_back);
+        servo_set_01(servo_left_back, servo_right_front,
+                     servo_right_back, servo_left_front);
 
         control_modify_judge();
         PID_Update_Lo(&yaw_loop);
