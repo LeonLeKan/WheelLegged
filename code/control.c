@@ -175,8 +175,8 @@ void control_state_de_thunder(void)
 
         speed_loop2.Target = (float)thunsp->data_int / 100.0f;
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
-        speed_loop2.OutMax = +6;
-        speed_loop2.OutMin = -6;
+        speed_loop2.OutMax = +5;
+        speed_loop2.OutMin = -5;
         PID_Update_Lo(&speed_loop2);
 
         transform_xy_right(-speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);
@@ -537,8 +537,8 @@ void control_state_forward(void)
             speed_loop2.Target = (float)thsp->data_int / 100.0f;
         }
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
-        speed_loop2.OutMax = +6;
-        speed_loop2.OutMin = -6;
+        speed_loop2.OutMax = +5;
+        speed_loop2.OutMin = -5;
         PID_Update_Lo(&speed_loop2);
 
         transform_xy_right(-speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);
@@ -581,8 +581,8 @@ void control_state_decline_front_single_side(void)
 
         speed_loop2.Target = (float)snspeed->data_int / 100.0f;
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
-        speed_loop2.OutMax = +6;
-        speed_loop2.OutMin = -6;
+        speed_loop2.OutMax = +5;
+        speed_loop2.OutMin = -5;
         PID_Update_Lo(&speed_loop2);
 
         transform_xy_right(-speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);

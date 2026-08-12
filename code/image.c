@@ -82,7 +82,7 @@ int error = 0;
 int error_calc_near_line = 52;
 int error_calc_far_line = 50;
 uint8_t mid_update = 0;
-uint8_t middle = 84;    // 中线校准（有些摄像头会整体向左右偏，所以真正的正中间不一定是94）
+uint8_t middle = 94;    // 中线校准（有些摄像头会整体向左右偏，所以真正的正中间不一定是94）
 
 int white_count = 0;    // 白色像素点数量
 
