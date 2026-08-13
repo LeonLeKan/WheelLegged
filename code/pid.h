@@ -41,8 +41,6 @@ void an1pid_update(float kp, float ki, float kd);
 void an1_zero(void);
 void an2pid_update(float kp, float ki, float kd);
 void an2_zero(void);
-void sppid_update(float kp, float ki, float kd);
-void sp_zero(void);
 void sp2pid_update(float kp, float ki, float kd);
 void sp2_zero(void);
 void tu1pid_update(float kp, float ki, float kd);

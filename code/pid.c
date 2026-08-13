@@ -120,23 +120,6 @@ void an2_zero(void)
     angle_loop2.Kd = 0;
 }
 
-void sppid_update(float kp, float ki, float kd)
-{
-    speed_loop2.Kp = kp;
-    speed_loop2.Ki = ki;
-    speed_loop2.Kd = kd;
-    speed_loop2.OutMax = +50;
-    speed_loop2.OutMin = -50;
-    speed_loop2.ErrorIntMax = 500;
-}
-
-void sp_zero(void)
-{
-    speed_loop2.Kp = 0;
-    speed_loop2.Ki = 0;
-    speed_loop2.Kd = 0;
-}
-
 void sp2pid_update(float kp, float ki, float kd)
 {
     speed_loop2.Kp = kp;
@@ -301,7 +284,6 @@ void para_zero(void)
 {
     an1_zero();
     an2_zero();
-    sp_zero();
     sp2_zero();
     tu1_zero();
     tu2_zero();
