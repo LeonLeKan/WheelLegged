@@ -294,9 +294,15 @@ static void quit_follow_stairs(void)
 
 static void de_to_jolt(void)
 {
-    if (current_state == STATE_DE_JOLT && speed_loop2.Actual <= (float)jospeed->data_int / 100.0f + 1.0f)
+    if (current_state == STATE_DE_JOLT)
     {
-        current_state = STATE_JOLT;
+        static uint32_t count = 0;
+        count++;
+        if (count >= 200)
+        {
+            count = 0;
+            current_state = STATE_JOLT;
+        }
     }
 }
 

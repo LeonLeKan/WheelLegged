@@ -915,12 +915,12 @@ void control_state_simple_jump(void)
         static uint32_t count2 = 0;
         count1++;
         count2++;
-        if (count2 >= 45 && simple_jump_count == 1)
+        if (count2 >= 30 && simple_jump_count == 1)
         {
             count2 = 0;
             simple_jump_flag = 1;
         }
-        else if (count2 >= 45 && simple_jump_count == 2)
+        else if (count2 >= 30 && simple_jump_count == 2)
         {
             count2 = 0;
             simple_jump_flag = 1;
@@ -994,13 +994,13 @@ void control_state_jump_up(void)
 
     small_driver_set_duty((int16)(aspeed_loop.Out), (int16)(-(aspeed_loop.Out)));
 
-    if (count < 17)
+    if (count < 15)
     {
         servo_set(20.0f, 20.0f,
                   160.0f, 160.0f);
     }
 
-    else if (count >= 17 && count < 35)
+    else if (count >= 15 && count < 35)
     {
         servo_set(120.0f, 120.0f,
                   60.0f, 60.0f);
@@ -1015,6 +1015,7 @@ void control_state_jump_up(void)
                   90.0f, 90.0f);
         angle_loop2.ErrorInt = 0.0f;
         speed_loop2.ErrorInt = 0.0f;
+        speed_loop2.Out = 0.0f;
         turn_loop2.ErrorInt = 0.0f;
         current_state = STATE_MAINTAIN_JUMP;
     }
