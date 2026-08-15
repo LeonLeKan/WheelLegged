@@ -138,37 +138,76 @@ static void judge_time_to_jump(void)
 {
     if (current_state == STATE_MAINTAIN_JUMP && jump_lock == 0)
     {
-        if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && stair_distance > 0)
+        if (jump->data_int == 1)
         {
-            mid_update = 0;
-            image_block = 0;
-            jump_count += 1;
-            current_state = STATE_JUMP_UP;
-        }
-        else if (stair_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && stair_distance > 0)
-        {
-            mid_update = 0;
-            image_block = 0;
-            jump_count += 1;
-            current_state = STATE_JUMP_UP;
-        }
-        else if (stair_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && stair_distance > 0)
-        {
-            mid_update = 0;
-            image_block = 0;
-            jump_count += 1;
-            current_state = STATE_JUMP_UP;
-        }
-        else if (jump_count >= 3)
-        {
-            current_state = STATE_MAINTAIN_JUMP;
-            static uint32_t quit_image_jump_count = 0;
-            quit_image_jump_count++;
-            if (quit_image_jump_count >= 100)
+            if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && stair_distance > 0)
             {
-                quit_image_jump_count = 0;
+                mid_update = 0;
                 image_block = 0;
-                current_state = STATE_MODIFY;
+                jump_count += 1;
+                current_state = STATE_JUMP_UP;
+            }
+            else if (stair_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && stair_distance > 0)
+            {
+                mid_update = 0;
+                image_block = 0;
+                jump_count += 1;
+                current_state = STATE_JUMP_UP;
+            }
+            else if (stair_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && stair_distance > 0)
+            {
+                mid_update = 0;
+                image_block = 0;
+                jump_count += 1;
+                current_state = STATE_JUMP_UP;
+            }
+            else if (jump_count >= 3)
+            {
+                current_state = STATE_MAINTAIN_JUMP;
+                static uint32_t quit_full_jump_count = 0;
+                quit_full_jump_count++;
+                if (quit_full_jump_count >= 100)
+                {
+                    quit_full_jump_count = 0;
+                    image_block = 0;
+                    current_state = STATE_MODIFY;
+                }
+            }
+        }
+        else if (jump->data_int == 3)
+        {
+            if (tof_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && tof_distance > 0)
+            {
+                mid_update = 0;
+                image_block = 0;
+                jump_count += 1;
+                current_state = STATE_JUMP_UP;
+            }
+            else if (tof_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && tof_distance > 0)
+            {
+                mid_update = 0;
+                image_block = 0;
+                jump_count += 1;
+                current_state = STATE_JUMP_UP;
+            }
+            else if (tof_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && tof_distance > 0)
+            {
+                mid_update = 0;
+                image_block = 0;
+                jump_count += 1;
+                current_state = STATE_JUMP_UP;
+            }
+            else if (jump_count >= 3)
+            {
+                current_state = STATE_MAINTAIN_JUMP;
+                static uint32_t quit_full_jump_count = 0;
+                quit_full_jump_count++;
+                if (quit_full_jump_count >= 120)
+                {
+                    quit_full_jump_count = 0;
+                    image_block = 0;
+                    current_state = STATE_MODIFY;
+                }
             }
         }
     }
@@ -191,7 +230,7 @@ static void judge_time_to_jump(void)
     if (jump_lock == 1 && jump_count < 3)
     {
         jump_lock_count++;
-        if (jump_lock_count >= 30)
+        if (jump_lock_count >= 40)
         {
             image_block = 1;
             jump_lock = 0;
@@ -200,21 +239,28 @@ static void judge_time_to_jump(void)
     }
     else if (jump_lock == 1 && jump_count >= 3)
     {
-        jump_lock_count++;
-        if (jump_lock_count >= 30)
-        {
-            jump_lock = 0;
-            jump_lock_count = 0;
-        }
+        jump_lock = 0;
+        jump_lock_count = 0;
     }
 }
 
 static void simple_find_jump(void)
 {
-    if (current_state == STATE_SIMPLE_MAINTAIN && stair_distance <= stdis1->data_int && stair_distance > 0)
+    if (jump->data_int == 2)
     {
-        image_block = 0;
-        current_state = STATE_SIMPLE_JUMP;
+        if (current_state == STATE_SIMPLE_MAINTAIN && stair_distance <= stdis1->data_int && stair_distance > 0)
+        {
+            image_block = 0;
+            current_state = STATE_SIMPLE_JUMP;
+        }
+    }
+    else if (jump->data_int == 4)
+    {
+        if (current_state == STATE_SIMPLE_MAINTAIN && tof_distance <= stdis1->data_int && tof_distance > 0)
+        {
+            image_block = 0;
+            current_state = STATE_SIMPLE_JUMP;
+        }
     }
 }
 

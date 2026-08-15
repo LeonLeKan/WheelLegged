@@ -19,6 +19,7 @@ volatile float servo_right_front = 90.0f;
 volatile float servo_left_front = 90.0f;
 volatile float servo_right_back = 90.0f;
 volatile float servo_left_back = 90.0f;
+volatile uint16_t tof_distance = 0;
 
 void control_init(void)
 {
@@ -735,11 +736,11 @@ void control_state_de_stairs(void)
     {
         count = 0;
 
-        if (jump->data_int == 1)
+        if (jump->data_int == 1 || jump->data_int == 3)
         {
             speed_loop2.Target = (float)stspeed->data_int / 100.0f;
         }
-        else if (jump->data_int == 2)
+        else if (jump->data_int == 2 || jump->data_int == 4)
         {
             speed_loop2.Target = (float)sipsp->data_int / 100.0f;
         }
@@ -786,10 +787,23 @@ void control_state_simple_maintain(void)
 
         speed_loop2.Target = (float)sipsp->data_int / 100.0f;
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+        if (jump->data_int == 4)
+        {
+            speed_loop2.OutMax = +0.4;
+            speed_loop2.OutMin = -0.4;
+        }
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        if (jump->data_int == 2)
+        {
+            transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+            transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        }
+        else if (jump->data_int == 4)
+        {
+            transform_xy_right(speed_loop2.Out, 2.6f, &servo_right_front, &servo_right_back);
+            transform_xy_left(speed_loop2.Out, 2.6f, &servo_left_front, &servo_left_back);
+        }
 
         servo_set_01(servo_left_back, servo_right_front,
                      servo_right_back, servo_left_front);
@@ -829,10 +843,23 @@ void control_state_maintain_jump(void)
 
         speed_loop2.Target = (float)stspeed->data_int / 100.0f;
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+        if (jump->data_int == 3)
+        {
+            speed_loop2.OutMax = +0.4;
+            speed_loop2.OutMin = -0.4;
+        }
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        if (jump->data_int == 1)
+        {
+            transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+            transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        }
+        else if (jump->data_int == 3)
+        {
+            transform_xy_right(speed_loop2.Out, 2.6f, &servo_right_front, &servo_right_back);
+            transform_xy_left(speed_loop2.Out, 2.6f, &servo_left_front, &servo_left_back);
+        }
 
         servo_set_01(servo_left_back, servo_right_front,
                      servo_right_back, servo_left_front);
@@ -860,6 +887,7 @@ void control_state_simple_jump(void)
 {
     static uint8_t simple_jump_count = 0;
     static uint8_t simple_jump_flag = 1;
+    static uint32_t quit_simple_count = 0;
 
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
@@ -867,30 +895,27 @@ void control_state_simple_jump(void)
     yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
 
-    static uint8_t quit_simple_jump = 0;
-    static uint32_t quit_simple_count = 0;
-
     if (simple_jump_flag == 1 && simple_jump_count <= 2)
     {
         static uint32_t count = 0;
         count++;
-        if (count < 20)
+        if (count < 15)
         {
-        servo_set(40.0f, 40.0f,
-                  140.0f, 140.0f);
+            servo_set(40.0f, 40.0f,
+                      140.0f, 140.0f);
         }
 
-        else if (count >= 20 && count < 32)
+        else if (count >= 15 && count < 30)
         {
-            servo_set(120.0f, 120.0f,
-                      60.0f, 60.0f);
+            servo_set(130.0f, 130.0f,
+                      50.0f, 50.0f);
         }
 
-        else if (count >= 32)
+        else if (count >= 30)
         {
             count = 0;
-            servo_set(90.0f, 90.0f,
-                      90.0f, 90.0f);
+            servo_set(130.0f, 130.0f,
+                      50.0f, 50.0f);
             angle_loop2.ErrorInt = 0.0f;
             speed_loop2.ErrorInt = 0.0f;
             turn_loop2.ErrorInt = 0.0f;
@@ -915,12 +940,12 @@ void control_state_simple_jump(void)
         static uint32_t count2 = 0;
         count1++;
         count2++;
-        if (count2 >= 30 && simple_jump_count == 1)
+        if (count2 >= 35 && simple_jump_count == 1)
         {
             count2 = 0;
             simple_jump_flag = 1;
         }
-        else if (count2 >= 30 && simple_jump_count == 2)
+        else if (count2 >= 40 && simple_jump_count == 2)
         {
             count2 = 0;
             simple_jump_flag = 1;
@@ -928,21 +953,12 @@ void control_state_simple_jump(void)
         else if (simple_jump_count >= 3)
         {
             count2 = 0;
-            if (quit_simple_jump == 0)
+            quit_simple_count++;
+            if (quit_simple_count >= 120)
             {
-                quit_simple_count++;
-            }
-            if (quit_simple_count >= 60)
-            {
-                quit_simple_jump = 1;
-                image_block = 1;
-                if (front_stairs_end_judge.end_flag == 1)
-                {
-                    quit_simple_count = 0;
-                    quit_simple_jump = 0;
-                    image_block = 0;
-                    current_state = STATE_MODIFY;
-                }
+                quit_simple_count = 0;
+                image_block = 0;
+                current_state = STATE_MODIFY;
             }
         }
         if (count1 >= 4)
@@ -951,10 +967,23 @@ void control_state_simple_jump(void)
 
             speed_loop2.Target = (float)sipsp->data_int / 100.0f;
             speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
+            if (jump->data_int == 4)
+            {
+                speed_loop2.OutMax = +0.4;
+                speed_loop2.OutMin = -0.4;
+            }
             PID_Update_Lo(&speed_loop2);
 
-            transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-            transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+            if (jump->data_int == 2)
+            {
+                transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+                transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+            }
+            else if (jump->data_int == 4)
+            {
+                transform_xy_right(speed_loop2.Out, 2.6f, &servo_right_front, &servo_right_back);
+                transform_xy_left(speed_loop2.Out, 2.6f, &servo_left_front, &servo_left_back);
+            }
 
             servo_set_01(servo_right_front, servo_left_front,
                          servo_right_back, servo_left_back);
@@ -981,43 +1010,87 @@ void control_state_simple_jump(void)
 
 void control_state_jump_up(void)
 {
-    static uint32_t count = 0;
-    count++;
-
-    angle_loop2.Target = pzero->data_float;
-    angle_loop2.Actual = imu.output.euler[1];
-    PID_Update_Lo(&angle_loop2);
-
-    aspeed_loop.Target = angle_loop2.Out;
-    aspeed_loop.Actual = imu.output.gyro[1];
-    PID_Update_Lo(&aspeed_loop);
-
-    small_driver_set_duty((int16)(aspeed_loop.Out), (int16)(-(aspeed_loop.Out)));
-
-    if (count < 15)
+    if (jump->data_int == 1)
     {
-        servo_set(20.0f, 20.0f,
-                  160.0f, 160.0f);
+        static uint32_t count = 0;
+        count++;
+
+        angle_loop2.Target = pzero->data_float;
+        angle_loop2.Actual = imu.output.euler[1];
+        PID_Update_Lo(&angle_loop2);
+
+        aspeed_loop.Target = angle_loop2.Out;
+        aspeed_loop.Actual = imu.output.gyro[1];
+        PID_Update_Lo(&aspeed_loop);
+
+        small_driver_set_duty((int16)(aspeed_loop.Out), (int16)(-(aspeed_loop.Out)));
+
+        if (count < 15)
+        {
+            servo_set(20.0f, 20.0f,
+                      160.0f, 160.0f);
+        }
+
+        else if (count >= 15 && count < 35)
+        {
+            servo_set(120.0f, 120.0f,
+                      60.0f, 60.0f);
+        }
+
+        else if (count >= 35)
+        {
+            count = 0;
+            image_block = 0;
+            jump_lock = 1;
+            servo_set(90.0f, 90.0f,
+                      90.0f, 90.0f);
+            angle_loop2.ErrorInt = 0.0f;
+            speed_loop2.ErrorInt = 0.0f;
+            speed_loop2.Out = 0.0f;
+            turn_loop2.ErrorInt = 0.0f;
+            current_state = STATE_MAINTAIN_JUMP;
+        }
     }
-
-    else if (count >= 15 && count < 35)
+    else if (jump->data_int == 3)
     {
-        servo_set(120.0f, 120.0f,
-                  60.0f, 60.0f);
-    }
+        static uint32_t count = 0;
+        count++;
 
-    else if (count >= 35)
-    {
-        count = 0;
-        image_block = 0;
-        jump_lock = 1;
-        servo_set(90.0f, 90.0f,
-                  90.0f, 90.0f);
-        angle_loop2.ErrorInt = 0.0f;
-        speed_loop2.ErrorInt = 0.0f;
-        speed_loop2.Out = 0.0f;
-        turn_loop2.ErrorInt = 0.0f;
-        current_state = STATE_MAINTAIN_JUMP;
+        angle_loop2.Target = pzero->data_float;
+        angle_loop2.Actual = imu.output.euler[1];
+        PID_Update_Lo(&angle_loop2);
+
+        aspeed_loop.Target = angle_loop2.Out;
+        aspeed_loop.Actual = imu.output.gyro[1];
+        PID_Update_Lo(&aspeed_loop);
+
+        small_driver_set_duty((int16)(aspeed_loop.Out), (int16)(-(aspeed_loop.Out)));
+
+        if (count < 15)
+        {
+            servo_set(20.0f, 20.0f,
+                      160.0f, 160.0f);
+        }
+
+        else if (count >= 15 && count < 30)
+        {
+            servo_set(130.0f, 130.0f,
+                      50.0f, 50.0f);
+        }
+
+        else if (count >= 30)
+        {
+            count = 0;
+            image_block = 0;
+            jump_lock = 1;
+            servo_set(130.0f, 130.0f,
+                      50.0f, 50.0f);
+            angle_loop2.ErrorInt = 0.0f;
+            speed_loop2.ErrorInt = 0.0f;
+            speed_loop2.Out = 0.0f;
+            turn_loop2.ErrorInt = 0.0f;
+            current_state = STATE_MAINTAIN_JUMP;
+        }
     }
 }
 
@@ -1083,8 +1156,8 @@ void control_state_follow_stairs(void)
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        transform_xy_right(speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(speed_loop2.Out, 6.0f, &servo_left_front, &servo_left_back);
 
         servo_set_01(servo_left_back, servo_right_front,
                      servo_right_back, servo_left_front);
@@ -1127,8 +1200,8 @@ void control_state_maintain_follow(void)
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
         PID_Update_Lo(&speed_loop2);
 
-        transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-        transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
+        transform_xy_right(speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);
+        transform_xy_left(speed_loop2.Out, 6.0f, &servo_left_front, &servo_left_back);
 
         servo_set_01(servo_left_back, servo_right_front,
                      servo_right_back, servo_left_front);
@@ -1408,7 +1481,7 @@ void control_state_uturn(void)
 {
     an2pid_update(13.0f, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
-    sp2pid_update(1.5f, sp2ki->data_float, sp2kd->data_float);
+    sp2pid_update(1.0f, sp2ki->data_float, sp2kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
 
     imu.rot_comp.param.yaw_compensate_cw = cwtucop->data_float;

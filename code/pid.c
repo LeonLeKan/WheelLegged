@@ -221,8 +221,8 @@ void snpid_update(float kp, float ki, float kd)
     single_loop.Kp = kp;
     single_loop.Ki = ki;
     single_loop.Kd = kd;
-    single_loop.OutMax = +30;
-    single_loop.OutMin = -30;
+    single_loop.OutMax = +4.0f;
+    single_loop.OutMin = -4.0f;
 }
 
 void sn_zero(void)

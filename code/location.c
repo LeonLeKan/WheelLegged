@@ -343,7 +343,7 @@ void location_update_2_2(void)
         }
     }
 
-    if (jump->data_int == 1)
+    if (jump->data_int == 1 || jump->data_int == 3)
     {
         if (current_target && !current_target->next) 
         {
@@ -359,7 +359,7 @@ void location_update_2_2(void)
             current_state = STATE_MAINTAIN_JUMP;
         }
     }
-    else if (jump->data_int == 2)
+    else if (jump->data_int == 2 || jump->data_int == 4)
     {
         if (current_target && !current_target->next) 
         {

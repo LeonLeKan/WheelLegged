@@ -16,6 +16,7 @@ extern volatile float servo_right_front;
 extern volatile float servo_left_front;
 extern volatile float servo_right_back;
 extern volatile float servo_left_back;
+extern volatile uint16_t tof_distance;
 
 void control_init(void);
 void control_modify_judge(void);

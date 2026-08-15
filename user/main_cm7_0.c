@@ -55,6 +55,7 @@ int main(void)
 
     // 控制相关初始化
     mt9v03x_init();
+    dl1b_init();
     control_init();
     car_balance();
     gpio_init_all();
@@ -201,7 +202,19 @@ int main(void)
                             image_main();
                             mt9v03x_finish_flag = 0;
                         }
-
+                        if (jump->data_int == 3 || jump->data_int == 4)
+                        {
+                            dl1b_get_distance();
+                            if (dl1b_finsh_flag == 1)
+                            {
+                                dl1b_finsh_flag = 0;
+                                tof_distance = dl1b_distance_mm;
+                            }
+                            else
+                            {
+                                tof_distance = 8192;
+                            }
+                        }
                         if (testnum->data_int == 2 && test_state == 1)
                         {
                             if (test_2_save == 0)
@@ -355,7 +368,7 @@ void handle_channel(void)
     }
 
     else if ((uart_receiver.channel[3] == 1792 && last_ch3 != 1792) ||
-             (uart_receiver.channel[3] == 192  && last_ch3 != 192))
+             (uart_receiver.channel[3] == 192 && last_ch3 != 192))
     {
         // 科目三确认更换存档
         if (testnum->data_int == 2)
