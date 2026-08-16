@@ -165,6 +165,8 @@ void control_state_de_thunder(void)
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
     sp2pid_update(sp2kp->data_float, sp2ki->data_float, sp2kd->data_float);
+    speed_loop2.OutMax = +5.0;
+    speed_loop2.OutMin = -5.0;
     yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
 
@@ -176,8 +178,6 @@ void control_state_de_thunder(void)
 
         speed_loop2.Target = (float)thunsp->data_int / 100.0f;
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
-        speed_loop2.OutMax = +5.0;
-        speed_loop2.OutMin = -5.0;
         PID_Update_Lo(&speed_loop2);
 
         transform_xy_right(speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);
@@ -509,6 +509,8 @@ void control_state_forward(void)
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
     sp2pid_update(sp2kp->data_float, sp2ki->data_float, sp2kd->data_float);
+    speed_loop2.OutMax = +5.0;
+    speed_loop2.OutMin = -5.0;
     yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
 
@@ -550,8 +552,6 @@ void control_state_forward(void)
             speed_loop2.Target = (float)thsp->data_int / 100.0f;
         }
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
-        speed_loop2.OutMax = +5.0;
-        speed_loop2.OutMin = -5.0;
         PID_Update_Lo(&speed_loop2);
 
         transform_xy_right(speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);
@@ -583,6 +583,8 @@ void control_state_decline_front_single_side(void)
     an2pid_update(an2kp->data_float, an2ki->data_float, an2kd->data_float);
     aspid_update(askp->data_float, aski->data_float, askd->data_float);
     sp2pid_update(sp2kp->data_float, sp2ki->data_float, sp2kd->data_float);
+    speed_loop2.OutMax = +5.0;
+    speed_loop2.OutMin = -5.0;
     tu1pid_update(tu1kp->data_float, tu1ki->data_float, tu1kd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
 
@@ -594,8 +596,6 @@ void control_state_decline_front_single_side(void)
 
         speed_loop2.Target = (float)snspeed->data_int / 100.0f;
         speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
-        speed_loop2.OutMax = +5.0;
-        speed_loop2.OutMin = -5.0;
         PID_Update_Lo(&speed_loop2);
 
         transform_xy_right(speed_loop2.Out, 6.0f, &servo_right_front, &servo_right_back);
@@ -883,6 +883,7 @@ void control_state_maintain_jump(void)
     small_driver_set_duty((int16)(aspeed_loop.Out - turn_loop2.Out), (int16)(-(aspeed_loop.Out + turn_loop2.Out)));
 }
 
+
 void control_state_simple_jump(void)
 {
     static uint8_t simple_jump_count = 0;
@@ -895,27 +896,66 @@ void control_state_simple_jump(void)
     yapid_update(yakp->data_float, yaki->data_float, yakd->data_float);
     tu2pid_update_f(tu2kp->data_float, tu2ki->data_float, tu2kd->data_float);
 
-    if (simple_jump_flag == 1 && simple_jump_count <= 2)
+    if (simple_jump_flag == 1 && simple_jump_count == 0)
     {
         static uint32_t count = 0;
         count++;
-        if (count < 15)
+        if (count < 20)
         {
-            servo_set(40.0f, 40.0f,
-                      140.0f, 140.0f);
+        servo_set(40.0f, 40.0f,
+                  140.0f, 140.0f);
         }
 
-        else if (count >= 15 && count < 30)
+        else if (count >= 20 && count < 32)
         {
-            servo_set(130.0f, 130.0f,
-                      50.0f, 50.0f);
+            servo_set(120.0f, 120.0f,
+                      60.0f, 60.0f);
         }
 
-        else if (count >= 30)
+        else if (count >= 32)
         {
             count = 0;
-            servo_set(130.0f, 130.0f,
-                      50.0f, 50.0f);
+            servo_set(90.0f, 90.0f,
+                      90.0f, 90.0f);
+            angle_loop2.ErrorInt = 0.0f;
+            speed_loop2.ErrorInt = 0.0f;
+            turn_loop2.ErrorInt = 0.0f;
+            simple_jump_count += 1;
+            simple_jump_flag = 0;
+        }
+
+        angle_loop2.Target = pzero->data_float;
+        angle_loop2.Actual = imu.output.euler[1];
+        PID_Update_Lo(&angle_loop2);
+
+        aspeed_loop.Target = angle_loop2.Out;
+        aspeed_loop.Actual = imu.output.gyro[1];
+        PID_Update_Lo(&aspeed_loop);
+
+        small_driver_set_duty((int16)(aspeed_loop.Out), (int16)(-(aspeed_loop.Out)));
+    }
+
+    if (simple_jump_flag == 1 && simple_jump_count <= 2 && simple_jump_count > 0)
+    {
+        static uint32_t count = 0;
+        count++;
+        if (count < 20)
+        {
+        servo_set(40.0f, 40.0f,
+                  140.0f, 140.0f);
+        }
+
+        else if (count >= 20 && count < 32)
+        {
+            servo_set(120.0f, 120.0f,
+                      60.0f, 60.0f);
+        }
+
+        else if (count >= 32)
+        {
+            count = 0;
+            servo_set(90.0f, 90.0f,
+                      90.0f, 90.0f);
             angle_loop2.ErrorInt = 0.0f;
             speed_loop2.ErrorInt = 0.0f;
             turn_loop2.ErrorInt = 0.0f;
@@ -940,12 +980,12 @@ void control_state_simple_jump(void)
         static uint32_t count2 = 0;
         count1++;
         count2++;
-        if (count2 >= 35 && simple_jump_count == 1)
+        if (count2 >= 30 && simple_jump_count == 1)
         {
             count2 = 0;
             simple_jump_flag = 1;
         }
-        else if (count2 >= 40 && simple_jump_count == 2)
+        else if (count2 >= 30 && simple_jump_count == 2)
         {
             count2 = 0;
             simple_jump_flag = 1;
@@ -954,7 +994,7 @@ void control_state_simple_jump(void)
         {
             count2 = 0;
             quit_simple_count++;
-            if (quit_simple_count >= 120)
+            if (quit_simple_count >= 100)
             {
                 quit_simple_count = 0;
                 image_block = 0;
@@ -967,23 +1007,10 @@ void control_state_simple_jump(void)
 
             speed_loop2.Target = (float)sipsp->data_int / 100.0f;
             speed_loop2.Actual = ((float)motor_value.receive_left_speed_data - (float)motor_value.receive_right_speed_data) / 2.0f / 100.0f;
-            if (jump->data_int == 4)
-            {
-                speed_loop2.OutMax = +0.4;
-                speed_loop2.OutMin = -0.4;
-            }
             PID_Update_Lo(&speed_loop2);
 
-            if (jump->data_int == 2)
-            {
-                transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
-                transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
-            }
-            else if (jump->data_int == 4)
-            {
-                transform_xy_right(speed_loop2.Out, 2.6f, &servo_right_front, &servo_right_back);
-                transform_xy_left(speed_loop2.Out, 2.6f, &servo_left_front, &servo_left_back);
-            }
+            transform_xy_right(speed_loop2.Out, 4.0f, &servo_right_front, &servo_right_back);
+            transform_xy_left(speed_loop2.Out, 4.0f, &servo_left_front, &servo_left_back);
 
             servo_set_01(servo_right_front, servo_left_front,
                          servo_right_back, servo_left_back);
