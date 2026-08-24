@@ -26,7 +26,7 @@ static void deaccelerate_to_stop(void)
 {
     if (current_state == STATE_DEACCELERATE && (speed_loop2.Actual < 0.5f))
     {
-        current_state = STATE_STOP;
+        current_state = STATE_MISERY;
     }
 }
 
@@ -68,7 +68,7 @@ static void deaccelerate_within_2(void)
 static void decline_to_single_side_stand(void)
 {
     if (current_state == STATE_DECLINE_FRONT_SINGLE_SIDE
-      && speed_loop2.Actual < (float)snspeed->data_int / 100.0f + 0.5f)
+      && speed_loop2.Actual < (float)snspeed->data_int / 100.0f + 1.2f)
     {
         current_state = STATE_STAND_FRONT_SINGLE_SIDE;
     }
@@ -79,7 +79,7 @@ static void stand_to_single_side(void)
     if (current_state == STATE_STAND_FRONT_SINGLE_SIDE)
     {
         single_delay++;
-        if (single_delay >= 40)
+        if (single_delay >= 10)
         {
             single_delay = 0;
             roll_base = rollba->data_float;
@@ -344,7 +344,7 @@ static void de_to_jolt(void)
     {
         static uint32_t count = 0;
         count++;
-        if (count >= 200)
+        if (count >= 150)
         {
             count = 0;
             current_state = STATE_JOLT;
@@ -507,6 +507,9 @@ void control_state_update(void)
         break;
     case STATE_MODIFY:
         control_state_modify();
+        break;
+    case STATE_MISERY:
+        control_state_misery();
         break;
     default:
         control_state_forward();

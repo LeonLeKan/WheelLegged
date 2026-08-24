@@ -45,6 +45,7 @@ void control_state_jolt_trap(void);
 void control_state_test(void);
 void control_state_uturn(void);
 void control_state_modify(void);
+void control_state_misery(void);
 void control_state_stop(void);
 
 #endif

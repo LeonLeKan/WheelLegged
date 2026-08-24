@@ -27,6 +27,7 @@ typedef enum {
     STATE_TEST,
     STATE_UTURN,
     STATE_MODIFY,
+    STATE_MISERY,
     STATE_STOP
 } control_state_t;
 
