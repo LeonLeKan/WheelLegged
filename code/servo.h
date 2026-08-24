@@ -15,6 +15,7 @@ void servo2_set_angle(float angle);
 void servo3_set_angle(float angle);
 void servo4_set_angle(float angle);
 void car_balance(void);
-void servo_set(float servo_right_back, float servo_left_front, float servo_right_front, float servo_left_back);
+void servo_set(float servo_right_front, float servo_left_front, float servo_right_back, float servo_left_back);
+void servo_set_01(float servo_right_front, float servo_left_front, float servo_right_back, float servo_left_back);
 
 #endif

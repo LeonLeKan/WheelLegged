@@ -82,7 +82,7 @@ int error = 0;
 int error_calc_near_line = 52;
 int error_calc_far_line = 50;
 uint8_t mid_update = 0;
-uint8_t middle = 84;    // 中线校准（有些摄像头会整体向左右偏，所以真正的正中间不一定是94）
+uint8_t middle = 94;    // 中线校准（有些摄像头会整体向左右偏，所以真正的正中间不一定是94）
 
 int white_count = 0;    // 白色像素点数量
 
@@ -959,13 +959,21 @@ void search_white_range()
             }
         }
         white_range[i].num = tnum;
-        int expected_w = 0.8 * get_expected_road_width(i, 100, 30);
+        int expected_w = 0;
+        if(now_element == SINGLE_SIDE)
+        {
+            expected_w = 0.6 * get_expected_road_width(i, 100, 30);
+        }
+        else 
+        {
+            expected_w = 0.8 * get_expected_road_width(i, 100, 30);
+        }
         if (!found_road_start && longest >= expected_w)
         {
             found_road_start = 1;
             road_start = i;
         }
-        else if (!found_road_end && found_road_start && longest < expected_w * 0.4)
+        else if (!found_road_end && found_road_start && longest < expected_w * 0.6)
         {
             found_road_end = 1;
             road_end = i;
@@ -1440,7 +1448,8 @@ uint8_t find_least_square_start(uint8_t* line, uint8_t start, uint8_t end, uint8
         if (change_y == 0) // 线条连续，没有跳变
         {
             // 检查赛道宽度是否合法
-            if (right_line[i] - left_line[i] < 0.8 * get_expected_road_width(i, 100, 30)) continue;
+            if (now_element == SINGLE_SIDE &&right_line[i] - left_line[i] < 0.6 * get_expected_road_width(i, 100, 30)) continue;
+            else if(right_line[i] - left_line[i] < 0.8 * get_expected_road_width(i, 100, 30)) continue;
             // 找到连续线段，判断k
             float input[3];
             least_square_with_R(line, i, limit, input);
@@ -1544,10 +1553,10 @@ void calc_stair_distance()
 void mend_single_side()
 {
     float input[2];
-    if (NEAR_LINE - road_start >= 20 && road_start - road_end >= 10)
+    if (NEAR_LINE - road_start >= 20 && road_start - road_end >= 6)
     {
-        uint8_t lstart = find_least_square_start(left_line, road_start, road_end, 6, 0, false, 0.85, 1.3, 0.8);
-        uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 6, 1, false, 0.85, 1.3, 0.8);
+        uint8_t lstart = find_least_square_start(left_line, road_start, road_end, 6, 0, false, 0.85, 1.5, 1);
+        uint8_t rstart = find_least_square_start(right_line, road_start, road_end, 6, 1, false, 0.85, 1.5, 1);
         if (lstart) least_square_get_line(left_line, lstart, 6, input, NEAR_LINE, lstart);
         if (rstart) least_square_get_line(right_line, rstart, 6, input, NEAR_LINE, rstart);
     }
@@ -1821,8 +1830,8 @@ void image_main()
     switch (now_element)
     {
     case FRONT_STAIRS:
-		if (error > 20) error = 0;
-		else if (error < -20) error = 0;
+        if (error > 20) error = 0;
+        else if (error < -20) error = 0;
         break;
 
     case BACK_STAIRS:
@@ -1836,18 +1845,26 @@ void image_main()
             //    error = 0;
             //}
         }
+        if (error < -50) error = 0;
+        if (error > 50) error = 0;
         break;
     case SINGLE_SIDE:
-        if (single_side_state)
+        if (NEAR_LINE - road_start >= 20)
         {
-            if (error > 15 || error < -15) error = 0;
-            if (error < -10) error = -10;
-            if (error > 10) error = 10;
+            if (error < -60) error = 0;
+            else if (error > 60) error = 0;
+        }
+        else
+        {
+            if (error < -40) error = 0;
+            if (error > 40) error = 0;
         }
         break;
+    default:
+        if (error < -50) error = 0;
+        if (error > 50) error = 0;
+        break;
     }
-    if (error < -50) error = 0;
-    if (error > 50) error = 0;
 
 
     for (int i = 0; i < CAMERA_W; i++)

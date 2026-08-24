@@ -6,25 +6,19 @@
 typedef enum {
     STATE_IDLE,
     STATE_STAND_STILL,
-    STATE_ACCELERATE,
     STATE_DEACCELERATE,
     STATE_DE_THUNDER,
-    STATE_TRA_THUNDER,
     STATE_THUNDER,
     STATE_FORWARD,
     STATE_DECLINE_FRONT_SINGLE_SIDE,
     STATE_STAND_FRONT_SINGLE_SIDE,
     STATE_SINGLE_SIDE,
     STATE_DE_STAIRS,
-    STATE_TRA_STAIRS,
-    STATE_FIND_JUMP,
     STATE_SIMPLE_MAINTAIN,
     STATE_MAINTAIN_JUMP,
-    STATE_SIMPLE_FIND,
     STATE_SIMPLE_JUMP,
     STATE_JUMP_UP,
     STATE_DE_FOLLOW,
-    STATE_TRA_FOLLOW,
     STATE_FOLLOW_STAIRS,
     STATE_MAINTAIN_FOLLOW,
     STATE_DE_JOLT,
@@ -33,6 +27,7 @@ typedef enum {
     STATE_TEST,
     STATE_UTURN,
     STATE_MODIFY,
+    STATE_MISERY,
     STATE_STOP
 } control_state_t;
 
@@ -52,7 +47,6 @@ extern volatile uint32_t jump_lock_count;
 extern volatile uint8_t follow_lock;
 extern volatile uint32_t follow_lock_count_1;
 extern volatile uint32_t follow_lock_count_2;
-extern volatile uint8_t follow_speed_change;
 
 void control_state_switch(void);
 void control_state_update(void);

@@ -39,7 +39,7 @@ void PID_Update_Lo(volatile PID_t *p)
         p->Error0 = p->Target - p->Actual;
     }
 
-    if ((p == &speed_loop2 || p == &speed_loop) && p->Error0 > 0.5f)
+    if ((p == &speed_loop2 || p == &speed_loop) && fabs(p->Error0) > 0.5f)
     {
         p->ErrorInt = 0.0f;
     }
@@ -58,6 +58,24 @@ void PID_Update_Lo(volatile PID_t *p)
     }
 
     p->Out = p->Kp * p->Error0 + p->Ki * p->ErrorInt + p->Kd * (p->Error0 - p->Error1);
+
+    if (p->Out > p->OutMax)
+    {
+        p->Out = p->OutMax;
+    }
+    if (p->Out < p->OutMin)
+    {
+        p->Out = p->OutMin;
+    }
+}
+
+void PID_Update_In(volatile PID_t *p)
+{
+    p->Error1 = p->Error0;
+    p->Error0 = p->Target - p->Actual;
+    p->Error2 = p->Error1;
+
+    p->Out += p->Kp * (p->Error0 - p->Error1) + p->Ki * p->Error0 + p->Kd * (p->Error0 - 2 * p->Error1 + p->Error2);
 
     if (p->Out > p->OutMax)
     {
@@ -102,30 +120,13 @@ void an2_zero(void)
     angle_loop2.Kd = 0;
 }
 
-void sppid_update(float kp, float ki, float kd)
-{
-    speed_loop.Kp = kp;
-    speed_loop.Ki = ki;
-    speed_loop.Kd = kd;
-    speed_loop.OutMax = +50;
-    speed_loop.OutMin = -50;
-    speed_loop.ErrorIntMax = 500;
-}
-
-void sp_zero(void)
-{
-    speed_loop.Kp = 0;
-    speed_loop.Ki = 0;
-    speed_loop.Kd = 0;
-}
-
 void sp2pid_update(float kp, float ki, float kd)
 {
     speed_loop2.Kp = kp;
     speed_loop2.Ki = ki;
     speed_loop2.Kd = kd;
-    speed_loop2.OutMax = +35;
-    speed_loop2.OutMin = -35;
+    speed_loop2.OutMax = +3.5;
+    speed_loop2.OutMin = -3.5;
     speed_loop2.ErrorIntMax = 500;
 }
 
@@ -220,8 +221,8 @@ void snpid_update(float kp, float ki, float kd)
     single_loop.Kp = kp;
     single_loop.Ki = ki;
     single_loop.Kd = kd;
-    single_loop.OutMax = +30;
-    single_loop.OutMin = -30;
+    single_loop.OutMax = +4.0f;
+    single_loop.OutMin = -4.0f;
 }
 
 void sn_zero(void)
@@ -283,7 +284,6 @@ void para_zero(void)
 {
     an1_zero();
     an2_zero();
-    sp_zero();
     sp2_zero();
     tu1_zero();
     tu2_zero();

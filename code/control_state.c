@@ -21,167 +21,12 @@ volatile uint32_t jump_lock_count = 0;
 volatile uint8_t follow_lock = 0;
 volatile uint32_t follow_lock_count_1 = 0;
 volatile uint32_t follow_lock_count_2 = 0;
-volatile uint8_t follow_speed_change = 0;
-
-static void accelerate_to_forward(void)
-{
-    if (testnum->data_int == 2 && (road_idx[road_num] == 0 || road_idx[road_num] == 7))
-    {
-        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed0->data_int / 100.0f - 1.0f))
-        {
-            current_state = STATE_FORWARD;
-        }
-    }
-    else if (testnum->data_int == 2 && (road_idx[road_num] == 1 || road_idx[road_num] == 5))
-    {
-        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed1->data_int / 100.0f - 1.0f))
-        {
-            current_state = STATE_FORWARD;
-        }
-    }
-    else if (testnum->data_int == 2 && road_idx[road_num] == 2)
-    {
-        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed2->data_int / 100.0f - 1.0f))
-        {
-            current_state = STATE_FORWARD;
-        }
-    }
-    else if (testnum->data_int == 2 && road_idx[road_num] == 3)
-    {
-        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed3->data_int / 100.0f - 1.0f))
-        {
-            current_state = STATE_FORWARD;
-        }
-    }
-    else if (testnum->data_int == 2 && (road_idx[road_num] == 4 || road_idx[road_num] == 6))
-    {
-        if (current_state == STATE_ACCELERATE && (speed_loop.Actual > (float)speed4->data_int / 100.0f - 1.0f))
-        {
-            current_state = STATE_FORWARD;
-        }
-    }
-}
 
 static void deaccelerate_to_stop(void)
 {
-    if (testnum->data_int == 0 || testnum->data_int == 1)
+    if (current_state == STATE_DEACCELERATE && (speed_loop2.Actual < 0.5f))
     {
-        if (current_state == STATE_DEACCELERATE && (speed_loop2.Actual < 1.0f))
-        {
-            current_state = STATE_STOP;
-        }
-    }
-    else if (testnum->data_int == 2)
-    {
-        if (current_state == STATE_DEACCELERATE && (speed_loop.Actual < 1.0f))
-        {
-            current_state = STATE_STOP;
-        }
-    }
-}
-
-static void deaccelerate_within_0(void)
-{
-    if (current_target && current_target->next)
-    {
-        double x_within_now = imu.output.position_x;
-        double y_within_now = imu.output.position_y;
-        double x_within_tgt = current_target->waypoint.x;
-        double y_within_tgt = current_target->waypoint.y;
-        double x_within_tgt_next = current_target->next->waypoint.x;
-        double y_within_tgt_next = current_target->next->waypoint.y;
-
-        double dis_0 = sqrt((x_within_tgt - x_within_tgt_next) * (x_within_tgt - x_within_tgt_next) + (y_within_tgt - y_within_tgt_next) * (y_within_tgt - y_within_tgt_next));
-        double dis_1 = sqrt((x_within_now - x_within_tgt) * (x_within_now - x_within_tgt) + (y_within_now - y_within_tgt) * (y_within_now - y_within_tgt));
-        if (current_target->id_startup < tunum->data_int)
-        {
-            speed_0_change = 0;
-        }
-        else if (current_target->id_startup == tunum->data_int)
-        {
-            if (dis_1 < dis2->data_float)
-            {
-                speed_0_change = 2;
-            }
-            else
-            {
-                speed_0_change = 0;
-            }
-        }
-        else if (current_target->id_startup > tunum->data_int && current_target->id_startup < tunext->data_int)
-        {
-            speed_0_change = 3;
-        }
-        else if (current_target->id_startup == tunext->data_int)
-        {
-            if (dis_1 < dis1->data_float)
-            {
-                speed_0_change = 1;
-            }
-            else
-            {
-                speed_0_change = 3;
-            }
-        }
-        else if (current_target->id_startup > tunext->data_int && current_target->id_startup <= curnext->data_int)
-        {
-            speed_0_change = 1;
-        }
-        else if (current_target->id_startup > curnext->data_int)
-        {
-            speed_0_change = 0;
-        }
-    }
-    else if (current_target && !current_target->next)
-    {
-        speed_0_change = 0;
-    }
-}
-
-static void deaccelerate_within_1(void)
-{
-    if (current_target && current_target->next)
-    {
-        double x_within_now = imu.output.position_x;
-        double y_within_now = imu.output.position_y;
-        double x_within_tgt = current_target->waypoint.x;
-        double y_within_tgt = current_target->waypoint.y;
-        double x_within_tgt_next = current_target->next->waypoint.x;
-        double y_within_tgt_next = current_target->next->waypoint.y;
-
-        double dis_0 = sqrt((x_within_tgt - x_within_tgt_next) * (x_within_tgt - x_within_tgt_next) + (y_within_tgt - y_within_tgt_next) * (y_within_tgt - y_within_tgt_next));
-        double dis_1 = sqrt((x_within_now - x_within_tgt) * (x_within_now - x_within_tgt) + (y_within_now - y_within_tgt) * (y_within_now - y_within_tgt));
-        if (current_target->id_startup < tunum->data_int)
-        {
-            speed_1_change = 3;
-        }
-        else if (current_target->id_startup == tunum->data_int)
-        {
-            if (dis_1 < dis2->data_float)
-            {
-                speed_1_change = 2;
-            }
-            else
-            {
-                speed_1_change = 3;
-            }
-        }
-        else if(current_target->id_startup > tunum->data_int)
-        {
-            speed_1_change = 0;
-        }
-    }
-    else if (current_target && !current_target->next)
-    {
-        speed_1_change = 0;
-    }
-}
-
-static void deaccelerate_to_thunder(void)
-{
-    if (current_state == STATE_DE_THUNDER && (speed_loop.Actual < 1.0f))
-    {
-        current_state = STATE_TRA_THUNDER;
+        current_state = STATE_MISERY;
     }
 }
 
@@ -198,12 +43,16 @@ static void deaccelerate_within_2(void)
 
         double dis_0 = sqrt((x_within_tgt - x_within_tgt_next) * (x_within_tgt - x_within_tgt_next) + (y_within_tgt - y_within_tgt_next) * (y_within_tgt - y_within_tgt_next));
         double dis_1 = sqrt((x_within_now - x_within_tgt) * (x_within_now - x_within_tgt) + (y_within_now - y_within_tgt) * (y_within_now - y_within_tgt));
-        if(road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
+        if (road_idx[road_num] == uturn_3_idx[0] && current_target->id_startup == uturn_3_idx[1])
         {
             if (dis_1 < dis2->data_float)
             {
                 speed_2_change = 2;
             }
+        }
+        else if (road_idx[road_num] == thun_3_idx[0] && current_target->id_startup <= thun_3_idx[1])
+        {
+            speed_2_change = 3;
         }
         else
         {
@@ -219,7 +68,7 @@ static void deaccelerate_within_2(void)
 static void decline_to_single_side_stand(void)
 {
     if (current_state == STATE_DECLINE_FRONT_SINGLE_SIDE
-      && speed_loop.Actual < (float)snspeed->data_int / 100.0f)
+      && speed_loop2.Actual < (float)snspeed->data_int / 100.0f + 1.2f)
     {
         current_state = STATE_STAND_FRONT_SINGLE_SIDE;
     }
@@ -230,7 +79,7 @@ static void stand_to_single_side(void)
     if (current_state == STATE_STAND_FRONT_SINGLE_SIDE)
     {
         single_delay++;
-        if (single_delay >= 60)
+        if (single_delay >= 10)
         {
             single_delay = 0;
             roll_base = rollba->data_float;
@@ -270,9 +119,7 @@ static void quit_single_side(void)
     }
     else if (current_state == STATE_MODIFY)
     {
-        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 0.5f)   ||
-            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 0.5f) ||
-            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 0.5f))
+        if (control_modify_switch(road_num, imu.output.euler[2]) == true)
         {
             disturb_flag = 1;
             last_raw_yaw = 0.0f;
@@ -280,31 +127,9 @@ static void quit_single_side(void)
             ins_reset();
             road_num++;
             save_manager_load(testnum->data_int + road_idx[road_num]);
-            speed_loop.ErrorInt = 0.0f;
-            current_state = STATE_ACCELERATE;
+            speed_loop2.ErrorInt = 0.0f;
+            current_state = STATE_FORWARD;
             disturb_flag = 0;
-        }
-    }
-}
-
-static void decline_to_stairs(void)
-{
-    if (jump->data_int == 1)
-    {
-        if (current_state == STATE_DE_STAIRS
-        && speed_loop.Actual < ((float)stspeed->data_int / 100.0f)
-        && current_target)
-        {
-            current_state = STATE_TRA_STAIRS;
-        }
-    }
-    else if (jump->data_int == 2)
-    {
-        if (current_state == STATE_DE_STAIRS
-        && speed_loop.Actual < ((float)sipsp->data_int / 100.0f)
-        && current_target)
-        {
-            current_state = STATE_TRA_STAIRS;
         }
     }
 }
@@ -313,45 +138,82 @@ static void judge_time_to_jump(void)
 {
     if (current_state == STATE_MAINTAIN_JUMP && jump_lock == 0)
     {
-        if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && stair_distance > 0)
+        if (jump->data_int == 1)
         {
-            mid_update = 0;
-            image_block = 0;
-            jump_count += 1;
-            current_state = STATE_JUMP_UP;
-        }
-        else if (stair_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && stair_distance > 0)
-        {
-            mid_update = 0;
-            image_block = 0;
-            jump_count += 1;
-            current_state = STATE_JUMP_UP;
-        }
-        else if (stair_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && stair_distance > 0)
-        {
-            mid_update = 0;
-            image_block = 0;
-            jump_count += 1;
-            current_state = STATE_JUMP_UP;
-        }
-        else if (jump_count >= 3)
-        {
-            current_state = STATE_MAINTAIN_JUMP;
-            static uint32_t quit_image_jump_count = 0;
-            quit_image_jump_count++;
-            if (quit_image_jump_count >= 100)
+            if (stair_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && stair_distance > 0)
             {
-                quit_image_jump_count = 0;
+                mid_update = 0;
                 image_block = 0;
-                current_state = STATE_MODIFY;
+                jump_count += 1;
+                current_state = STATE_JUMP_UP;
+            }
+            else if (stair_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && stair_distance > 0)
+            {
+                mid_update = 0;
+                image_block = 0;
+                jump_count += 1;
+                current_state = STATE_JUMP_UP;
+            }
+            else if (stair_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && stair_distance > 0)
+            {
+                mid_update = 0;
+                image_block = 0;
+                jump_count += 1;
+                current_state = STATE_JUMP_UP;
+            }
+            else if (jump_count >= 3)
+            {
+                current_state = STATE_MAINTAIN_JUMP;
+                static uint32_t quit_full_jump_count = 0;
+                quit_full_jump_count++;
+                if (quit_full_jump_count >= 100)
+                {
+                    quit_full_jump_count = 0;
+                    image_block = 0;
+                    current_state = STATE_MODIFY;
+                }
+            }
+        }
+        else if (jump->data_int == 3)
+        {
+            if (tof_distance <= stdis1->data_int && jump_count == 0 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && tof_distance > 0)
+            {
+                mid_update = 0;
+                image_block = 0;
+                jump_count += 1;
+                current_state = STATE_JUMP_UP;
+            }
+            else if (tof_distance <= stdis2->data_int && jump_count == 1 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && tof_distance > 0)
+            {
+                mid_update = 0;
+                image_block = 0;
+                jump_count += 1;
+                current_state = STATE_JUMP_UP;
+            }
+            else if (tof_distance <= stdis3->data_int && jump_count == 2 && mid_update == 1 && fabs(imu.output.euler[2]) < 15.0f && tof_distance > 0)
+            {
+                mid_update = 0;
+                image_block = 0;
+                jump_count += 1;
+                current_state = STATE_JUMP_UP;
+            }
+            else if (jump_count >= 3)
+            {
+                current_state = STATE_MAINTAIN_JUMP;
+                static uint32_t quit_full_jump_count = 0;
+                quit_full_jump_count++;
+                if (quit_full_jump_count >= 120)
+                {
+                    quit_full_jump_count = 0;
+                    image_block = 0;
+                    current_state = STATE_MODIFY;
+                }
             }
         }
     }
     else if (current_state == STATE_MODIFY)
     {
-        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 0.5f)   ||
-            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 0.5f) ||
-            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 0.5f))
+        if (control_modify_switch(road_num, imu.output.euler[2]) == true)
         {
             disturb_flag = 1;
             jump_count = 0;
@@ -360,15 +222,15 @@ static void judge_time_to_jump(void)
             ins_reset();
             road_num++;
             save_manager_load(testnum->data_int + road_idx[road_num]);
-            speed_loop.ErrorInt = 0.0f;
-            current_state = STATE_ACCELERATE;
+            speed_loop2.ErrorInt = 0.0f;
+            current_state = STATE_FORWARD;
             disturb_flag = 0;
         }
     }
     if (jump_lock == 1 && jump_count < 3)
     {
         jump_lock_count++;
-        if (jump_lock_count >= 30)
+        if (jump_lock_count >= 40)
         {
             image_block = 1;
             jump_lock = 0;
@@ -377,37 +239,28 @@ static void judge_time_to_jump(void)
     }
     else if (jump_lock == 1 && jump_count >= 3)
     {
-        jump_lock_count++;
-        if (jump_lock_count >= 30)
-        {
-            jump_lock = 0;
-            jump_lock_count = 0;
-        }
+        jump_lock = 0;
+        jump_lock_count = 0;
     }
 }
 
 static void simple_find_jump(void)
 {
-    if (current_state == STATE_SIMPLE_MAINTAIN && stair_distance <= stdis1->data_int && stair_distance > 0)
+    if (jump->data_int == 2)
     {
-        image_block = 0;
-        current_state = STATE_SIMPLE_JUMP;
+        if (current_state == STATE_SIMPLE_MAINTAIN && stair_distance <= stdis1->data_int && stair_distance > 0)
+        {
+            image_block = 0;
+            current_state = STATE_SIMPLE_JUMP;
+        }
     }
-    else if (current_state == STATE_SIMPLE_FIND && stair_distance <= 60 && stair_distance > 0)
+    else if (jump->data_int == 4)
     {
-        current_state = STATE_SIMPLE_MAINTAIN;
-    }
-    else if (current_state == STATE_FIND_JUMP && stair_distance <= 40 && stair_distance > 0)
-    {
-        current_state = STATE_MAINTAIN_JUMP;
-    }
-}
-
-static void de_to_tra_follow(void)
-{
-    if (current_state == STATE_DE_FOLLOW && speed_loop.Actual <= 2.0f)
-    {
-        current_state = STATE_TRA_FOLLOW;
+        if (current_state == STATE_SIMPLE_MAINTAIN && tof_distance <= stdis1->data_int && tof_distance > 0)
+        {
+            image_block = 0;
+            current_state = STATE_SIMPLE_JUMP;
+        }
     }
 }
 
@@ -415,7 +268,7 @@ static void quit_follow_stairs(void)
 {
     static uint32_t not_find_follow = 0;
     static uint8_t not_find_flag = 0;
-    if ((current_state == STATE_TRA_FOLLOW || current_state == STATE_DE_FOLLOW) && not_find_flag == 0)
+    if (current_state == STATE_DE_FOLLOW && not_find_flag == 0)
     {
         not_find_follow++;
         if (not_find_follow >= 600)
@@ -423,7 +276,7 @@ static void quit_follow_stairs(void)
             current_state = STATE_MODIFY;
         }
     }
-    if ((current_state == STATE_TRA_FOLLOW || current_state == STATE_DE_FOLLOW) && stair_distance <= 50 && stair_distance > 0)
+    if (current_state == STATE_DE_FOLLOW && stair_distance <= 50 && stair_distance > 0)
     {
         not_find_flag = 1;
         current_state = STATE_FOLLOW_STAIRS;
@@ -438,7 +291,7 @@ static void quit_follow_stairs(void)
         if (follow_lock == 1)
         {
             follow_lock_count_1++;
-            if (follow_lock_count_1 >= 200)
+            if (follow_lock_count_1 >= 100)
             {
                 follow_lock = 0;
                 follow_lock_count_1 = 0;
@@ -456,7 +309,7 @@ static void quit_follow_stairs(void)
         if (follow_lock == 1)
         {
             follow_lock_count_2++;
-            if (follow_lock_count_2 >= 100)
+            if (follow_lock_count_2 >= 150)
             {
                 follow_lock = 3;
                 follow_lock_count_2 = 0;
@@ -470,19 +323,16 @@ static void quit_follow_stairs(void)
     }
     if (current_state == STATE_MODIFY)
     {
-        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 0.5f)   ||
-            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 0.5f) ||
-            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 0.5f))
+        if (control_modify_switch(road_num, imu.output.euler[2]) == true)
         {
             disturb_flag = 1;
-            follow_speed_change = 0;
             last_raw_yaw = 0.0f;
             target_yaw = 0.0f;
             ins_reset();
             road_num++;
             save_manager_load(testnum->data_int + road_idx[road_num]);
-            speed_loop.ErrorInt = 0.0f;
-            current_state = STATE_ACCELERATE;
+            speed_loop2.ErrorInt = 0.0f;
+            current_state = STATE_FORWARD;
             disturb_flag = 0;
         }
     }
@@ -490,9 +340,15 @@ static void quit_follow_stairs(void)
 
 static void de_to_jolt(void)
 {
-    if (current_state == STATE_DE_JOLT && speed_loop.Actual <= (float)jospeed->data_int / 100.0f + 1.0f)
+    if (current_state == STATE_DE_JOLT)
     {
-        current_state = STATE_JOLT;
+        static uint32_t count = 0;
+        count++;
+        if (count >= 150)
+        {
+            count = 0;
+            current_state = STATE_JOLT;
+        }
     }
 }
 
@@ -526,20 +382,18 @@ static void quit_jolt(void)
     }
     else if (current_state == STATE_MODIFY)
     {
-        if ((modify_idx[road_num] == 1 && fabs(imu.output.euler[2] - 0.0f) < 0.5f)   ||
-            (modify_idx[road_num] == 2 && fabs(imu.output.euler[2] - 180.0f) < 0.5f) ||
-            (modify_idx[road_num] == 3 && fabs(imu.output.euler[2] + 180.0f) < 0.5f))
+        if (control_modify_switch(road_num, imu.output.euler[2]) == true)
         {
             disturb_flag = 1;
             angle_loop2.ErrorInt = 0.0f;
-            speed_loop.ErrorInt = 0.0f;
+            speed_loop2.ErrorInt = 0.0f;
             turn_loop2.ErrorInt = 0.0f;
             last_raw_yaw = 0.0f;
             target_yaw = 0.0f;
             ins_reset();
             road_num++;
             save_manager_load(testnum->data_int + road_idx[road_num]);
-            current_state = STATE_ACCELERATE;
+            current_state = STATE_FORWARD;
             disturb_flag = 0;
         }
     }
@@ -547,27 +401,9 @@ static void quit_jolt(void)
 
 void control_state_switch(void)
 {
-    accelerate_to_forward();
     deaccelerate_to_stop();
 
-    if (testnum->data_int == 0)
-    {
-        deaccelerate_within_0();
-    }
-
-    else if (testnum->data_int == 1)
-    {
-        if (thunder_count >= thnum->data_int)
-        {
-            deaccelerate_within_1();
-        }
-        else if (thunder_count < thnum->data_int)
-        {
-            deaccelerate_to_thunder();
-        }
-    }
-
-    else if (testnum->data_int == 2 && (road_idx[road_num] == 1 || road_idx[road_num] == 5))
+    if (testnum->data_int == 2 && (road_idx[road_num] == 1 || road_idx[road_num] == 5))
     {
         deaccelerate_within_2();
         decline_to_single_side_stand();
@@ -578,7 +414,6 @@ void control_state_switch(void)
     else if (testnum->data_int == 2 && road_idx[road_num] == 2)
     {
         deaccelerate_within_2();
-        decline_to_stairs();
         judge_time_to_jump();
         simple_find_jump();
     }
@@ -586,7 +421,6 @@ void control_state_switch(void)
     else if (testnum->data_int == 2 && road_idx[road_num] == 3)
     {
         deaccelerate_within_2();
-        de_to_tra_follow();
         quit_follow_stairs();
     }
 
@@ -608,17 +442,11 @@ void control_state_update(void)
     case STATE_STAND_STILL:
         control_state_stand_still();
         break;
-    case STATE_ACCELERATE:
-        control_state_accelerate();
-        break;
     case STATE_DEACCELERATE:
         control_state_deaccelerate();
         break;
     case STATE_DE_THUNDER:
         control_state_de_thunder();
-        break;
-    case STATE_TRA_THUNDER:
-        control_state_tra_thunder();
         break;
     case STATE_THUNDER:
         control_state_thunder();
@@ -638,12 +466,6 @@ void control_state_update(void)
     case STATE_DE_STAIRS:
         control_state_de_stairs();
         break;
-    case STATE_TRA_STAIRS:
-        control_state_tra_stairs();
-        break;
-    case STATE_FIND_JUMP:
-        control_state_find_jump();
-        break;
     case STATE_SIMPLE_MAINTAIN:
         control_state_simple_maintain();
         break;
@@ -653,17 +475,11 @@ void control_state_update(void)
     case STATE_JUMP_UP:
         control_state_jump_up();
         break;
-    case STATE_SIMPLE_FIND:
-        control_state_simple_find();
-        break;
     case STATE_SIMPLE_JUMP:
         control_state_simple_jump();
         break;
     case STATE_DE_FOLLOW:
         control_state_de_follow();
-        break;
-    case STATE_TRA_FOLLOW:
-        control_state_tra_follow();
         break;
     case STATE_FOLLOW_STAIRS:
         control_state_follow_stairs();
@@ -691,6 +507,9 @@ void control_state_update(void)
         break;
     case STATE_MODIFY:
         control_state_modify();
+        break;
+    case STATE_MISERY:
+        control_state_misery();
         break;
     default:
         control_state_forward();

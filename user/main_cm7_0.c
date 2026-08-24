@@ -24,6 +24,7 @@ void remote_control(void);
 void calculate_route(void);
 void calculate_modify(void);
 void calculate_uturn_3(void);
+void calculate_thun_3(void);
 void image_update(void);
 
 uint8_t motion_mode1 = 0;
@@ -54,6 +55,7 @@ int main(void)
 
     // 控制相关初始化
     mt9v03x_init();
+    dl1b_init();
     control_init();
     car_balance();
     gpio_init_all();
@@ -96,18 +98,12 @@ int main(void)
     // 图像初始化
     image_update();
 
-    // 判断科目几，以及科目三的路径
-    if (testnum->data_int == 2)
-    {
-        calculate_route();
-        calculate_modify();
-        calculate_uturn_3();
-        save_manager_load(testnum->data_int + road_idx[road_num]);
-    }
-    else if (testnum->data_int == 1 || testnum->data_int == 0)
-    {
-        save_manager_load(testnum->data_int);
-    }
+    // 判断科目三的路径
+    calculate_route();
+    calculate_modify();
+    calculate_uturn_3();
+    calculate_thun_3();
+    save_manager_load(testnum->data_int + road_idx[road_num]);
 
     // 设置曝光度
     mt9v03x_set_exposure_time(imexp->data_int);
@@ -193,24 +189,9 @@ int main(void)
                     }
                     else if (test_state == 0)
                     {
-                        if (testnum->data_int == 2)
-                        {
-                            imu.rot_comp.param.yaw_compensate_cw = 0.0f;
-                            imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
-                            current_state = STATE_ACCELERATE;
-                        }
-                        else if (testnum->data_int == 1)
-                        {
-                            imu.rot_comp.param.yaw_compensate_cw = 0.0f;
-                            imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
-                            current_state = STATE_FORWARD;
-                        }
-                        else if (testnum->data_int == 0)
-                        {
-                            imu.rot_comp.param.yaw_compensate_cw = 0.0f;
-                            imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
-                            current_state = STATE_FORWARD;
-                        }
+                        imu.rot_comp.param.yaw_compensate_cw = 0.0f;
+                        imu.rot_comp.param.yaw_compensate_ccw = 0.0f;
+                        current_state = STATE_FORWARD;
                         ins_reset();
                     }
                     while (true)
@@ -221,7 +202,19 @@ int main(void)
                             image_main();
                             mt9v03x_finish_flag = 0;
                         }
-
+                        if (jump->data_int == 3 || jump->data_int == 4)
+                        {
+                            dl1b_get_distance();
+                            if (dl1b_finsh_flag == 1)
+                            {
+                                dl1b_finsh_flag = 0;
+                                tof_distance = dl1b_distance_mm;
+                            }
+                            else
+                            {
+                                tof_distance = 8192;
+                            }
+                        }
                         if (testnum->data_int == 2 && test_state == 1)
                         {
                             if (test_2_save == 0)
@@ -375,7 +368,7 @@ void handle_channel(void)
     }
 
     else if ((uart_receiver.channel[3] == 1792 && last_ch3 != 1792) ||
-             (uart_receiver.channel[3] == 192  && last_ch3 != 192))
+             (uart_receiver.channel[3] == 192 && last_ch3 != 192))
     {
         // 科目三确认更换存档
         if (testnum->data_int == 2)
@@ -415,7 +408,7 @@ void remote_control(void)
 {
     if (1 == uart_receiver.finsh_flag)
     {
-        speed_loop.Target = (uart_receiver.channel[1] - 832) / 200.0f;
+        speed_loop2.Target = (uart_receiver.channel[1] - 832) / 400.0f;
         yaw_test_bias = (uart_receiver.channel[0] - 832) * 1.5;
         if ((uart_receiver.channel[3] == 1792 || uart_receiver.channel[3] == 992 || uart_receiver.channel[3] == 192) && test_state == 0)
         {
@@ -524,6 +517,40 @@ void calculate_uturn_3(void)
         else
         {
             uturn_3_idx[i] = 0;
+        }
+    }
+}
+
+void calculate_thun_3(void)
+{
+    int temp = thun3->data_int;
+    uint8_t digits[2] = {0};
+    int count = 0;
+
+    if (temp == 0)
+    {
+        digits[0] = 0;
+        count = 1;
+    }
+    else
+    {
+        while (temp > 0 && count < 2)
+        {
+            digits[count] = (uint8_t)(temp % 10);
+            count++;
+            temp /= 10;
+        }
+    }
+
+    for (int i = 0; i < 2; i++)
+    {
+        if (i < count)
+        {
+            thun_3_idx[i] = digits[count - 1 - i];
+        }
+        else
+        {
+            thun_3_idx[i] = 0;
         }
     }
 }
